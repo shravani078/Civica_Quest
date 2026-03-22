@@ -1,0 +1,224 @@
+/* Floating AI Button - Bottom Left Corner */
+#cq_ai_button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  cursor: pointer;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  transition: all 0.3s ease;
+  border: 3px solid white;
+}
+
+#cq_ai_button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+#cq_ai_button.active {
+  background: #ef4444;
+}
+
+/* Expandable HUD Panel */
+#cq_hud {
+  position: fixed;
+  bottom: 90px;
+  left: 20px;
+  z-index: 99999;
+  font-family: Arial, sans-serif;
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+#cq_hud.visible {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.cq-hud-card {
+  width: 300px;
+  background: rgba(255,255,255,0.98);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.cq-hud-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.cq-hud-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: #555;
+}
+
+.cq-hud-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cq-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: #eee;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.cq-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.cq-primary {
+  background: #667eea;
+  color: white;
+}
+
+.cq-danger {
+  background: #ef4444;
+  color: white;
+}
+
+#cq_chatbot {
+  position: fixed;
+  left: 20px;
+  bottom: 90px;
+  width: 380px;
+  height: 500px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+  z-index: 999999;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+  transform: scale(0.8) translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  transform-origin: bottom left;
+  pointer-events: none;
+}
+
+#cq_chatbot.visible {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.cq-chat-header {
+  background: #0f5d2b;
+  color: white;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cq-chat-log {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+  background: #f6f7f8;
+}
+
+.cq-chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  background: white;
+}
+
+.cq-chat-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.cq-bot {
+  background: white;
+  padding: 10px 12px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  max-width: 92%;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+
+.cq-user {
+  background: #d8f2e2;
+  padding: 10px 12px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  max-width: 92%;
+  margin-left: auto;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+
+html.cq-elder {
+  font-size: 120%;
+}
+
+html.cq-elder button,
+html.cq-elder input,
+html.cq-elder select {
+  font-size: 1.05rem;
+  padding: 12px 14px !important;
+}
+
+@media (max-width: 520px){
+  #cq_ai_button {
+    width: 56px;
+    height: 56px;
+    bottom: 16px;
+    left: 16px;
+    font-size: 24px;
+  }
+  
+  #cq_hud {
+    left: 16px;
+    bottom: 80px;
+  }
+  
+  .cq-hud-card {
+    width: calc(100vw - 32px);
+    max-width: 340px;
+  }
+  
+  #cq_chatbot {
+    width: calc(100vw - 32px);
+    height: 70vh;
+    left: 16px;
+    bottom: 80px;
+    max-width: 400px;
+  }
+}
