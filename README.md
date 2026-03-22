@@ -40,7 +40,9 @@ HTML, CSS, JavaScript
 Firebase Authentication
 Firestore Database
 
-📁 Project Structure
+## 📁 Project Structure
+
+```
 CivicaQuest/
 │
 ├── auth.html
@@ -58,7 +60,10 @@ CivicaQuest/
 │
 └── static/
     ├── css/
+    │   └── cq_ai.css
     └── js/
+        └── cq_ai.js
+```
     
 🚀 How to Run
 Setup Firebase project
