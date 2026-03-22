@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constitution Quiz - CivicaQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="static/css/cq_ai.css" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-landmark"></i> CivicaQuest
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" href="budget-game.html"><i class="fas fa-money-bill-wave"></i> Budget</a>
+                <a class="nav-link active" href="quiz-game.html"><i class="fas fa-gavel"></i> Quiz</a>
+                <a class="nav-link" href="leaderboard.html"><i class="fas fa-trophy"></i> Leaderboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="game-header text-center">
+            <h1><i class="fas fa-gavel"></i> Constitution & Rights Quiz</h1>
+            <p class="lead">Test your knowledge of Indian Constitution, Fundamental Rights, and Duties!</p>
+        </div>
+
+        <!-- Quiz Progress -->
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Progress</h5>
+                        <div class="progress" style="height: 25px;">
+                            <div id="quizProgressBar" class="progress-bar" style="width: 0%;">0%</div>
+                        </div>
+                        <p class="mt-2">Question: <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></p>
+                        <p>Score: <span id="currentScore">0</span> points</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Question -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="quiz-question" id="questionText"></h4>
+                <div id="optionsContainer">
+                    <!-- Options will be loaded here -->
+                </div>
+                <div id="feedback" class="feedback"></div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none;">
+                        Next Question <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="btn btn-success" id="submitBtn" onclick="submitAnswer()">
+                        Submit Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" style="display: none;">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-trophy"></i> Quiz Complete!</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h2>Your Score: <span id="finalQuizScore">0</span>/100</h2>
+                    <h4 id="quizGrade"></h4>
+                    <p id="quizComment" class="lead"></p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Correct Answers</h5>
+                                    <h2 id="correctAnswers">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Time Taken</h5>
+                                    <h2 id="timeTaken">0</h2><small>seconds</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                            <i class="fas fa-home"></i> Back to Home
+                        </button>
+                        <button class="btn btn-warning" onclick="restartQuiz()">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges Earned -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-award"></i> Badges You Can Earn</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-crown fa-2x text-warning"></i>
+                        <p>Constitution Expert<br><small>Score 90+</small></p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-balance-scale fa-2x text-primary"></i>
+                        <p>Rights Champion<br><small>All rights questions correct</small></p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-bolt fa-2x text-success"></i>
+                        <p>Speed Master<br><small>Complete in 60 seconds</small></p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-star fa-2x text-danger"></i>
+                        <p>Perfect Score<br><small>100% accuracy</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>CivicaQuest - Constitution Quiz | Test your civic knowledge</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Quiz Questions
+        const quizQuestions = [
+            {
+                question: "What is the minimum voting age in India?",
+                options: ["16 years", "18 years", "21 years", "25 years"],
+                correct: 1,
+                explanation: "The 61st Amendment Act (1988) lowered the voting age from 21 to 18 years."
+            },
+            {
+                question: "How many Fundamental Rights are guaranteed by the Indian Constitution?",
+                options: ["5", "6", "7", "8"],
+                correct: 1,
+                explanation: "Originally 7, but now 6 Fundamental Rights after the 44th Amendment."
+            },
+            {
+                question: "Who is known as the Father of the Indian Constitution?",
+                options: ["Mahatma Gandhi", "Jawaharlal Nehru", "B.R. Ambedkar", "Sardar Patel"],
+                correct: 2,
+                explanation: "Dr. B.R. Ambedkar was the Chairman of the Drafting Committee."
+            },
+            {
+                question: "Which article abolishes untouchability?",
+                options: ["Article 14", "Article 17", "Article 21", "Article 32"],
+                correct: 1,
+                explanation: "Article 17 abolishes untouchability and forbids its practice in any form."
+            },
+            {
+                question: "What is the term of office for the President of India?",
+                options: ["4 years", "5 years", "6 years", "7 years"],
+                correct: 1,
+                explanation: "The President holds office for a term of 5 years from the date of entering office."
+            },
+            {
+                question: "Which Fundamental Right is called the 'Heart and Soul' of the Constitution?",
+                options: ["Right to Equality", "Right to Freedom", "Right to Constitutional Remedies", "Right against Exploitation"],
+                correct: 2,
+                explanation: "Article 32 (Right to Constitutional Remedies) was called the 'heart and soul' of the Constitution by Dr. Ambedkar."
+            },
+            {
+                question: "How many languages are recognized in the 8th Schedule of the Constitution?",
+                options: ["14", "18", "22", "26"],
+                correct: 2,
+                explanation: "Originally 14, now 22 languages are recognized in the 8th Schedule."
+            },
+            {
+                question: "Who appoints the Chief Justice of India?",
+                options: ["Prime Minister", "President", "Parliament", "Supreme Court Collegium"],
+                correct: 1,
+                explanation: "The President of India appoints the Chief Justice of India."
+            },
+            {
+                question: "Which article provides for the right to education?",
+                options: ["Article 21A", "Article 45", "Article 51A", "Article 350"],
+                correct: 0,
+                explanation: "Article 21A was inserted by the 86th Amendment Act, 2002, making education a fundamental right."
+            },
+            {
+                question: "What is the maximum number of members in Lok Sabha?",
+                options: ["543", "545", "550", "552"],
+                correct: 1,
+                explanation: "The maximum strength of Lok Sabha is 552 (530 from States, 20 from Union Territories, 2 nominated)."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let quizStartTime = null;
+        let correctAnswers = 0;
+
+        function loadQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = `Q${currentQuestionIndex + 1}: ${question.question}`;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = quizQuestions.length;
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / quizQuestions.length) * 100;
+            document.getElementById('quizProgressBar').style.width = `${progress}%`;
+            document.getElementById('quizProgressBar').textContent = `${Math.round(progress)}%`;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.innerHTML = `
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="quizOption" id="option${index}" value="${index}">
+                        <label class="form-check-label" for="option${index}">
+                            ${option}
+                        </label>
+                    </div>
+                `;
+                
+                optionDiv.onclick = () => {
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    optionDiv.classList.add('selected');
+                    document.querySelectorAll('input[name="quizOption"]')[index].checked = true;
+                    selectedOption = index;
+                };
+                
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Reset feedback and buttons
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Update score display
+            document.getElementById('currentScore').textContent = score;
+            
+            // Start timer on first question
+            if (currentQuestionIndex === 0 && !quizStartTime) {
+                quizStartTime = new Date();
+            }
+        }
+
+        function submitAnswer() {
+            if (selectedOption === null) {
+                alert('Please select an answer!');
+                return;
+            }
+            
+            const question = quizQuestions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            const isCorrect = selectedOption === question.correct;
+            
+            if (isCorrect) {
+                score += 10;
+                correctAnswers++;
+                feedback.innerHTML = `<strong><i class="fas fa-check-circle"></i> Correct!</strong> ${question.explanation}`;
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.innerHTML = `<strong><i class="fas fa-times-circle"></i> Incorrect!</strong> ${question.explanation}`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('currentScore').textContent = score;
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                selectedOption = null;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const endTime = new Date();
+            const timeTaken = quizStartTime ? Math.round((endTime - quizStartTime) / 1000) : 0;
+            
+            // Calculate final score (convert 0-100 scale)
+            const finalScore = score;
+            
+            // Save score to localStorage
+            saveProgress('quizScore', finalScore);
+            
+            // Update results display
+            document.getElementById('finalQuizScore').textContent = finalScore;
+            document.getElementById('correctAnswers').textContent = `${correctAnswers}/${quizQuestions.length}`;
+            document.getElementById('timeTaken').textContent = timeTaken;
+            
+            // Add performance comment
+            let grade = '';
+            let comment = '';
+            
+            if (finalScore >= 90) {
+                grade = 'A+ - Constitution Expert!';
+                comment = 'Outstanding! You have excellent knowledge of the Indian Constitution.';
+            } else if (finalScore >= 70) {
+                grade = 'B+ - Good Understanding';
+                comment = 'Good job! You have a solid understanding of civic knowledge.';
+            } else if (finalScore >= 50) {
+                grade = 'C+ - Fair Knowledge';
+                comment = 'Fair knowledge. Keep learning to improve your civic awareness.';
+            } else {
+                grade = 'Needs Improvement';
+                comment = 'Keep practicing! Understanding our Constitution is important for every citizen.';
+            }
+            
+            document.getElementById('quizGrade').textContent = grade;
+            document.getElementById('quizComment').textContent = comment;
+            
+            // Show results, hide quiz
+            document.querySelector('.card.mb-4').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedOption = null;
+            quizStartTime = null;
+            correctAnswers = 0;
+            
+            document.querySelector('.card.mb-4').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Load first question when page loads
+        document.addEventListener('DOMContentLoaded', loadQuestion);
+    </script>
+  <script src="static/js/cq_ai.js"></script>
+</body>
+</html>

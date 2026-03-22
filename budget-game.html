@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Game - CivicaQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="static/css/cq_ai.css" />
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-landmark"></i> CivicaQuest
+            </a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link active" href="budget-game.html"><i class="fas fa-money-bill-wave"></i> Budget Game</a>
+                <a class="nav-link" href="quiz-game.html"><i class="fas fa-gavel"></i> Quiz</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Game Header -->
+        <div class="game-header text-center">
+            <h1><i class="fas fa-money-bill-wave"></i> City Budget Allocation Game</h1>
+            <p class="lead">You are the Mayor! Allocate ₹10,00,000 to solve city problems. Make wise choices!</p>
+        </div>
+
+        <!-- Budget Display -->
+        <div class="budget-meter text-center">
+            <h4>City Budget Remaining:</h4>
+            <div class="budget-amount" id="remainingBudget">₹10,00,000</div>
+            <div class="progress" style="height: 20px;">
+                <div id="budgetProgressBar" class="progress-bar bg-success" style="width: 100%;"></div>
+            </div>
+            <p class="mt-2">Spent: ₹<span id="spentBudget">0</span> / ₹10,00,000</p>
+        </div>
+
+        <!-- Problems to Solve -->
+        <div id="problemsContainer">
+            <!-- Problems will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" style="display: none;">
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-trophy"></i> Game Complete!</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Your Score: <span id="finalScore">0</span>/100</h5>
+                    <div id="scoreBreakdown"></div>
+                    <p id="performanceComment"></p>
+                    <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                        <i class="fas fa-home"></i> Back to Home
+                    </button>
+                    <button class="btn btn-warning" onclick="restartGame()">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Instructions -->
+        <div class="alert alert-info mt-4">
+            <h5><i class="fas fa-info-circle"></i> How to Play:</h5>
+            <p>You have ₹10,00,000 to solve city problems. Each problem has multiple solutions with different costs and impacts. Choose wisely to maximize citizen happiness!</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>CivicaQuest - Budget Allocation Game | Your progress is saved automatically</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Budget Game Data
+        const budgetProblems = [
+            {
+                id: 1,
+                title: "Road Repair",
+                description: "Main roads are damaged after heavy monsoon. Potholes are causing accidents.",
+                image: "🛣️",
+                options: [
+                    { 
+                        text: "Quick Patch Work (₹1,00,000)", 
+                        cost: 100000, 
+                        impact: "Temporary fix. Citizens: +20, Next Year: -10",
+                        happiness: 20,
+                        sustainability: -10
+                    },
+                    { 
+                        text: "Complete Reconstruction (₹4,00,000)", 
+                        cost: 400000, 
+                        impact: "Long-term solution. Citizens: +60, Next Year: +30",
+                        happiness: 60,
+                        sustainability: 30
+                    },
+                    { 
+                        text: "Smart Roads with Sensors (₹6,00,000)", 
+                        cost: 600000, 
+                        impact: "High-tech solution. Citizens: +80, Next Year: +50",
+                        happiness: 80,
+                        sustainability: 50
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Water Supply",
+                description: "Many areas get water only 2 hours a day. People are protesting.",
+                image: "💧",
+                options: [
+                    { 
+                        text: "Water Tankers (₹50,000/month)", 
+                        cost: 50000, 
+                        impact: "Temporary relief. Citizens: +15, Next Year: 0",
+                        happiness: 15,
+                        sustainability: 0
+                    },
+                    { 
+                        text: "Pipeline Extension (₹3,00,000)", 
+                        cost: 300000, 
+                        impact: "Permanent solution. Citizens: +70, Next Year: +40",
+                        happiness: 70,
+                        sustainability: 40
+                    },
+                    { 
+                        text: "Rainwater Harvesting Systems (₹2,00,000)", 
+                        cost: 200000, 
+                        impact: "Sustainable solution. Citizens: +50, Next Year: +60",
+                        happiness: 50,
+                        sustainability: 60
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Waste Management",
+                description: "Garbage is piling up in streets. Health hazard for residents.",
+                image: "🗑️",
+                options: [
+                    { 
+                        text: "More Bins & Collections (₹1,50,000)", 
+                        cost: 150000, 
+                        impact: "Basic improvement. Citizens: +30, Next Year: +10",
+                        happiness: 30,
+                        sustainability: 10
+                    },
+                    { 
+                        text: "Waste Segregation & Recycling (₹2,50,000)", 
+                        cost: 250000, 
+                        impact: "Modern system. Citizens: +50, Next Year: +40",
+                        happiness: 50,
+                        sustainability: 40
+                    },
+                    { 
+                        text: "Waste-to-Energy Plant (₹8,00,000)", 
+                        cost: 800000, 
+                        impact: "Advanced solution. Citizens: +90, Next Year: +80",
+                        happiness: 90,
+                        sustainability: 80
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Public Parks",
+                description: "Children have no safe place to play. Need green spaces.",
+                image: "🌳",
+                options: [
+                    { 
+                        text: "Small Park with Basic Facilities (₹1,00,000)", 
+                        cost: 100000, 
+                        impact: "Basic park. Citizens: +40, Next Year: +20",
+                        happiness: 40,
+                        sustainability: 20
+                    },
+                    { 
+                        text: "Medium Park with Play Area (₹2,00,000)", 
+                        cost: 200000, 
+                        impact: "Good facilities. Citizens: +60, Next Year: +40",
+                        happiness: 60,
+                        sustainability: 40
+                    },
+                    { 
+                        text: "Large Park with Sports Complex (₹5,00,000)", 
+                        cost: 500000, 
+                        impact: "Premium facilities. Citizens: +90, Next Year: +70",
+                        happiness: 90,
+                        sustainability: 70
+                    }
+                ]
+            }
+        ];
+
+        let totalBudget = 1000000;
+        let remainingBudget = 1000000;
+        let spentBudget = 0;
+        let selectedOptions = {};
+        let solvedProblems = 0;
+        let totalHappiness = 0;
+        let totalSustainability = 0;
+
+        function loadBudgetGame() {
+            const container = document.getElementById('problemsContainer');
+            container.innerHTML = '';
+            
+            budgetProblems.forEach(problem => {
+                const problemHTML = `
+                    <div class="problem-card" id="problem-${problem.id}">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-3" style="font-size: 2rem;">${problem.image}</div>
+                            <div>
+                                <h5>${problem.title}</h5>
+                                <p class="mb-0">${problem.description}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="options mt-3">
+                            ${problem.options.map((option, index) => `
+                                <button class="btn btn-outline-primary option-btn ${selectedOptions[problem.id] === index ? 'active' : ''}"
+                                        onclick="selectOption(${problem.id}, ${index}, ${option.cost})"
+                                        ${option.cost > remainingBudget ? 'disabled' : ''}>
+                                    ${option.text}
+                                    <br><small>${option.impact}</small>
+                                </button>
+                            `).join('')}
+                        </div>
+                        
+                        ${selectedOptions[problem.id] !== undefined ? `
+                            <div class="mt-3 alert alert-success">
+                                <strong>Selected:</strong> ${problem.options[selectedOptions[problem.id]].text}
+                                <button class="btn btn-sm btn-danger float-end" onclick="deselectOption(${problem.id})">
+                                    <i class="fas fa-times"></i> Change
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                container.innerHTML += problemHTML;
+            });
+
+            // Add submit button if all problems are solved
+            const allSolved = Object.keys(selectedOptions).length === budgetProblems.length;
+            if (allSolved) {
+                container.innerHTML += `
+                    <div class="text-center mt-4">
+                        <button class="btn btn-success btn-lg" onclick="calculateResults()">
+                            <i class="fas fa-calculator"></i> Calculate Final Results
+                        </button>
+                    </div>
+                `;
+            }
+
+            updateBudgetDisplay();
+        }
+
+        function selectOption(problemId, optionIndex, cost) {
+            if (selectedOptions[problemId] === undefined) {
+                remainingBudget -= cost;
+                spentBudget += cost;
+            } else {
+                // If changing option, adjust budget
+                const oldCost = budgetProblems.find(p => p.id === problemId).options[selectedOptions[problemId]].cost;
+                remainingBudget += oldCost;
+                spentBudget -= oldCost;
+                remainingBudget -= cost;
+                spentBudget += cost;
+            }
+            
+            selectedOptions[problemId] = optionIndex;
+            loadBudgetGame();
+        }
+
+        function deselectOption(problemId) {
+            const option = budgetProblems.find(p => p.id === problemId).options[selectedOptions[problemId]];
+            remainingBudget += option.cost;
+            spentBudget -= option.cost;
+            delete selectedOptions[problemId];
+            loadBudgetGame();
+        }
+
+        function updateBudgetDisplay() {
+            document.getElementById('remainingBudget').textContent = `₹${remainingBudget.toLocaleString()}`;
+            document.getElementById('spentBudget').textContent = spentBudget.toLocaleString();
+            const percentage = (spentBudget / totalBudget) * 100;
+            document.getElementById('budgetProgressBar').style.width = `${percentage}%`;
+            document.getElementById('budgetProgressBar').textContent = `${percentage.toFixed(1)}%`;
+            
+            if (percentage > 80) {
+                document.getElementById('budgetProgressBar').className = 'progress-bar bg-danger';
+            } else if (percentage > 50) {
+                document.getElementById('budgetProgressBar').className = 'progress-bar bg-warning';
+            } else {
+                document.getElementById('budgetProgressBar').className = 'progress-bar bg-success';
+            }
+        }
+
+        function calculateResults() {
+            totalHappiness = 0;
+            totalSustainability = 0;
+            
+            Object.keys(selectedOptions).forEach(problemId => {
+                const problem = budgetProblems.find(p => p.id == problemId);
+                const option = problem.options[selectedOptions[problemId]];
+                totalHappiness += option.happiness;
+                totalSustainability += option.sustainability;
+            });
+
+            // Calculate score (max 100)
+            const happinessScore = Math.min(totalHappiness, 100);
+            const sustainabilityScore = Math.min(totalSustainability, 100);
+            const budgetEfficiency = remainingBudget > 0 ? 20 : 0; // Bonus for not overspending
+            const finalScore = Math.floor((happinessScore * 0.5) + (sustainabilityScore * 0.3) + budgetEfficiency);
+            
+            // Save score
+            saveProgress('budgetScore', finalScore);
+            
+            // Show results
+            document.getElementById('problemsContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('finalScore').textContent = finalScore;
+            
+            document.getElementById('scoreBreakdown').innerHTML = `
+                <p>Citizen Happiness: ${totalHappiness} points</p>
+                <p>Sustainability: ${totalSustainability} points</p>
+                <p>Budget Remaining: ₹${remainingBudget.toLocaleString()}</p>
+            `;
+            
+            let comment = "";
+            if (finalScore >= 80) {
+                comment = "Excellent! You're a natural leader who balances citizen needs with long-term planning.";
+            } else if (finalScore >= 60) {
+                comment = "Good job! You made solid decisions that pleased citizens while being responsible.";
+            } else if (finalScore >= 40) {
+                comment = "Fair performance. Some choices could be improved for better long-term results.";
+            } else {
+                comment = "Needs improvement. Consider more sustainable and citizen-focused solutions.";
+            }
+            document.getElementById('performanceComment').textContent = comment;
+        }
+
+        function restartGame() {
+            totalBudget = 1000000;
+            remainingBudget = 1000000;
+            spentBudget = 0;
+            selectedOptions = {};
+            solvedProblems = 0;
+            totalHappiness = 0;
+            totalSustainability = 0;
+            
+            document.getElementById('problemsContainer').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            loadBudgetGame();
+        }
+
+        // Load game when page loads
+        document.addEventListener('DOMContentLoaded', loadBudgetGame);
+    </script>
+  <script src="static/js/cq_ai.js"></script>
+</body>
+</html>

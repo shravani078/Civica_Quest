@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CivicaQuest - Gamified Civic Learning Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <style>
+    /* ===== GLOBAL STYLES ===== */
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #ffffff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 2.6rem;
+      font-weight: 700;
+    }
+
+    /* Welcome Banner */
+    .welcome-banner {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .welcome-banner h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    .welcome-banner p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* User Info Display */
+    .user-info {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 9999;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px 16px;
+      border-radius: 12px;
+      color: #1f2937;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .user-info .user-name {
+      margin-right: 12px;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+
+    .login-btn {
+      background: #2979ff;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ===== DASHBOARD LAYOUT ===== */
+    .dashboard {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px 100px 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .dashboard-card {
+      border-radius: 22px;
+      padding: 30px 20px;
+      text-align: center;
+      text-decoration: none;
+      color: #ffffff;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-10px);
+    }
+
+    .dashboard-card.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .dashboard-card.locked:hover {
+      transform: none;
+    }
+
+    /* ===== CARD COLORS ===== */
+    .budget-card    { background: linear-gradient(135deg, #22c55e, #16a34a); }   
+    .quiz-card      { background: linear-gradient(135deg, #f97316, #ea580c); }   
+    .civics-card    { background: linear-gradient(135deg, #06b6d4, #0891b2); }   
+    .parl-card      { background: linear-gradient(135deg, #3b82f6, #2563eb); }   
+    .voting-card    { background: linear-gradient(135deg, #14b8a6, #0d9488); }   
+    .leaderboard-card { background: linear-gradient(135deg, #facc15, #f59e0b); }
+
+    /* ===== ICON STYLES ===== */
+    .dashboard-icon {
+      font-size: 3.8rem;
+      margin-bottom: 12px;
+    }
+
+    .dashboard-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .dashboard-description {
+      font-size: 0.85rem;
+      margin-top: 8px;
+      opacity: 0.9;
+      color: #ffffff;
+    }
+
+    .lock-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .info-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: help;
+      font-size: 1rem;
+      z-index: 10;
+      transition: background 0.3s;
+    }
+
+    .info-icon:hover {
+      background: rgba(255,255,255,0.5);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+    }
+
+    /* ===== LOADING SCREEN ===== */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .loading-content {
+      text-align: center;
+      color: white;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Auth requirement message */
+    .auth-required {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+    }
+
+    .auth-required-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      color: #333;
+    }
+
+    .auth-required-content h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+
+    .auth-required-content p {
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .auth-required-btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+  </style>
+  <link rel="stylesheet" href="static/css/cq_ai.css" />
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h2>Loading CivicaQuest...</h2>
+      <p>Preparing your civic learning experience</p>
+    </div>
+  </div>
+
+  <!-- Auth Required Modal -->
+  <div id="authRequired" class="auth-required">
+    <div class="auth-required-content">
+      <h2>🏛️ Welcome to CivicaQuest!</h2>
+      <p>
+        <strong>Please login or create an account to access all features.</strong>
+      </p>
+      <p>
+        Join thousands of learners exploring democracy, understanding government, 
+        and becoming better citizens through interactive games and simulations.
+      </p>
+      <a href="auth.html" class="auth-required-btn">Login / Sign Up</a>
+    </div>
+  </div>
+
+  <!-- User Info (shown when logged in) -->
+  <div id="userInfo" class="user-info" style="display: none;">
+    <span class="user-name">👤 <span id="displayUserName"></span></span>
+    <button onclick="logout()" class="logout-btn">Logout</button>
+  </div>
+
+  <!-- Login Button (shown when not logged in) -->
+  <div id="loginButton" style="position:fixed;top:15px;right:15px;z-index:9999;display:none;">
+    <a href="auth.html" class="login-btn">Login / Signup</a>
+  </div>
+
+  <!-- Welcome Banner -->
+  <div class="welcome-banner" id="welcomeBanner" style="display: none;">
+    <h2>🏛️ Welcome to CivicaQuest!</h2>
+    <p>
+      <strong>Become a Better Citizen Through Interactive Learning</strong><br>
+      Explore the foundations of democracy, understand your rights and duties, 
+      learn about government processes, and participate in interactive simulations. 
+      Our AI assistant will guide you through each feature to make civic education 
+      fun, engaging, and meaningful.
+    </p>
+    <p style="font-size: 0.95rem; opacity: 0.9;">
+      🎮 Earn XP and badges • 🏆 Compete on leaderboards • 🤖 Get AI assistance
+    </p>
+  </div>
+
+  <h1>🎮 Civic Learning Games & Simulations</h1>
+
+  <!-- Dashboard Cards -->
+  <div class="dashboard" id="dashboard">
+    
+    <!-- Voting Simulator Card - NOW VISIBLE! -->
+    <div class="dashboard-card voting-card locked" data-feature="voting">
+      <div class="lock-icon">🔒</div>
+      <div class="dashboard-icon">🗳️</div>
+      <div class="dashboard-title">Voting Simulator</div>
+      <div class="dashboard-description">Experience EVM & VVPAT voting process</div>
+      <div class="info-icon" title="Click for guide">ℹ️</div>
+    </div>
+
+    <!-- Budget Allocation Game -->
+    <div class="dashboard-card budget-card locked" data-feature="budget">
+      <div class="lock-icon">🔒</div>
+      <div class="dashboard-icon">💰</div>
+      <div class="dashboard-title">Budget Allocation Game</div>
+      <div class="dashboard-description">Learn government budget management</div>
+      <div class="info-icon" title="Click for guide">ℹ️</div>
+    </div>
+
+    <!-- Constitution Quiz -->
+    <div class="dashboard-card quiz-card locked" data-feature="quiz">
+      <div class="lock-icon">🔒</div>
+      <div class="dashboard-icon">📜</div>
+      <div class="dashboard-title">Constitution Quiz</div>
+      <div class="dashboard-description">Test your constitutional knowledge</div>
+      <div class="info-icon" title="Click for guide">ℹ️</div>
+    </div>
+
+    <!-- Civics Learning -->
+    <div class="dashboard-card civics-card locked" data-feature="civics">
+      <div class="lock-icon">🔒</div>
+      <div class="dashboard-icon">📚</div>
+      <div class="dashboard-title">Civics Learning</div>
+      <div class="dashboard-description">Comprehensive civic education modules</div>
+      <div class="info-icon" title="Click for guide">ℹ️</div>
+    </div>
+
+    <!-- Parliament Simulator -->
+    <div class="dashboard-card parl-card locked" data-feature="parliament">
+      <div class="lock-icon">🔒</div>
+      <div class="dashboard-icon">🏛️</div>
+      <div class="dashboard-title">Parliament Simulator</div>
+      <div class="dashboard-description">Experience bicameral law-making with live voice debates</div>
+      <div class="info-icon" title="Click for guide">ℹ️</div>
+    </div>
+
+
+
+    <!-- Leaderboard -->
+    <div class="dashboard-card leaderboard-card locked" data-feature="leaderboard">
+      <div class="lock-icon">🔒</div>
+      <div class="dashboard-icon">🏆</div>
+      <div class="dashboard-title">Leaderboard</div>
+      <div class="dashboard-description">View rankings and compete globally</div>
+      <div class="info-icon" title="Click for guide">ℹ️</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { doc, getDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const featureUrls = {
+      voting: 'voting-simulator.html',
+      budget: 'budget-game.html',
+      quiz: 'quiz-game.html',
+      civics: 'civics.html',
+      parliament: 'parliament-simulator.html',
+      leaderboard: 'leaderboard.html'
+    };
+
+    let currentUser = null;
+
+    // Initialize app
+    onAuthStateChanged(auth, async (user) => {
+      const loadingScreen = document.getElementById('loadingScreen');
+      
+      // Simulate minimum loading time for better UX
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (user) {
+        currentUser = user;
+        
+        try {
+          // Get user data from Firestore
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          let userData = userDoc.data();
+          
+          // If user document doesn't exist, create it
+          if (!userDoc.exists()) {
+            userData = {
+              uid: user.uid,
+              name: user.displayName || user.email.split('@')[0],
+              email: user.email,
+              createdAt: new Date().toISOString(),
+              lastLogin: new Date().toISOString(),
+              scores: {
+                budget: 0,
+                quiz: 0,
+                voting: 0,
+                parliament: 0,
+                total: 0
+              },
+              xp: 0,
+              level: 1,
+              badges: [],
+              gamesPlayed: 0
+            };
+            
+            await setDoc(doc(db, 'users', user.uid), userData);
+          } else {
+            // Update last login
+            await updateDoc(doc(db, 'users', user.uid), {
+              lastLogin: new Date().toISOString()
+            });
+          }
+
+          const displayName = userData.name || user.displayName || user.email.split('@')[0];
+
+          // Show user interface
+          document.getElementById('displayUserName').textContent = displayName;
+          document.getElementById('userInfo').style.display = 'block';
+          document.getElementById('loginButton').style.display = 'none';
+          document.getElementById('welcomeBanner').style.display = 'block';
+          
+          unlockFeatures();
+          
+        } catch (error) {
+          console.error('Error loading user data:', error);
+          // Still show UI even if Firestore fails
+          document.getElementById('displayUserName').textContent = user.email.split('@')[0];
+          document.getElementById('userInfo').style.display = 'block';
+          document.getElementById('loginButton').style.display = 'none';
+          document.getElementById('welcomeBanner').style.display = 'block';
+          unlockFeatures();
+        }
+      } else {
+        // Not logged in - show auth required message
+        document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('loginButton').style.display = 'block';
+        document.getElementById('welcomeBanner').style.display = 'none';
+        lockFeatures();
+        
+        // Show auth required modal after a delay
+        setTimeout(() => {
+          document.getElementById('authRequired').style.display = 'flex';
+        }, 500);
+      }
+      
+      loadingScreen.style.display = 'none';
+    });
+
+    function unlockFeatures() {
+      const cards = document.querySelectorAll('.dashboard-card');
+      cards.forEach(card => {
+        card.classList.remove('locked');
+        const lockIcon = card.querySelector('.lock-icon');
+        if (lockIcon) lockIcon.remove();
+        
+        const feature = card.getAttribute('data-feature');
+        card.onclick = (e) => {
+          // Don't trigger if clicking info icon
+          if (e.target.classList.contains('info-icon')) {
+            return;
+          }
+          
+          const url = featureUrls[feature];
+          if (url) {
+            window.location.href = url;
+          }
+        };
+      });
+    }
+
+    function lockFeatures() {
+      const cards = document.querySelectorAll('.dashboard-card');
+      cards.forEach(card => {
+        card.classList.add('locked');
+        card.onclick = () => {
+          document.getElementById('authRequired').style.display = 'flex';
+        };
+      });
+    }
+
+    window.logout = async function() {
+      if (confirm('Are you sure you want to logout?')) {
+        try {
+          await auth.signOut();
+          window.location.reload();
+        } catch (error) {
+          console.error('Error logging out:', error);
+          alert('Error logging out: ' + error.message);
+        }
+      }
+    };
+  </script>
+
+  <script src="static/js/cq_ai.js"></script>
+</body>
+</html>
