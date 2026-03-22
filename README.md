@@ -34,10 +34,12 @@ python -m http.server 8000
 
 # Open in browser
 http://localhost:8000/auth.html
+
 🛠️ Technologies Used
 HTML, CSS, JavaScript
 Firebase Authentication
 Firestore Database
+
 📁 Project Structure
 CivicaQuest/
 │
@@ -57,36 +59,38 @@ CivicaQuest/
 └── static/
     ├── css/
     └── js/
+    
 🚀 How to Run
 Setup Firebase project
 Update firebase.js with your config
 Start local server
 Open browser and run the app
+
 🎯 Objectives
 Simplify parliamentary concepts
 Simulate law-making process
 Improve civic awareness
 Provide interactive learning
+
 📱 Highlights
 Clean and modern UI
 Mobile responsive design
 Smooth user experience
 Fast performance
+
 🏆 Success Criteria
 User can create account
 All features work correctly
 Games load properly
 UI works on mobile
-📌 Version
-Version: 2.2
-Status: Production Ready
+
 💡 Future Improvements
 Add more games
 Enhance AI chatbot
 Add multilingual support
 Improve analytics
-🎉 Conclusion
 
+🎉 Conclusion
 CivicaQuest makes learning democracy interactive and engaging through gamification and real-world simulations.
 
 Made for better civic education 🏛️📚🎮
