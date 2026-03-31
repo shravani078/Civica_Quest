@@ -11,7 +11,7 @@ const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
-const path = require('path');
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,7 +21,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'civicaquest-super-secret-key-chang
 app.use(express.json());
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','PATCH'] }));
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.static(path.join(__dirname, '../civica_enhanced')));
+app.use(express.static(path.join(__dirname, "build")));
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
@@ -148,6 +148,10 @@ app.patch('/api/users/me', authenticate, (req, res) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
   ['displayName','photoURL','bio'].forEach(f => { if (req.body[f] !== undefined) user[f] = req.body[f]; });
   res.json({ ...safeUser(user), levelTitle: getLevelTitle(user.level) });
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
