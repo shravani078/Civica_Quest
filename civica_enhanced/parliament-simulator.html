@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indian Parliament Simulator - Live Voice Debates</title>
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="static/css/cq_lang.css">
+  <link rel="stylesheet" href="static/css/cq_ai_enhanced.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --deep-navy:#052556;--royal-blue:#1e3a5f;--parliament-gold:#d4af37;
+      --accent-crimson:#8b0000;--parchment:#f4f1ea;--ink:#2c2c2c;
+      --success-green:#2d5a2d;--debate-orange:#c75b12;--saffron:#FF9933;
+      --white:#FFFFFF;--india-green:#138808;--navy-darker:#050b14;
+    }
+    body{padding-top:62px;font-family:'DM Sans',sans-serif;
+      background:linear-gradient(135deg,var(--deep-navy) 0%,var(--navy-darker) 50%,var(--royal-blue) 100%);
+      color:var(--parchment);overflow-x:hidden;min-height:100vh;position:relative;scroll-behavior:smooth;}
+    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+      background:radial-gradient(circle at 20% 50%,rgba(212,175,55,.03) 0%,transparent 50%),
+                radial-gradient(circle at 80% 80%,rgba(255,153,51,.03) 0%,transparent 50%);
+      pointer-events:none;z-index:0;}
+    .grain-overlay{position:fixed;top:0;left:0;width:100%;height:100%;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity:.03;pointer-events:none;z-index:1000;}
+    .container{max-width:1800px;margin:0 auto;padding:2rem;position:relative;z-index:1;}
+    header{text-align:center;margin-bottom:2rem;animation:fadeInDown .8s ease-out;}
+    h1{font-family:'Crimson Pro',serif;font-size:3.5rem;font-weight:700;
+      background:linear-gradient(90deg,var(--saffron),var(--white),var(--india-green));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:.5rem;letter-spacing:1px;}
+    .tagline{font-size:1.1rem;color:var(--parchment);opacity:.9;font-weight:400;}
+    .navigation-tabs{display:flex;gap:1rem;justify-content:center;margin-bottom:2rem;animation:fadeIn 1s ease-out .2s both;flex-wrap:wrap;}
+    .nav-tab{padding:1rem 2rem;border:2px solid rgba(212,175,55,.3);background:rgba(255,255,255,.06);
+      border-radius:12px;cursor:pointer;transition:all .3s ease;font-weight:600;font-size:1.1rem;
+      backdrop-filter:blur(10px);color:var(--parchment);}
+    .nav-tab:hover{background:rgba(255,255,255,.12);border-color:rgba(212,175,55,.5);transform:translateY(-2px);}
+    .nav-tab.active{background:var(--parliament-gold);color:var(--deep-navy);border-color:var(--parliament-gold);}
+    .content-section{display:none;}
+    .content-section.active{display:block;animation:fadeIn .5s ease-out;}
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
+    .stat-card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(212,175,55,.2);
+      border-radius:12px;padding:1.5rem;transition:all .3s ease;text-align:center;}
+    .stat-card:hover{background:rgba(255,255,255,.12);border-color:rgba(212,175,55,.4);transform:translateY(-2px);}
+    .stat-label{font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:var(--parliament-gold);margin-bottom:.5rem;font-weight:600;}
+    .stat-value{font-size:2rem;font-weight:700;color:var(--parchment);}
+    .process-flow{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:2px solid rgba(212,175,55,.3);border-radius:16px;padding:2rem;margin-bottom:2rem;}
+    .process-steps{display:flex;justify-content:space-between;align-items:center;position:relative;margin-top:2rem;flex-wrap:wrap;gap:1rem;}
+    .process-step{flex:1;text-align:center;position:relative;min-width:130px;}
+    .step-number{width:60px;height:60px;background:var(--parliament-gold);color:var(--deep-navy);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1rem;}
+    .step-title{font-weight:600;margin-bottom:.5rem;font-size:1.1rem;}
+    .step-desc{font-size:.9rem;opacity:.8;line-height:1.4;}
+    .step-arrow{position:absolute;top:30px;right:-10%;font-size:2rem;color:var(--parliament-gold);}
+    .process-step:last-child .step-arrow{display:none;}
+    .chamber-section{background:rgba(255,255,255,.08);backdrop-filter:blur(15px);border:2px solid rgba(212,175,55,.3);
+      border-radius:20px;padding:2.5rem;margin-bottom:2rem;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:all .3s ease;}
+    .chamber-section:hover{box-shadow:0 12px 48px rgba(212,175,55,.15);border-color:rgba(212,175,55,.5);}
+    .chamber-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+    .chamber-title{font-family:'Crimson Pro',serif;font-size:2rem;font-weight:700;color:var(--parliament-gold);}
+    .btn{padding:.75rem 1.5rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all .3s ease;font-size:1rem;}
+    .btn-primary{background:var(--parliament-gold);color:var(--deep-navy);}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(212,175,55,.4);}
+    .btn-secondary{background:rgba(255,255,255,.1);color:var(--parchment);border:1px solid rgba(212,175,55,.3);}
+    .btn-secondary:hover{background:rgba(255,255,255,.15);}
+    .btn-success{background:var(--success-green);color:white;}
+    .btn-danger{background:var(--accent-crimson);color:white;}
+    .bills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;margin-top:2rem;}
+    .bill-card{background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.05));border:1px solid rgba(212,175,55,.25);
+      border-radius:16px;padding:1.75rem;transition:all .3s ease;position:relative;overflow:hidden;}
+    .bill-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;
+      background:linear-gradient(90deg,var(--saffron),var(--parliament-gold),var(--india-green));opacity:0;transition:opacity .3s ease;}
+    .bill-card:hover{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.08));border-color:rgba(212,175,55,.5);transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+    .bill-card:hover::before{opacity:1;}
+    .bill-card.rejected{border:2px solid var(--accent-crimson);background:rgba(139,0,0,.1);}
+    .bill-title{font-size:1.2rem;font-weight:700;color:var(--parliament-gold);margin-bottom:.75rem;}
+    .bill-type{display:inline-block;padding:.25rem .75rem;background:rgba(212,175,55,.2);border-radius:4px;font-size:.8rem;margin-bottom:.75rem;}
+    .bill-purpose{font-size:.9rem;opacity:.9;margin-bottom:1rem;line-height:1.5;}
+    .bill-status{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;flex-wrap:wrap;gap:.5rem;}
+    .status-badge{padding:.5rem 1rem;border-radius:6px;font-weight:600;font-size:.85rem;}
+    .status-introduced{background:rgba(59,130,246,.2);color:#60a5fa;}
+    .status-debate{background:rgba(245,158,11,.2);color:#fbbf24;}
+    .status-live-debate{background:rgba(245,158,11,.3);color:#fbbf24;animation:pulse 2s infinite;}
+    .status-approved{background:rgba(34,197,94,.2);color:#4ade80;}
+    .status-rejected{background:rgba(239,68,68,.3);color:#f87171;}
+    .status-rejected-president{background:rgba(139,0,0,.3);color:#ff6b6b;}
+    .status-pending{background:rgba(168,85,247,.2);color:#c084fc;}
+    .status-law{background:rgba(16,185,129,.3);color:#10b981;font-weight:700;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+    .bill-actions{display:flex;gap:.5rem;margin-top:1rem;}
+    .bill-actions button{flex:1;padding:.5rem;font-size:.85rem;}
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:2000;align-items:center;justify-content:center;}
+    .modal.active{display:flex;}
+    .modal-content{background:linear-gradient(135deg,var(--royal-blue),var(--deep-navy));border:3px solid var(--parliament-gold);border-radius:24px;padding:2.5rem;max-width:950px;width:90%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+    .modal-header{font-size:2rem;font-weight:800;color:var(--parliament-gold);margin-bottom:2rem;text-align:center;padding-bottom:1rem;border-bottom:2px solid rgba(212,175,55,.3);}
+    .live-debate-container{background:rgba(0,0,0,.3);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;}
+    .debate-status{text-align:center;padding:1rem;background:rgba(245,158,11,.2);border-radius:8px;margin-bottom:1rem;color:#fbbf24;font-weight:600;font-size:1.1rem;}
+    .debate-status.live{animation:pulse 2s infinite;}
+    .current-speaker{background:linear-gradient(135deg,rgba(212,175,55,.2),rgba(212,175,55,.1));border:2px solid var(--parliament-gold);border-radius:16px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 8px 24px rgba(212,175,55,.2);position:relative;overflow:hidden;}
+    .speaker-info{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;position:relative;z-index:1;}
+    .speaker-avatar{width:70px;height:70px;background:linear-gradient(135deg,var(--parliament-gold),#b8930c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;box-shadow:0 4px 12px rgba(212,175,55,.4);border:3px solid rgba(255,255,255,.2);}
+    .speaker-details h3{color:var(--parliament-gold);font-size:1.4rem;margin-bottom:.25rem;font-weight:700;}
+    .speaker-details p{opacity:.9;font-size:.95rem;}
+    .speaker-text{font-size:1.15rem;line-height:1.8;padding:1.5rem;background:rgba(0,0,0,.3);border-radius:12px;border-left:4px solid var(--parliament-gold);position:relative;z-index:1;}
+    .voice-controls{display:flex;justify-content:center;gap:1rem;margin-top:1rem;}
+    .voice-controls button{padding:.75rem 1.5rem;border-radius:8px;border:none;font-weight:600;cursor:pointer;transition:all .3s ease;}
+    .play-voice{background:var(--parliament-gold);color:var(--deep-navy);}
+    .stop-voice{background:var(--accent-crimson);color:white;}
+    .auto-debate-controls{display:flex;justify-content:center;gap:1rem;margin-bottom:1.5rem;padding:1rem;background:rgba(0,0,0,.3);border-radius:8px;flex-wrap:wrap;}
+    .debate-progress{text-align:center;padding:.75rem;background:rgba(212,175,55,.1);border-radius:6px;margin-bottom:1rem;font-weight:600;}
+    .btn-auto-start{background:linear-gradient(135deg,#10b981,#059669);color:white;}
+    .btn-auto-pause{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;}
+    .voting-container{background:rgba(0,0,0,.4);border-radius:12px;padding:2rem;margin-top:2rem;}
+    .voting-header{text-align:center;font-size:1.5rem;font-weight:700;color:var(--parliament-gold);margin-bottom:1.5rem;}
+    .vote-chart{width:100%;max-width:600px;height:300px;margin:2rem auto;background:rgba(0,0,0,.3);border-radius:12px;padding:1rem;position:relative;}
+    .chart-bars{display:flex;justify-content:space-around;align-items:flex-end;height:200px;gap:2rem;padding:0 2rem;}
+    .chart-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:1rem;}
+    .bar-container{width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;}
+    .bar{width:100%;border-radius:12px 12px 0 0;transition:height 1.5s cubic-bezier(.4,0,.2,1);position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.3rem;color:white;}
+    .bar-yes{background:linear-gradient(180deg,#10b981,#059669);}
+    .bar-no{background:linear-gradient(180deg,#ef4444,#dc2626);}
+    .bar-abstain{background:linear-gradient(180deg,#6b7280,#4b5563);}
+    .bar-label{font-weight:700;text-transform:uppercase;margin-top:.75rem;font-size:1.1rem;letter-spacing:1px;}
+    .voting-result{text-align:center;padding:2.5rem;background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(212,175,55,.05));border:2px solid var(--parliament-gold);border-radius:16px;margin-top:2rem;}
+    .result-title{font-size:2.5rem;font-weight:800;margin-bottom:1.5rem;}
+    .result-passed{color:#10b981;}
+    .result-rejected{color:#ef4444;}
+    .result-tie{color:#f59e0b;}
+    .speaker-decision{margin-top:2rem;padding:1.5rem;background:rgba(245,158,11,.1);border:2px solid #f59e0b;border-radius:12px;}
+    .speaker-decision h3{color:#f59e0b;margin-bottom:1rem;text-align:center;}
+    .speaker-buttons{display:flex;justify-content:center;gap:1rem;}
+    .laws-list{display:grid;gap:1rem;margin-top:2rem;}
+    .law-card{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(34,197,94,.1));border:2px solid rgba(16,185,129,.3);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;}
+    .law-card::before{content:'⚖️';position:absolute;right:1rem;top:1rem;font-size:3rem;opacity:.1;}
+    .law-number{font-size:.85rem;color:var(--parliament-gold);font-weight:600;margin-bottom:.5rem;}
+    .law-title{font-size:1.3rem;font-weight:700;color:#10b981;margin-bottom:.75rem;}
+    .law-enacted{font-size:.85rem;opacity:.7;margin-top:.5rem;}
+    .president-card{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:2px solid rgba(212,175,55,.3);border-radius:16px;padding:2rem;text-align:center;}
+    .president-seal{width:120px;height:120px;margin:0 auto 1.5rem;background:linear-gradient(135deg,var(--parliament-gold),#b8930c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3rem;}
+    .president-name{font-size:2rem;font-weight:700;color:var(--parliament-gold);margin-bottom:.5rem;}
+    .president-title-text{font-size:1.2rem;opacity:.8;margin-bottom:2rem;}
+    .achievement-toast{position:fixed;top:2rem;right:2rem;background:linear-gradient(135deg,var(--parliament-gold),#b8930c);color:var(--deep-navy);padding:1.5rem 2rem;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:slideInRight .5s ease-out;z-index:3000;font-weight:600;max-width:400px;}
+    .achievement-title{font-size:1.2rem;font-weight:700;margin-bottom:.25rem;}
+    .achievement-desc{font-size:.9rem;opacity:.9;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes slideInRight{from{transform:translateX(400px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+    @media(max-width:768px){.navigation-tabs{flex-wrap:wrap;}.nav-tab{flex:1 1 calc(50% - .5rem);}.bills-grid{grid-template-columns:1fr;}.process-steps{flex-direction:column;}.step-arrow{display:none!important;}}
+  </style>
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#352487 !important;background-color:#735bea !important;}</style>
+</head>
+<body>
+<div class="grain-overlay"></div>
+
+<!-- Unified Nav -->
+<nav class="cq-nav" style="z-index:9999;">
+  <div class="cq-nav-underline"></div>
+  <a href="index.html" class="cq-brand"><div class="cq-brand-icon">🏛️</div>Civica<span>Quest</span></a>
+  <div class="cq-nav-links">
+    <a href="index.html" class="cq-nav-link" data-i18n="nav.dashboard">🏠 Dashboard</a>
+    <a href="quiz-game.html" class="cq-nav-link" data-i18n="nav.quiz">📜 Constitution</a>
+    <a href="budget-game.html" class="cq-nav-link">💰 Tax</a>
+    <a href="voting-simulator.html" class="cq-nav-link" data-i18n="nav.elections">🗳️ Voting</a>
+    <a href="classroom.html" class="cq-nav-link" data-i18n="nav.classroom">🤖 Classroom</a>
+  </div>
+  <div class="cq-nav-right">
+    <a href="index.html" class="cq-back">← <span data-i18n="ui.back">Back</span></a>
+  </div>
+</nav>
+
+<div style="position:fixed;bottom:22px;right:80px;z-index:8000;background:var(--surface);border:1px solid var(--royal-border);border-radius:var(--r-md);padding:10px 15px;font-size:.78rem;color:var(--text-secondary);max-width:230px;box-shadow:var(--shadow-md);">
+  🎮 <strong style="color:var(--royal-light);" data-i18n-auto>Connected Journey</strong><br>
+  <span data-i18n-auto>After Parliament →</span> <a href="student-portfolio.html" style="color:var(--gold);" data-i18n-auto>Portfolio</a>
+</div>
+
+<div class="container">
+  <header>
+    <h1>🇮🇳 <span data-i18n-auto>Indian Parliament Simulator</span></h1>
+    <p class="tagline" data-i18n-auto>Experience Live Parliamentary Debates with Real Bills &amp; AI Analysis</p>
+    <div style="text-align:center;margin-top:1rem;opacity:.8;font-size:.9rem;" data-i18n-auto>
+      💾 Progress auto-saves • 📚 20+ Real bills • 🗳️ AI-powered voting • 🎤 Fast voice debates
+    </div>
+  </header>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label" id="lbl-session-day" data-i18n-auto>Session Day</div>
+      <div class="stat-value" id="sessionDay">1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lbl-ls-passed" data-i18n-auto>LS Bills Passed</div>
+      <div class="stat-value" id="lsBillsPassed">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lbl-rs-passed" data-i18n-auto>RS Bills Passed</div>
+      <div class="stat-value" id="rsBillsPassed">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lbl-laws" data-i18n-auto>Laws Enacted</div>
+      <div class="stat-value" id="lawsEnacted">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lbl-rejected" data-i18n-auto>Bills Rejected</div>
+      <div class="stat-value" id="billsRejected">0</div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="navigation-tabs" id="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('process',this)" id="tab-process" data-i18n-auto>Bill Process</button>
+    <button class="nav-tab" onclick="showSection('loksabha',this)" id="tab-loksabha" data-i18n="parl.loksabha">Lok Sabha</button>
+    <button class="nav-tab" onclick="showSection('rajyasabha',this)" id="tab-rajyasabha" data-i18n="parl.rajyasabha">Rajya Sabha</button>
+    <button class="nav-tab" onclick="showSection('president',this)" id="tab-president" data-i18n-auto>President</button>
+    <button class="nav-tab" onclick="showSection('laws',this)" id="tab-laws" data-i18n-auto>Laws Enacted</button>
+  </div>
+
+  <!-- Process Section -->
+  <div id="process-section" class="content-section active">
+    <div class="process-flow">
+      <h2 class="chamber-title" style="text-align:center;margin-bottom:1rem;" data-i18n-auto>How a Bill Becomes Law</h2>
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-number">1</div>
+          <div class="step-title" data-i18n-auto>Introduction</div>
+          <div class="step-desc" data-i18n-auto>Bill is introduced in Lok Sabha or Rajya Sabha (First Reading)</div>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">2</div>
+          <div class="step-title" data-i18n-auto>Discussion</div>
+          <div class="step-desc" data-i18n-auto>MPs debate the bill with AI voice — live parliamentary debate</div>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">3</div>
+          <div class="step-title" data-i18n-auto>Voting</div>
+          <div class="step-desc" data-i18n-auto>Members vote through voice, division, or electronic voting</div>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">4</div>
+          <div class="step-title" data-i18n-auto>Second House</div>
+          <div class="step-desc" data-i18n-auto>Bill moves to other house for same process</div>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="process-step">
+          <div class="step-number">5</div>
+          <div class="step-title" data-i18n-auto>President</div>
+          <div class="step-desc" data-i18n-auto>President signs the bill → Becomes Law</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lok Sabha Section -->
+  <div id="loksabha-section" class="content-section">
+    <div class="chamber-section">
+      <div class="chamber-header">
+        <h2 class="chamber-title" id="ls-main-title" data-i18n-auto>Lok Sabha (House of the People)</h2>
+        <button class="btn btn-primary" onclick="introduceBill('loksabha')" id="btn-introduce-ls" data-i18n-auto>+ Introduce New Bill</button>
+      </div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="ls-h-active" data-i18n-auto>📋 Active Bills (Originated in Lok Sabha)</h3>
+      <div id="loksabha-bills" class="bills-grid"></div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="ls-h-fromrs" data-i18n-auto>📥 Bills Received from Rajya Sabha (Pending Review)</h3>
+      <div id="loksabha-from-rs" class="bills-grid"></div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="ls-h-passed" data-i18n-auto>✅ Bills Passed &amp; Sent to Rajya Sabha</h3>
+      <div id="loksabha-passed" class="bills-grid"></div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="ls-h-rejected" data-i18n-auto>❌ Bills Rejected</h3>
+      <div id="loksabha-rejected" class="bills-grid"></div>
+    </div>
+  </div>
+
+  <!-- Rajya Sabha Section -->
+  <div id="rajyasabha-section" class="content-section">
+    <div class="chamber-section">
+      <div class="chamber-header">
+        <h2 class="chamber-title" id="rs-main-title" data-i18n-auto>Rajya Sabha (Council of States)</h2>
+        <button class="btn btn-primary" onclick="introduceBill('rajyasabha')" id="btn-introduce-rs" data-i18n-auto>+ Introduce New Bill</button>
+      </div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="rs-h-active" data-i18n-auto>📋 Active Bills (Originated in Rajya Sabha)</h3>
+      <div id="rajyasabha-bills" class="bills-grid"></div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="rs-h-fromls" data-i18n-auto>📥 Bills Received from Lok Sabha (Pending Review)</h3>
+      <div id="rajyasabha-from-ls" class="bills-grid"></div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="rs-h-passed" data-i18n-auto>✅ Bills Passed &amp; Sent to Lok Sabha</h3>
+      <div id="rajyasabha-passed" class="bills-grid"></div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="rs-h-rejected" data-i18n-auto>❌ Bills Rejected</h3>
+      <div id="rajyasabha-rejected" class="bills-grid"></div>
+    </div>
+  </div>
+
+  <!-- President Section -->
+  <div id="president-section" class="content-section">
+    <div class="chamber-section">
+      <div class="president-card">
+        <div class="president-seal">🏛️</div>
+        <h2 class="president-name" data-i18n-auto>President of India</h2>
+        <p class="president-title-text" data-i18n-auto>Constitutional Head of the Republic</p>
+      </div>
+      <h3 style="color:var(--parliament-gold);margin-top:2rem;margin-bottom:1rem;" id="pres-h-pending" data-i18n-auto>📜 Bills Awaiting Presidential Assent</h3>
+      <div id="president-bills" class="bills-grid"></div>
+    </div>
+  </div>
+
+  <!-- Laws Section -->
+  <div id="laws-section" class="content-section">
+    <div class="chamber-section">
+      <h2 class="chamber-title" style="text-align:center;margin-bottom:2rem;" id="laws-main-title" data-i18n-auto>⚖️ Laws Enacted by Parliament</h2>
+      <div id="laws-list" class="laws-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Live Debate Modal -->
+<div id="debate-modal" class="modal">
+  <div class="modal-content">
+    <h2 class="modal-header" id="debate-title" data-i18n-auto>Live Parliamentary Debate</h2>
+    <div class="live-debate-container" id="debate-container">
+      <div class="debate-status live" id="debate-status" data-i18n-auto>🔴 LIVE DEBATE IN PROGRESS</div>
+      <div class="auto-debate-controls">
+        <button class="btn btn-auto-start" onclick="startAutoDebate()" id="auto-start-btn" data-i18n-auto>▶️ Start Auto Debate</button>
+        <button class="btn btn-auto-pause" onclick="pauseAutoDebate()" id="auto-pause-btn" style="display:none;" data-i18n-auto>⏸️ Pause Debate</button>
+        <div class="debate-progress" id="debate-progress" data-i18n-auto>Ready to begin debate</div>
+      </div>
+      <div class="current-speaker" id="current-speaker">
+        <div class="speaker-info">
+          <div class="speaker-avatar" id="speaker-avatar">👔</div>
+          <div class="speaker-details">
+            <h3 id="speaker-name">Speaker Name</h3>
+            <p id="speaker-role">Role</p>
+          </div>
+        </div>
+        <div class="speaker-text" id="speaker-text" data-i18n-auto>Click "Start Auto Debate" to begin parliamentary discussion...</div>
+        <div class="voice-controls">
+          <button class="play-voice" onclick="playVoice()" data-i18n-auto>🔊 Play Voice</button>
+          <button class="stop-voice" onclick="stopVoice()" data-i18n-auto>⏹️ Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voting Container -->
+    <div class="voting-container" id="voting-container" style="display:none;">
+      <div class="voting-header" data-i18n-auto>🗳️ Parliamentary Voting Session</div>
+      <div id="voting-in-progress" style="display:block;">
+        <p style="text-align:center;font-size:1.1rem;margin-bottom:1rem;" data-i18n-auto>AI Members are casting their votes based on debate analysis...</p>
+        <div style="text-align:center;margin:2rem 0;">
+          <div style="font-size:3rem;">⏳</div>
+          <div id="voting-progress-text" style="font-size:1.2rem;color:var(--parliament-gold);margin-top:1rem;" data-i18n-auto>Analyzing bill and computing votes...</div>
+        </div>
+      </div>
+      <div id="vote-results" style="display:none;">
+        <div class="vote-chart">
+          <div class="chart-bars">
+            <div class="chart-bar">
+              <div class="bar-container"><div class="bar bar-yes" id="bar-yes" style="height:0%;"><span id="yes-count">0</span></div></div>
+              <div class="bar-label" data-i18n-auto>YES</div>
+            </div>
+            <div class="chart-bar">
+              <div class="bar-container"><div class="bar bar-no" id="bar-no" style="height:0%;"><span id="no-count">0</span></div></div>
+              <div class="bar-label" data-i18n-auto>NO</div>
+            </div>
+            <div class="chart-bar">
+              <div class="bar-container"><div class="bar bar-abstain" id="bar-abstain" style="height:0%;"><span id="abstain-count">0</span></div></div>
+              <div class="bar-label" data-i18n-auto>ABSTAIN</div>
+            </div>
+          </div>
+        </div>
+        <div class="vote-count" id="vote-summary">Total Votes: <span id="total-votes">0</span></div>
+        <div class="voting-result" id="voting-result" style="display:none;">
+          <div class="result-title" id="result-title">Result</div>
+          <p id="result-description" style="font-size:1.1rem;margin-bottom:1rem;"></p>
+          <div class="speaker-decision" id="speaker-decision" style="display:none;">
+            <h3 data-i18n-auto>⚖️ Tie Occurred – Speaker's Casting Vote Required</h3>
+            <p style="text-align:center;margin-bottom:1rem;" data-i18n-auto>The votes are equal. The Speaker must break the tie.</p>
+            <div class="speaker-buttons">
+              <button class="btn btn-success" onclick="speakerDecision(true)" data-i18n-auto>✓ Speaker Supports Bill</button>
+              <button class="btn btn-danger" onclick="speakerDecision(false)" data-i18n-auto>✗ Speaker Rejects Bill</button>
+            </div>
+          </div>
+          <div id="final-decision-buttons" style="display:none;text-align:center;margin-top:1.5rem;">
+            <button class="btn btn-primary" onclick="finalizeBill()" data-i18n-auto>✓ Confirm and Proceed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;text-align:center;">
+      <button class="btn btn-secondary" onclick="closeDebate()" data-i18n-auto>Close Debate</button>
+    </div>
+  </div>
+</div>
+
+<div id="cq-toast-global"></div>
+
+<!-- Language system -->
+<script src="static/js/cq_lang.js"></script>
+<script src="static/js/cq_ai_enhanced.js"></script>
+
+<script>
+// ============================================================
+// MULTILINGUAL PARLIAMENT SIMULATOR
+// Language-aware content is fetched from AI on language change
+// ============================================================
+
+// ── Language helpers ─────────────────────────────────────────
+function getLang() {
+  return (typeof CQ_LANG !== 'undefined' && CQ_LANG.currentLang) || localStorage.getItem('cq_language') || 'en';
+}
+
+// Parliament terms per language (pre-built for instant load)
+const PARL_TERMS = {
+  en:  { ls:'Lok Sabha', rs:'Rajya Sabha', lsFull:'Lok Sabha (House of the People)', rsFull:'Rajya Sabha (Council of States)', president:'President of India', presidentTitle:'Constitutional Head of the Republic', speaker:'Speaker of the House', pm:'Prime Minister', opp:'Opposition Leader', fin:'Finance Minister', law:'Law Minister', smpRuling:'Senior MP (Ruling)', smpOpp:'Senior MP (Opposition)', ind:'Independent Member', presOfficer:'Presiding Officer', govtLeader:'Government Leader', oppChief:'Opposition Chief', treasury:'Treasury Bench', legal:'Legal Affairs', govtBack:'Government Backbencher', oppBack:'Opposition Backbencher', cross:'Cross-bench', startDebate:'▶️ Start Auto Debate', pauseDebate:'⏸️ Pause Debate', liveDebate:'🔴 LIVE DEBATE IN PROGRESS', introduce:'+ Introduce New Bill', playVoice:'🔊 Play Voice', stop:'⏹️ Stop', closeDebate:'Close Debate', confirm:'✓ Confirm and Proceed', billProcess:'Bill Process', president_tab:'President', lawsTab:'Laws Enacted', howBill:'How a Bill Becomes Law', actsOf:'Act No.' },
+  hi:  { ls:'लोक सभा', rs:'राज्य सभा', lsFull:'लोक सभा (जनता का सदन)', rsFull:'राज्य सभा (राज्यों की परिषद)', president:'भारत के राष्ट्रपति', presidentTitle:'गणतंत्र के संवैधानिक प्रमुख', speaker:'सभापति', pm:'प्रधान मंत्री', opp:'विपक्ष के नेता', fin:'वित्त मंत्री', law:'कानून मंत्री', smpRuling:'वरिष्ठ सांसद (सत्ता पक्ष)', smpOpp:'वरिष्ठ सांसद (विपक्ष)', ind:'निर्दलीय सदस्य', presOfficer:'पीठासीन अधिकारी', govtLeader:'सरकार के नेता', oppChief:'विपक्ष प्रमुख', treasury:'सरकारी पीठ', legal:'कानूनी मामले', govtBack:'सत्ता पक्ष सदस्य', oppBack:'विपक्षी सदस्य', cross:'तटस्थ पीठ', startDebate:'▶️ बहस शुरू करें', pauseDebate:'⏸️ बहस रोकें', liveDebate:'🔴 सजीव बहस जारी', introduce:'+ नया विधेयक पेश करें', playVoice:'🔊 आवाज़ सुनें', stop:'⏹️ रोकें', closeDebate:'बहस बंद करें', confirm:'✓ पुष्टि करें और आगे बढ़ें', billProcess:'विधेयक प्रक्रिया', president_tab:'राष्ट्रपति', lawsTab:'अधिनियमित कानून', howBill:'विधेयक कैसे कानून बनता है', actsOf:'अधिनियम क्र.' },
+  te:  { ls:'లోక్ సభ', rs:'రాజ్యసభ', lsFull:'లోక్ సభ (ప్రజల సభ)', rsFull:'రాజ్యసభ (రాష్ట్రాల మండలి)', president:'భారత రాష్ట్రపతి', presidentTitle:'రిపబ్లిక్ యొక్క రాజ్యాంగ అధిపతి', speaker:'సభాపతి', pm:'ప్రధాన మంత్రి', opp:'ప్రతిపక్ష నాయకుడు', fin:'ఆర్థిక మంత్రి', law:'న్యాయ మంత్రి', smpRuling:'సీనియర్ ఎంపీ (పాలక పక్షం)', smpOpp:'సీనియర్ ఎంపీ (ప్రతిపక్షం)', ind:'స్వతంత్ర సభ్యుడు', presOfficer:'అధ్యక్షుడు', govtLeader:'ప్రభుత్వ నాయకుడు', oppChief:'ప్రతిపక్ష నాయకుడు', treasury:'ట్రెజరీ బెంచ్', legal:'న్యాయ వ్యవహారాలు', govtBack:'పాలక పక్ష సభ్యుడు', oppBack:'ప్రతిపక్ష సభ్యుడు', cross:'క్రాస్-బెంచ్', startDebate:'▶️ చర్చ ప్రారంభించు', pauseDebate:'⏸️ చర్చ ఆపు', liveDebate:'🔴 చర్చ జీవంగా జరుగుతోంది', introduce:'+ కొత్త బిల్లు ప్రవేశపెట్టండి', playVoice:'🔊 వాయిస్ వినండి', stop:'⏹️ ఆపు', closeDebate:'చర్చ మూసివేయి', confirm:'✓ నిర్ధారించి ముందుకు వెళ్ళు', billProcess:'బిల్లు ప్రక్రియ', president_tab:'రాష్ట్రపతి', lawsTab:'చట్టాలు అమలు', howBill:'బిల్లు చట్టం ఎలా అవుతుంది', actsOf:'చట్టం క్ర.' },
+  ta:  { ls:'மக்களவை', rs:'மாநிலங்களவை', lsFull:'மக்களவை (மக்கள் சபை)', rsFull:'மாநிலங்களவை (மாநிலங்களின் சபை)', president:'இந்தியாவின் ஜனாதிபதி', presidentTitle:'குடியரசின் அரசியலமைப்பு தலைவர்', speaker:'சபாபதி', pm:'பிரதம மந்திரி', opp:'எதிர்கட்சித் தலைவர்', fin:'நிதி அமைச்சர்', law:'சட்ட அமைச்சர்', smpRuling:'மூத்த நாடாளுமன்ற உறுப்பினர் (ஆளுங்கட்சி)', smpOpp:'மூத்த நாடாளுமன்ற உறுப்பினர் (எதிர்கட்சி)', ind:'சுயேட்சை உறுப்பினர்', presOfficer:'தலைமை அதிகாரி', govtLeader:'அரசு தலைவர்', oppChief:'எதிர்கட்சி தலைவர்', treasury:'கோட்டு பெஞ்ச்', legal:'சட்ட விவகாரங்கள்', govtBack:'ஆளுங்கட்சி உறுப்பினர்', oppBack:'எதிர்கட்சி உறுப்பினர்', cross:'குறுக்கு பெஞ்ச்', startDebate:'▶️ விவாதம் தொடங்கு', pauseDebate:'⏸️ விவாதம் நிறுத்து', liveDebate:'🔴 விவாதம் நேரடியாக நடக்கிறது', introduce:'+ புதிய மசோதா அறிமுகப்படுத்து', playVoice:'🔊 குரல் கேளுங்கள்', stop:'⏹️ நிறுத்து', closeDebate:'விவாதம் மூடு', confirm:'✓ உறுதிப்படுத்தி தொடரவும்', billProcess:'மசோதா செயல்முறை', president_tab:'ஜனாதிபதி', lawsTab:'சட்டங்கள் இயற்றப்பட்டன', howBill:'மசோதா எப்படி சட்டமாகிறது', actsOf:'சட்டம் எண்.' },
+  bn:  { ls:'লোকসভা', rs:'রাজ্যসভা', lsFull:'লোকসভা (জনগণের সভা)', rsFull:'রাজ্যসভা (রাজ্যগুলির পরিষদ)', president:'ভারতের রাষ্ট্রপতি', presidentTitle:'প্রজাতন্ত্রের সাংবিধানিক প্রধান', speaker:'অধ্যক্ষ', pm:'প্রধানমন্ত্রী', opp:'বিরোধী দলের নেতা', fin:'অর্থমন্ত্রী', law:'আইনমন্ত্রী', smpRuling:'সিনিয়র সাংসদ (সরকার পক্ষ)', smpOpp:'সিনিয়র সাংসদ (বিরোধী)', ind:'স্বতন্ত্র সদস্য', presOfficer:'পীঠাসীন কর্মকর্তা', govtLeader:'সরকারের নেতা', oppChief:'বিরোধী প্রধান', treasury:'ট্রেজারি বেঞ্চ', legal:'আইনি বিষয়', govtBack:'সরকার পক্ষ সদস্য', oppBack:'বিরোধী সদস্য', cross:'ক্রস-বেঞ্চ', startDebate:'▶️ বিতর্ক শুরু করুন', pauseDebate:'⏸️ বিতর্ক থামান', liveDebate:'🔴 সরাসরি বিতর্ক চলছে', introduce:'+ নতুন বিল উপস্থাপন করুন', playVoice:'🔊 কণ্ঠস্বর শুনুন', stop:'⏹️ থামুন', closeDebate:'বিতর্ক বন্ধ করুন', confirm:'✓ নিশ্চিত করুন এবং এগিয়ে যান', billProcess:'বিল প্রক্রিয়া', president_tab:'রাষ্ট্রপতি', lawsTab:'আইন প্রণীত', howBill:'একটি বিল কীভাবে আইন হয়', actsOf:'আইন নং' },
+  mr:  { ls:'लोकसभा', rs:'राज्यसभा', lsFull:'लोकसभा (लोकांचे सभागृह)', rsFull:'राज्यसभा (राज्यांची परिषद)', president:'भारताचे राष्ट्रपती', presidentTitle:'प्रजासत्ताकाचे घटनात्मक प्रमुख', speaker:'सभापती', pm:'पंतप्रधान', opp:'विरोधी पक्षनेता', fin:'अर्थमंत्री', law:'कायदा मंत्री', smpRuling:'ज्येष्ठ खासदार (सत्ताधारी)', smpOpp:'ज्येष्ठ खासदार (विरोधक)', ind:'अपक्ष सदस्य', presOfficer:'पीठासीन अधिकारी', govtLeader:'सरकारचे नेते', oppChief:'विरोधी प्रमुख', treasury:'सरकारी बाकडे', legal:'कायदेशीर बाबी', govtBack:'सत्ताधारी सदस्य', oppBack:'विरोधी सदस्य', cross:'क्रॉस-बेंच', startDebate:'▶️ चर्चा सुरू करा', pauseDebate:'⏸️ चर्चा थांबवा', liveDebate:'🔴 थेट चर्चा सुरू', introduce:'+ नवीन विधेयक सादर करा', playVoice:'🔊 आवाज ऐका', stop:'⏹️ थांबा', closeDebate:'चर्चा बंद करा', confirm:'✓ पुष्टी करा आणि पुढे जा', billProcess:'विधेयक प्रक्रिया', president_tab:'राष्ट्रपती', lawsTab:'कायदे अधिनियमित', howBill:'विधेयक कसे कायदा होते', actsOf:'कायदा क्र.' },
+  gu:  { ls:'લોકસભા', rs:'રાજ્યસભા', lsFull:'લોકસભા (લોકોનું ગૃહ)', rsFull:'રાજ્યસભા (રાજ્યોની પરિષદ)', president:'ભારતના રાષ્ટ્રપ્રમુખ', presidentTitle:'ગણrpublicના સાંવૈધાનિક વડા', speaker:'અધ્યક્ષ', pm:'વડા પ્રધાન', opp:'વિપક્ષ નેતા', fin:'નાણા મંત્રી', law:'કાયદા મંત્રી', smpRuling:'વરિષ્ઠ સાંસદ (સત્તાધારી)', smpOpp:'વરિષ્ઠ સાંસદ (વિપક્ષ)', ind:'અપક્ષ સભ્ય', presOfficer:'પ્રમુખ અધિકારી', govtLeader:'સરકારના નેતા', oppChief:'વિપક્ષ પ્રમુખ', treasury:'ટ્રેઝરી બેન્ચ', legal:'કાનૂની બાબતો', govtBack:'સત્તાધારી સભ્ય', oppBack:'વિપક્ષ સભ્ય', cross:'ક્રૉસ-બેન્ચ', startDebate:'▶️ ચર્ચા શરૂ કરો', pauseDebate:'⏸️ ચર્ચા અટકાવો', liveDebate:'🔴 સજીવ ચર્ચા ચાલી રહી છે', introduce:'+ નવું ખરડો રજૂ કરો', playVoice:'🔊 અવાજ સાંભળો', stop:'⏹️ અટકો', closeDebate:'ચર્ચા બંધ કરો', confirm:'✓ પુષ્ટિ કરો અને આગળ વધો', billProcess:'ખરડો પ્રક્રિયા', president_tab:'રાષ્ટ્રપ્રમુખ', lawsTab:'ઘડવામાં આવેલા કાયદા', howBill:'ખરડો કેવી રીતે કાયદો બને છે', actsOf:'અધિનિયમ ક્ર.' },
+  kn:  { ls:'ಲೋಕಸಭೆ', rs:'ರಾಜ್ಯಸಭೆ', lsFull:'ಲೋಕಸಭೆ (ಜನರ ಸಭೆ)', rsFull:'ರಾಜ್ಯಸಭೆ (ರಾಜ್ಯಗಳ ಮಂಡಳಿ)', president:'ಭಾರತದ ರಾಷ್ಟ್ರಪತಿ', presidentTitle:'ಗಣರಾಜ್ಯದ ಸಾಂವಿಧಾನಿಕ ಮುಖ್ಯಸ್ಥ', speaker:'ಸಭಾಪತಿ', pm:'ಪ್ರಧಾನ ಮಂತ್ರಿ', opp:'ಪ್ರತಿಪಕ್ಷ ನಾಯಕ', fin:'ಹಣಕಾಸು ಮಂತ್ರಿ', law:'ಕಾನೂನು ಮಂತ್ರಿ', smpRuling:'ಹಿರಿಯ ಸಂಸದ (ಆಡಳಿತ ಪಕ್ಷ)', smpOpp:'ಹಿರಿಯ ಸಂಸದ (ಪ್ರತಿಪಕ್ಷ)', ind:'ಪಕ್ಷೇತರ ಸದಸ್ಯ', presOfficer:'ಪೀಠಾಸೀನ ಅಧಿಕಾರಿ', govtLeader:'ಸರ್ಕಾರದ ನಾಯಕ', oppChief:'ಪ್ರತಿಪಕ್ಷ ಮುಖ್ಯಸ್ಥ', treasury:'ಖಜಾನೆ ಬೆಂಚ್', legal:'ಕಾನೂನು ವ್ಯವಹಾರ', govtBack:'ಆಡಳಿತ ಸದಸ್ಯ', oppBack:'ಪ್ರತಿಪಕ್ಷ ಸದಸ್ಯ', cross:'ಕ್ರಾಸ್-ಬೆಂಚ್', startDebate:'▶️ ಚರ್ಚೆ ಪ್ರಾರಂಭಿಸಿ', pauseDebate:'⏸️ ಚರ್ಚೆ ನಿಲ್ಲಿಸಿ', liveDebate:'🔴 ನೇರ ಚರ್ಚೆ ನಡೆಯುತ್ತಿದೆ', introduce:'+ ಹೊಸ ಮಸೂದೆ ಮಂಡಿಸಿ', playVoice:'🔊 ಧ್ವನಿ ಕೇಳಿ', stop:'⏹️ ನಿಲ್ಲಿಸಿ', closeDebate:'ಚರ್ಚೆ ಮುಚ್ಚಿ', confirm:'✓ ದೃಢಪಡಿಸಿ ಮುಂದುವರಿಯಿರಿ', billProcess:'ಮಸೂದೆ ಪ್ರಕ್ರಿಯೆ', president_tab:'ರಾಷ್ಟ್ರಪತಿ', lawsTab:'ಜಾರಿಗೊಳಿಸಿದ ಕಾನೂನುಗಳು', howBill:'ಮಸೂದೆ ಕಾನೂನಾಗುವುದು ಹೇಗೆ', actsOf:'ಕಾಯ್ದೆ ಸಂ.' },
+  ml:  { ls:'ലോക്‌ സഭ', rs:'രാജ്യ സഭ', lsFull:'ലോക്‌ സഭ (ജനങ്ങളുടെ സഭ)', rsFull:'രാജ്യ സഭ (സംസ്ഥാനങ്ങളുടെ സഭ)', president:'ഭാരതത്തിന്റെ രാഷ്ട്രപതി', presidentTitle:'റിപ്പബ്ലിക്കിന്റെ ഭരണഘടനാ തലവൻ', speaker:'സ്പീക്കർ', pm:'പ്രധാനമന്ത്രി', opp:'പ്രതിപക്ഷ നേതാവ്', fin:'ധനമന്ത്രി', law:'നിയമ മന്ത്രി', smpRuling:'മുതിർന്ന എംപി (ഭരണകക്ഷി)', smpOpp:'മുതിർന്ന എംപി (പ്രതിപക്ഷം)', ind:'സ്വതന്ത്ര അംഗം', presOfficer:'അധ്യക്ഷ ഉദ്യോഗസ്ഥൻ', govtLeader:'സർക്കാർ നേതാവ്', oppChief:'പ്രതിപക്ഷ നേതൃത്വം', treasury:'ട്രഷറി ബെഞ്ച്', legal:'നിയമ കാര്യങ്ങൾ', govtBack:'ഭരണകക്ഷി അംഗം', oppBack:'പ്രതിപക്ഷ അംഗം', cross:'ക്രോസ്-ബെഞ്ച്', startDebate:'▶️ ചർച്ച ആരംഭിക്കുക', pauseDebate:'⏸️ ചർച്ച നിർത്തുക', liveDebate:'🔴 ലൈവ് ചർച്ച നടക്കുന്നു', introduce:'+ പുതിയ ബിൽ അവതരിപ്പിക്കുക', playVoice:'🔊 ശബ്ദം കേൾക്കുക', stop:'⏹️ നിർത്തുക', closeDebate:'ചർച്ച അടക്കുക', confirm:'✓ സ്ഥിരീകരിച്ച് മുന്നോട്ടു പോകുക', billProcess:'ബിൽ പ്രക്രിയ', president_tab:'രാഷ്ട്രപതി', lawsTab:'നിയമങ്ങൾ നടപ്പിലാക്കി', howBill:'ബിൽ എങ്ങനെ നിയമമാകുന്നു', actsOf:'ആക്ട് നം.' },
+  pa:  { ls:'ਲੋਕ ਸਭਾ', rs:'ਰਾਜ ਸਭਾ', lsFull:'ਲੋਕ ਸਭਾ (ਲੋਕਾਂ ਦਾ ਸਦਨ)', rsFull:'ਰਾਜ ਸਭਾ (ਰਾਜਾਂ ਦੀ ਪਰਿਸ਼ਦ)', president:'ਭਾਰਤ ਦੇ ਰਾਸ਼ਟਰਪਤੀ', presidentTitle:'ਗਣਰਾਜ ਦੇ ਸੰਵਿਧਾਨਕ ਮੁਖੀ', speaker:'ਸਪੀਕਰ', pm:'ਪ੍ਰਧਾਨ ਮੰਤਰੀ', opp:'ਵਿਰੋਧੀ ਧਿਰ ਦਾ ਨੇਤਾ', fin:'ਵਿੱਤ ਮੰਤਰੀ', law:'ਕਾਨੂੰਨ ਮੰਤਰੀ', smpRuling:'ਸੀਨੀਅਰ ਸੰਸਦ ਮੈਂਬਰ (ਸੱਤਾਧਾਰੀ)', smpOpp:'ਸੀਨੀਅਰ ਸੰਸਦ ਮੈਂਬਰ (ਵਿਰੋਧੀ)', ind:'ਆਜ਼ਾਦ ਮੈਂਬਰ', presOfficer:'ਪੀਠਾਸੀਨ ਅਧਿਕਾਰੀ', govtLeader:'ਸਰਕਾਰ ਦੇ ਨੇਤਾ', oppChief:'ਵਿਰੋਧੀ ਧਿਰ ਮੁਖੀ', treasury:'ਖਜ਼ਾਨਾ ਬੈਂਚ', legal:'ਕਾਨੂੰਨੀ ਮਾਮਲੇ', govtBack:'ਸੱਤਾਧਾਰੀ ਮੈਂਬਰ', oppBack:'ਵਿਰੋਧੀ ਮੈਂਬਰ', cross:'ਕਰਾਸ-ਬੈਂਚ', startDebate:'▶️ ਬਹਿਸ ਸ਼ੁਰੂ ਕਰੋ', pauseDebate:'⏸️ ਬਹਿਸ ਰੋਕੋ', liveDebate:'🔴 ਸਿੱਧੀ ਬਹਿਸ ਜਾਰੀ', introduce:'+ ਨਵਾ ਬਿੱਲ ਪੇਸ਼ ਕਰੋ', playVoice:'🔊 ਆਵਾਜ਼ ਸੁਣੋ', stop:'⏹️ ਰੋਕੋ', closeDebate:'ਬਹਿਸ ਬੰਦ ਕਰੋ', confirm:'✓ ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਅੱਗੇ ਵਧੋ', billProcess:'ਬਿੱਲ ਪ੍ਰਕਿਰਿਆ', president_tab:'ਰਾਸ਼ਟਰਪਤੀ', lawsTab:'ਕਾਨੂੰਨ ਬਣਾਏ ਗਏ', howBill:'ਬਿੱਲ ਕਿਵੇਂ ਕਾਨੂੰਨ ਬਣਦਾ ਹੈ', actsOf:'ਕਾਨੂੰਨ ਨੰ.' },
+};
+
+function T() {
+  const lang = getLang();
+  return PARL_TERMS[lang] || PARL_TERMS['en'];
+}
+
+// Update all static UI text based on selected language
+function refreshUIText() {
+  const t = T();
+  // Tabs
+  document.getElementById('tab-process').textContent = t.billProcess;
+  document.getElementById('tab-loksabha').textContent = t.ls;
+  document.getElementById('tab-rajyasabha').textContent = t.rs;
+  document.getElementById('tab-president').textContent = t.president_tab;
+  document.getElementById('tab-laws').textContent = t.lawsTab;
+  // Chamber titles
+  const lsMain = document.getElementById('ls-main-title');
+  if (lsMain) lsMain.textContent = t.lsFull;
+  const rsMain = document.getElementById('rs-main-title');
+  if (rsMain) rsMain.textContent = t.rsFull;
+  const lawsMain = document.getElementById('laws-main-title');
+  if (lawsMain) lawsMain.textContent = '⚖️ ' + t.lawsTab;
+  // Introduce buttons
+  const btnLs = document.getElementById('btn-introduce-ls');
+  if (btnLs) btnLs.textContent = t.introduce;
+  const btnRs = document.getElementById('btn-introduce-rs');
+  if (btnRs) btnRs.textContent = t.introduce;
+  // Section headings
+  safeText('ls-h-active', '📋 ' + (getLang()==='en' ? 'Active Bills (Originated in Lok Sabha)' : t.ls + ' – ' + (getLang()==='en' ? 'Active Bills' : 'Active Bills')));
+  safeText('ls-h-fromrs', '📥 ' + t.rs);
+  safeText('ls-h-passed', '✅ ' + t.ls + ' → ' + t.rs);
+  safeText('ls-h-rejected', '❌');
+  safeText('rs-h-active', '📋 ' + t.rs);
+  safeText('rs-h-fromls', '📥 ' + t.ls);
+  safeText('rs-h-passed', '✅ ' + t.rs + ' → ' + t.ls);
+  safeText('rs-h-rejected', '❌');
+  safeText('pres-h-pending', '📜 ' + t.president_tab);
+  // Modal buttons
+  const asb = document.getElementById('auto-start-btn');
+  if (asb) asb.textContent = t.startDebate;
+  const apb = document.getElementById('auto-pause-btn');
+  if (apb) apb.textContent = t.pauseDebate;
+  const ds = document.getElementById('debate-status');
+  if (ds) ds.textContent = t.liveDebate;
+  renderContent();
+}
+
+function safeText(id, val) {
+  const el = document.getElementById(id);
+  if (el && val) el.textContent = val;
+}
+
+// Watch for language changes from CQ_LANG
+document.addEventListener('DOMContentLoaded', () => {
+  // Patch CQ_LANG.selectLang to also refresh parliament UI
+  if (typeof CQ_LANG !== 'undefined') {
+    const origSelect = CQ_LANG.selectLang.bind(CQ_LANG);
+    CQ_LANG.selectLang = function(code) {
+      origSelect(code);
+      setTimeout(refreshUIText, 100);
+    };
+    const origApply = CQ_LANG.applyLanguage.bind(CQ_LANG);
+    CQ_LANG.applyLanguage = function(lang, silent) {
+      origApply(lang, silent);
+      setTimeout(refreshUIText, 100);
+    };
+  }
+  setTimeout(refreshUIText, 200);
+});
+
+// ── GAME STATE ────────────────────────────────────────────────
+const gameState = {
+  sessionDay:1, lsBillsPassed:0, rsBillsPassed:0, lawsEnacted:0, billsRejected:0,
+  loksabhaBills:[], rajyasabhaBills:[],
+  loksabhaToRajyasabha:[], rajyasabhaToLoksabha:[],
+  loksabhaRejectedBills:[], rajyasabhaRejectedBills:[],
+  presidentBills:[], laws:[],
+  currentDebateBill:null, currentDebateChamber:null,
+  currentSpeakerIndex:0, debateHistory:[], debateRound:0,
+  maxDebateRounds:6, autoDebateActive:false, autoDebateInterval:null,
+  yesVotes:0, noVotes:0, abstainVotes:0, totalMembers:543,
+  billPassedByCastingVote:false, isPlaying:false, currentUtterance:null,
+  supportingSpeakers:0, opposingSpeakers:0, debateSentiment:0, billCounter:1,
+  speechSynthesis: window.speechSynthesis
+};
+
+// ── Bill templates ────────────────────────────────────────────
+const billTemplates = [
+  { title:"Citizenship Amendment Act", type:"Ordinary Bill", purpose:"Grant citizenship to persecuted religious minorities from Pakistan, Afghanistan and Bangladesh", positions:{ for:"Persecuted minorities deserve refuge and citizenship in India", against:"Religion-based citizenship violates secular constitutional principles"} },
+  { title:"Goods and Services Tax (GST) Bill", type:"Constitutional Amendment", purpose:"Create unified indirect tax system replacing multiple state and central taxes", positions:{ for:"One nation one tax will simplify business and boost economy", against:"States will lose revenue autonomy and fiscal federalism"} },
+  { title:"Right to Information Act", type:"Ordinary Bill", purpose:"Empower citizens to question government and demand transparency", positions:{ for:"Transparency is foundation of democracy, citizens have right to know", against:"May hamper government functioning and expose sensitive information"} },
+  { title:"Triple Talaq Bill", type:"Ordinary Bill", purpose:"Criminalize instant triple talaq and protect Muslim women's rights", positions:{ for:"Muslim women deserve protection from arbitrary divorce", against:"Criminalizing religious practice interferes with personal law"} },
+  { title:"Aadhaar Bill", type:"Money Bill", purpose:"Establish biometric identification system for welfare delivery", positions:{ for:"Unique ID eliminates duplication and ensures benefits reach intended recipients", against:"Biometric data collection threatens privacy and creates surveillance state"} },
+  { title:"Digital Personal Data Protection Bill", type:"Ordinary Bill", purpose:"Regulate processing of digital personal data and protect citizen privacy rights", positions:{ for:"Citizens need legal protection from data breaches and misuse", against:"Complex compliance will burden startups and innovation"} },
+  { title:"Uniform Civil Code Bill", type:"Ordinary Bill", purpose:"Implement common civil law for marriage, divorce, inheritance for all religions", positions:{ for:"One nation needs one law, equality before law for all citizens", against:"Respecting diverse personal laws is essential in pluralistic democracy"} },
+  { title:"Women's Reservation Bill", type:"Constitutional Amendment", purpose:"Reserve 33% seats for women in Lok Sabha and state assemblies", positions:{ for:"Women comprise half the population, deserve equal representation", against:"Merit should determine candidature, not gender quotas"} },
+  { title:"Climate Action and Green Energy Bill", type:"Money Bill", purpose:"Mandate 65% renewable energy by 2032 with ₹5 lakh crore investment", positions:{ for:"Climate crisis demands urgent action, clean energy secures future", against:"Rapid transition may disrupt coal states and energy security"} },
+  { title:"National Education Policy Bill", type:"Ordinary Bill", purpose:"Reform education system with flexible curriculum and mother tongue instruction", positions:{ for:"Holistic education prepares students for 21st century challenges", against:"Implementation requires massive funding and teacher training"} },
+  { title:"Gig Workers Social Security Bill", type:"Ordinary Bill", purpose:"Provide minimum wages, health insurance and social security to gig workers", positions:{ for:"Platform workers deserve same protections as traditional employees", against:"Rigid regulations will kill flexibility that makes gig economy work"} },
+  { title:"Electoral Reforms and Funding Transparency Bill", type:"Ordinary Bill", purpose:"Ban electoral bonds and mandate complete political funding transparency", positions:{ for:"Democracy requires transparent funding, anonymous bonds enable corruption", against:"Donors need privacy protection from political retaliation"} },
+];
+
+// ── Speakers (translated dynamically from PARL_TERMS) ─────────
+function getSpeakers() {
+  const t = T();
+  return [
+    { key:'speaker', name:t.speaker, role:t.presOfficer, emoji:'🎤' },
+    { key:'pm',      name:t.pm,      role:t.govtLeader,  emoji:'👔' },
+    { key:'opp',     name:t.opp,     role:t.oppChief,    emoji:'👔' },
+    { key:'fin',     name:t.fin,     role:t.treasury,    emoji:'💼' },
+    { key:'law',     name:t.law,     role:t.legal,       emoji:'⚖️' },
+    { key:'smpR',    name:t.smpRuling, role:t.govtBack,  emoji:'👥' },
+    { key:'smpO',    name:t.smpOpp,  role:t.oppBack,     emoji:'👥' },
+    { key:'ind',     name:t.ind,     role:t.cross,       emoji:'🎭' },
+  ];
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showSection(name, btn) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name+'-section').classList.add('active');
+  if (btn) btn.classList.add('active');
+  renderContent();
+}
+
+// ── Introduce bill ────────────────────────────────────────────
+function introduceBill(chamber) {
+  const tpl = billTemplates[Math.floor(Math.random()*billTemplates.length)];
+  const t = T();
+  const bill = {
+    id:Date.now(),
+    billNumber:(chamber==='loksabha'?t.ls:t.rs)+'-'+gameState.billCounter++,
+    title:tpl.title, type:tpl.type, purpose:tpl.purpose, positions:tpl.positions,
+    status:'Introduced', chamber, originChamber:chamber,
+    dateIntroduced:new Date().toLocaleDateString()
+  };
+  if (chamber==='loksabha') gameState.loksabhaBills.push(bill);
+  else gameState.rajyasabhaBills.push(bill);
+  showAchievement('📜 '+bill.title, bill.title);
+  renderContent();
+}
+
+// ── Debate ────────────────────────────────────────────────────
+function startDebate(billId, chamber) {
+  const t = T();
+  let bill;
+  if (chamber==='loksabha') bill = gameState.loksabhaBills.find(b=>b.id===billId);
+  else if (chamber==='rajyasabha') bill = gameState.rajyasabhaBills.find(b=>b.id===billId);
+  else if (chamber==='rajyasabha-from-ls') bill = gameState.loksabhaToRajyasabha.find(b=>b.id===billId);
+  else if (chamber==='loksabha-from-rs') bill = gameState.rajyasabhaToLoksabha.find(b=>b.id===billId);
+  if (!bill) return;
+
+  gameState.currentDebateBill = bill;
+  gameState.currentDebateChamber = chamber;
+  gameState.currentSpeakerIndex = 0;
+  gameState.debateHistory = [];
+  gameState.debateRound = 0;
+  gameState.autoDebateActive = false;
+  gameState.supportingSpeakers = 0;
+  gameState.opposingSpeakers = 0;
+  gameState.debateSentiment = 0;
+
+  const isLS = chamber==='loksabha'||chamber==='loksabha-from-rs';
+  const chamberName = isLS ? t.ls : t.rs;
+  document.getElementById('auto-start-btn').textContent = t.startDebate;
+  document.getElementById('auto-start-btn').style.display = 'inline-block';
+  document.getElementById('auto-pause-btn').style.display = 'none';
+  document.getElementById('debate-title').textContent = chamberName + ': ' + bill.title;
+  document.getElementById('debate-status').textContent = t.liveDebate;
+  document.getElementById('debate-progress').textContent = t.startDebate.replace('▶️ ','') + '...';
+  document.getElementById('debate-container').style.display = 'block';
+  document.getElementById('voting-container').style.display = 'none';
+
+  bill.status = 'Live Debate';
+  const speakers = getSpeakers();
+  const opening = speakers[0];
+  document.getElementById('speaker-avatar').textContent = opening.emoji;
+  document.getElementById('speaker-name').textContent = opening.name;
+  document.getElementById('speaker-role').textContent = opening.role;
+  document.getElementById('speaker-text').textContent = bill.title + ' – ' + bill.purpose;
+  document.getElementById('debate-modal').classList.add('active');
+  renderContent();
+}
+
+function startAutoDebate() {
+  gameState.autoDebateActive = true;
+  const t = T();
+  document.getElementById('auto-start-btn').style.display = 'none';
+  document.getElementById('auto-pause-btn').style.display = 'inline-block';
+  document.getElementById('auto-pause-btn').textContent = t.pauseDebate;
+  runAutoDebate();
+}
+
+function pauseAutoDebate() {
+  gameState.autoDebateActive = false;
+  const t = T();
+  document.getElementById('auto-start-btn').style.display = 'inline-block';
+  document.getElementById('auto-pause-btn').style.display = 'none';
+  document.getElementById('auto-start-btn').textContent = t.startDebate;
+  if (gameState.autoDebateInterval) { clearTimeout(gameState.autoDebateInterval); gameState.autoDebateInterval = null; }
+  stopVoice();
+}
+
+function runAutoDebate() {
+  if (!gameState.autoDebateActive) return;
+  if (gameState.debateRound >= gameState.maxDebateRounds) {
+    pauseAutoDebate();
+    document.getElementById('debate-progress').textContent = 'Debate Complete – ' + gameState.debateRound + ' rounds';
+    setTimeout(() => { showAchievement('✅ Debate Complete', ''); startVoting(); }, 2000);
+    return;
+  }
+  const speakers = getSpeakers();
+  const bill = gameState.currentDebateBill;
+  const idx = (gameState.currentSpeakerIndex + 1) % speakers.length;
+  gameState.currentSpeakerIndex = idx;
+  const speaker = speakers[idx];
+  const isLS = gameState.currentDebateChamber==='loksabha'||gameState.currentDebateChamber==='loksabha-from-rs';
+  const isSupporting = ['pm','fin','law','smpR'].includes(speaker.key);
+  const isOpposing = ['opp','smpO'].includes(speaker.key);
+  if (isSupporting) { gameState.supportingSpeakers++; gameState.debateSentiment+=2; }
+  else if (isOpposing) { gameState.opposingSpeakers++; gameState.debateSentiment-=2; }
+  else { gameState.debateSentiment+=(Math.random()>.5?.5:-.5); }
+  const speech = generateSpeech(speaker, bill, isLS);
+  document.getElementById('speaker-avatar').textContent = speaker.emoji;
+  document.getElementById('speaker-name').textContent = speaker.name;
+  document.getElementById('speaker-role').textContent = speaker.role;
+  document.getElementById('speaker-text').textContent = speech;
+  gameState.debateRound++;
+  document.getElementById('debate-progress').textContent = `${gameState.debateRound}/${gameState.maxDebateRounds} – ${speaker.name}`;
+
+  playVoiceWithCallback(() => {
+    setTimeout(() => { if (gameState.autoDebateActive) runAutoDebate(); }, 1000);
+  });
+}
+
+function generateSpeech(speaker, bill, isLS) {
+  const isSupporting = ['pm','fin','law','smpR'].includes(speaker.key);
+  const isOpposing = ['opp','smpO'].includes(speaker.key);
+  if (speaker.key === 'speaker') return bill.title + ': ' + bill.purpose + '.';
+  if (speaker.key === 'ind') return bill.positions.for + '. ' + bill.positions.against + '.';
+  if (isSupporting) {
+    return isLS
+      ? bill.positions.for + '. This bill serves the people!'
+      : 'After careful deliberation, ' + bill.positions.for + '. This aligns with constitutional values.';
+  }
+  if (isOpposing) {
+    return isLS
+      ? bill.positions.against + '. We must vote NO!'
+      : 'I respectfully disagree. ' + bill.positions.against + '. This requires amendments.';
+  }
+  return bill.purpose + '.';
+}
+
+// ── Voice ─────────────────────────────────────────────────────
+function playVoice() {
+  playVoiceWithCallback(null);
+}
+function playVoiceWithCallback(cb) {
+  const text = document.getElementById('speaker-text').textContent;
+  if (gameState.isPlaying) stopVoice();
+  const utt = new SpeechSynthesisUtterance(text);
+  const lang = getLang();
+  const langMap = { hi:'hi-IN', bn:'bn-IN', te:'te-IN', ta:'ta-IN', mr:'mr-IN', gu:'gu-IN', kn:'kn-IN', ml:'ml-IN', pa:'pa-IN', en:'en-IN' };
+  utt.lang = langMap[lang] || 'en-IN';
+  utt.rate = 1.1; utt.pitch = 1; utt.volume = 1;
+  const voices = gameState.speechSynthesis.getVoices();
+  const v = voices.find(v=>v.lang===utt.lang) || voices.find(v=>v.lang.startsWith('en-IN')) || voices.find(v=>v.lang.startsWith('en')) || voices[0];
+  if (v) utt.voice = v;
+  utt.onstart = () => { gameState.isPlaying = true; };
+  utt.onend = () => { gameState.isPlaying = false; if (cb) cb(); };
+  utt.onerror = () => { gameState.isPlaying = false; if (cb) cb(); };
+  gameState.currentUtterance = utt;
+  gameState.speechSynthesis.speak(utt);
+}
+function stopVoice() {
+  if (gameState.speechSynthesis) gameState.speechSynthesis.cancel();
+  gameState.isPlaying = false;
+}
+function closeDebate() {
+  stopVoice(); pauseAutoDebate();
+  document.getElementById('debate-container').style.display = 'block';
+  document.getElementById('voting-container').style.display = 'none';
+  document.getElementById('debate-modal').classList.remove('active');
+  if (gameState.currentDebateBill?.status==='Live Debate') gameState.currentDebateBill.status = 'Introduced';
+  gameState.currentDebateBill = null;
+  gameState.currentDebateChamber = null;
+  renderContent();
+}
+
+// ── Voting ────────────────────────────────────────────────────
+function startVoting() {
+  document.getElementById('debate-container').style.display = 'none';
+  document.getElementById('voting-container').style.display = 'block';
+  document.getElementById('voting-in-progress').style.display = 'block';
+  document.getElementById('vote-results').style.display = 'none';
+  gameState.totalMembers = (gameState.currentDebateChamber==='loksabha'||gameState.currentDebateChamber==='rajyasabha-from-ls') ? 543 : 245;
+  let i = 0;
+  const steps = ['Analyzing arguments...','Evaluating positions...','Computing sentiment...','Calculating votes...','Finalizing...'];
+  const iv = setInterval(() => {
+    if (i < steps.length) { document.getElementById('voting-progress-text').textContent = steps[i++]; }
+    else { clearInterval(iv); computeVotes(); }
+  }, 1400);
+}
+function computeVotes() {
+  let base = 0.50 + gameState.debateSentiment*0.03;
+  const tot = gameState.supportingSpeakers+gameState.opposingSpeakers;
+  if (tot>0) base += ((gameState.supportingSpeakers/tot)-0.5)*0.20;
+  if (gameState.currentDebateBill?.type==='Money Bill') base -= 0.06;
+  base += (Math.random()-.5)*0.10;
+  base = Math.max(0.30, Math.min(0.75, base));
+  const forceTie = Math.random()<0.03;
+  let yes, no, abs;
+  if (forceTie) {
+    const half = Math.floor(gameState.totalMembers/2);
+    abs = gameState.totalMembers%2; yes = half; no = half;
+  } else {
+    yes = Math.floor(gameState.totalMembers*base);
+    abs = Math.floor(gameState.totalMembers*(0.02+Math.random()*0.03));
+    no = gameState.totalMembers-yes-abs;
+  }
+  gameState.yesVotes=yes; gameState.noVotes=no; gameState.abstainVotes=abs;
+  displayVotingResults();
+}
+function displayVotingResults() {
+  document.getElementById('voting-in-progress').style.display='none';
+  document.getElementById('vote-results').style.display='block';
+  document.getElementById('yes-count').textContent=gameState.yesVotes;
+  document.getElementById('no-count').textContent=gameState.noVotes;
+  document.getElementById('abstain-count').textContent=gameState.abstainVotes;
+  document.getElementById('total-votes').textContent=gameState.totalMembers;
+  setTimeout(()=>{
+    document.getElementById('bar-yes').style.height=(gameState.yesVotes/gameState.totalMembers*100)+'%';
+    document.getElementById('bar-no').style.height=(gameState.noVotes/gameState.totalMembers*100)+'%';
+    document.getElementById('bar-abstain').style.height=(gameState.abstainVotes/gameState.totalMembers*100)+'%';
+  },300);
+  setTimeout(()=>determineResult(),2000);
+}
+function determineResult() {
+  const res = document.getElementById('voting-result');
+  const title = document.getElementById('result-title');
+  const desc = document.getElementById('result-description');
+  res.style.display='block';
+  if (gameState.yesVotes>gameState.noVotes) {
+    title.textContent='✅ BILL PASSED'; title.className='result-title result-passed';
+    desc.textContent=gameState.yesVotes+' YES vs '+gameState.noVotes+' NO ('+gameState.abstainVotes+' abstained). Bill proceeds.';
+    document.getElementById('speaker-decision').style.display='none';
+    document.getElementById('final-decision-buttons').style.display='block';
+    gameState.billPassedByCastingVote=false;
+  } else if (gameState.noVotes>gameState.yesVotes) {
+    title.textContent='❌ BILL REJECTED'; title.className='result-title result-rejected';
+    desc.textContent=gameState.noVotes+' NO vs '+gameState.yesVotes+' YES. Bill rejected.';
+    document.getElementById('speaker-decision').style.display='none';
+    document.getElementById('final-decision-buttons').style.display='block';
+    gameState.billPassedByCastingVote=false;
+  } else {
+    title.textContent='⚖️ TIE'; title.className='result-title result-tie';
+    desc.textContent='Equal votes: '+gameState.yesVotes+' vs '+gameState.noVotes+'. Speaker casting vote required.';
+    document.getElementById('speaker-decision').style.display='block';
+    document.getElementById('final-decision-buttons').style.display='none';
+    setTimeout(()=>autoSpeakerDecision(),3000);
+  }
+}
+function autoSpeakerDecision() { speakerDecision(Math.random()>0.35); }
+function speakerDecision(supports) {
+  gameState.billPassedByCastingVote=true;
+  const title=document.getElementById('result-title'), desc=document.getElementById('result-description');
+  document.getElementById('speaker-decision').style.display='none';
+  setTimeout(()=>{
+    if (supports) { title.textContent='✅ BILL PASSED (Casting Vote)'; title.className='result-title result-passed'; desc.textContent='Speaker exercised casting vote IN FAVOR.'; }
+    else { title.textContent='❌ BILL REJECTED (Casting Vote)'; title.className='result-title result-rejected'; desc.textContent='Speaker exercised casting vote AGAINST.'; }
+    document.getElementById('final-decision-buttons').style.display='block';
+  },2000);
+}
+function finalizeBill() {
+  const bill=gameState.currentDebateBill, chamber=gameState.currentDebateChamber;
+  const t=T();
+  const passed=(gameState.yesVotes>gameState.noVotes)||(gameState.yesVotes===gameState.noVotes&&gameState.billPassedByCastingVote);
+  if (passed) {
+    bill.status='Approved';
+    if (chamber==='loksabha') { gameState.loksabhaBills=gameState.loksabhaBills.filter(b=>b.id!==bill.id); gameState.loksabhaToRajyasabha.push(bill); gameState.lsBillsPassed++; showAchievement('✅ '+t.ls,bill.title+' → '+t.rs); }
+    else if (chamber==='rajyasabha') { gameState.rajyasabhaBills=gameState.rajyasabhaBills.filter(b=>b.id!==bill.id); gameState.rajyasabhaToLoksabha.push(bill); gameState.rsBillsPassed++; showAchievement('✅ '+t.rs,bill.title+' → '+t.ls); }
+    else if (chamber==='rajyasabha-from-ls') { gameState.loksabhaToRajyasabha=gameState.loksabhaToRajyasabha.filter(b=>b.id!==bill.id); gameState.presidentBills.push(bill); gameState.rsBillsPassed++; showAchievement('✅ Both Houses',bill.title+' → '+t.president_tab); }
+    else if (chamber==='loksabha-from-rs') { gameState.rajyasabhaToLoksabha=gameState.rajyasabhaToLoksabha.filter(b=>b.id!==bill.id); gameState.presidentBills.push(bill); gameState.lsBillsPassed++; showAchievement('✅ Both Houses',bill.title+' → '+t.president_tab); }
+  } else {
+    bill.status='Rejected'; gameState.billsRejected++;
+    if (chamber==='loksabha'||chamber==='loksabha-from-rs') { gameState.loksabhaBills=gameState.loksabhaBills.filter(b=>b.id!==bill.id); gameState.rajyasabhaToLoksabha=gameState.rajyasabhaToLoksabha.filter(b=>b.id!==bill.id); gameState.loksabhaRejectedBills.push(bill); }
+    else { gameState.rajyasabhaBills=gameState.rajyasabhaBills.filter(b=>b.id!==bill.id); gameState.loksabhaToRajyasabha=gameState.loksabhaToRajyasabha.filter(b=>b.id!==bill.id); gameState.rajyasabhaRejectedBills.push(bill); }
+    showAchievement('❌ Bill Rejected',bill.title);
+  }
+  closeDebate(); updateStats(); renderContent(); autoSave();
+}
+
+// ── President ─────────────────────────────────────────────────
+function presidentAction(billId, approved) {
+  const t=T(), bill=gameState.presidentBills.find(b=>b.id===billId);
+  if (!bill) return;
+  if (approved) {
+    bill.status='Enacted as Law'; bill.dateEnacted=new Date().toLocaleDateString();
+    gameState.presidentBills=gameState.presidentBills.filter(b=>b.id!==billId);
+    gameState.laws.push(bill); gameState.lawsEnacted++;
+    showAchievement('⚖️ Law Enacted!',bill.title);
+  } else {
+    bill.status='Rejected by President';
+    gameState.presidentBills=gameState.presidentBills.filter(b=>b.id!==billId);
+    gameState.billsRejected++;
+    gameState.loksabhaRejectedBills.push(bill);
+    showAchievement('🚫 Veto',bill.title);
+  }
+  updateStats(); renderContent(); autoSave();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderContent() {
+  const t=T();
+  renderChamber('loksabha', t.ls, t.rs);
+  renderChamber('rajyasabha', t.rs, t.ls);
+  renderPresident(t);
+  renderLaws(t);
+  updateStats();
+}
+
+function makeBillCard(bill, chamberArg, btnLabel) {
+  const t=T();
+  return `<div class="bill-card ${bill.status==='Rejected'||bill.status==='Rejected by President'?'rejected':''}">
+    <div class="bill-type">${bill.type} • ${bill.billNumber}</div>
+    <div class="bill-title">${bill.title}</div>
+    <div class="bill-purpose">${bill.purpose}</div>
+    <div class="bill-status"><span class="status-badge status-${bill.status==='Live Debate'?'live-debate':bill.status.toLowerCase().replace(/ /g,'-')}">${bill.status==='Live Debate'?'🔴 '+t.liveDebate:bill.status}</span></div>
+    ${btnLabel?`<div class="bill-actions"><button class="btn btn-primary" onclick="startDebate(${bill.id},'${chamberArg}')">🎤 ${btnLabel}</button></div>`:''}
+  </div>`;
+}
+function makePresidentCard(bill, t) {
+  return `<div class="bill-card">
+    <div class="bill-type">${bill.type} • ${bill.billNumber}</div>
+    <div class="bill-title">${bill.title}</div>
+    <div class="bill-purpose">${bill.purpose}</div>
+    <div class="bill-status"><span class="status-badge status-approved">✓</span></div>
+    <div class="bill-actions">
+      <button class="btn btn-success" onclick="presidentAction(${bill.id},true)">✓ Grant Assent</button>
+      <button class="btn btn-danger" onclick="presidentAction(${bill.id},false)">✗ Reject</button>
+    </div>
+  </div>`;
+}
+function empty(msg) { return `<p style="opacity:.6;text-align:center;padding:2rem;">${msg}</p>`; }
+
+function renderChamber(chamber, selfName, otherName) {
+  const t=T();
+  if (chamber==='loksabha') {
+    document.getElementById('loksabha-bills').innerHTML = gameState.loksabhaBills.length ? gameState.loksabhaBills.map(b=>makeBillCard(b,'loksabha','🎤 Start')).join('') : empty('No bills. '+t.introduce);
+    document.getElementById('loksabha-from-rs').innerHTML = gameState.rajyasabhaToLoksabha.length ? gameState.rajyasabhaToLoksabha.map(b=>makeBillCard(b,'loksabha-from-rs','🎤 Start')).join('') : empty('No bills from '+t.rs+'.');
+    document.getElementById('loksabha-passed').innerHTML = gameState.loksabhaToRajyasabha.length ? gameState.loksabhaToRajyasabha.map(b=>makeBillCard(b,null,null)).join('') : empty('No bills sent to '+t.rs+' yet.');
+    document.getElementById('loksabha-rejected').innerHTML = gameState.loksabhaRejectedBills.length ? gameState.loksabhaRejectedBills.map(b=>makeBillCard(b,null,null)).join('') : empty('No rejected bills.');
+  } else {
+    document.getElementById('rajyasabha-bills').innerHTML = gameState.rajyasabhaBills.length ? gameState.rajyasabhaBills.map(b=>makeBillCard(b,'rajyasabha','🎤 Start')).join('') : empty('No bills. '+t.introduce);
+    document.getElementById('rajyasabha-from-ls').innerHTML = gameState.loksabhaToRajyasabha.length ? gameState.loksabhaToRajyasabha.map(b=>makeBillCard(b,'rajyasabha-from-ls','🎤 Start')).join('') : empty('No bills from '+t.ls+'.');
+    document.getElementById('rajyasabha-passed').innerHTML = gameState.rajyasabhaToLoksabha.length ? gameState.rajyasabhaToLoksabha.map(b=>makeBillCard(b,null,null)).join('') : empty('No bills sent to '+t.ls+' yet.');
+    document.getElementById('rajyasabha-rejected').innerHTML = gameState.rajyasabhaRejectedBills.length ? gameState.rajyasabhaRejectedBills.map(b=>makeBillCard(b,null,null)).join('') : empty('No rejected bills.');
+  }
+}
+function renderPresident(t) {
+  const div=document.getElementById('president-bills');
+  div.innerHTML = gameState.presidentBills.length ? gameState.presidentBills.map(b=>makePresidentCard(b,t)).join('') : empty('No bills awaiting assent.');
+  // Update president section text
+  const pname=document.querySelector('.president-name');
+  if (pname) pname.textContent=t.president;
+  const ptitle=document.querySelector('.president-title-text');
+  if (ptitle) ptitle.textContent=t.presidentTitle;
+}
+function renderLaws(t) {
+  const div=document.getElementById('laws-list');
+  if (!gameState.laws.length) { div.innerHTML=empty('No laws enacted yet. Pass bills through both houses!'); return; }
+  div.innerHTML=gameState.laws.map((law,i)=>`
+    <div class="law-card">
+      <div class="law-number">${t.actsOf} ${i+1} of 2026</div>
+      <div class="law-title">${law.title}</div>
+      <div class="bill-purpose">${law.purpose}</div>
+      <div class="law-enacted">${law.dateEnacted} | ${law.originChamber==='loksabha'?t.ls:t.rs}</div>
+    </div>`).join('');
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('sessionDay').textContent=gameState.sessionDay;
+  document.getElementById('lsBillsPassed').textContent=gameState.lsBillsPassed;
+  document.getElementById('rsBillsPassed').textContent=gameState.rsBillsPassed;
+  document.getElementById('lawsEnacted').textContent=gameState.lawsEnacted;
+  document.getElementById('billsRejected').textContent=gameState.billsRejected;
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showAchievement(title, desc) {
+  document.querySelectorAll('.achievement-toast').forEach(e=>e.remove());
+  const toast=document.createElement('div');
+  toast.className='achievement-toast';
+  toast.innerHTML=`<div class="achievement-title">${title}</div>${desc?`<div class="achievement-desc">${desc}</div>`:''}`;
+  document.body.appendChild(toast);
+  setTimeout(()=>{ toast.style.animation='slideInRight .5s ease-out reverse'; setTimeout(()=>toast.remove(),500); },4000);
+}
+
+// ── Save/Load ─────────────────────────────────────────────────
+function autoSave() {
+  try {
+    localStorage.setItem('parlSim2',JSON.stringify({
+      sessionDay:gameState.sessionDay, lsBillsPassed:gameState.lsBillsPassed,
+      rsBillsPassed:gameState.rsBillsPassed, lawsEnacted:gameState.lawsEnacted,
+      billsRejected:gameState.billsRejected, laws:gameState.laws, savedAt:new Date().toISOString()
+    }));
+  } catch(e) {}
+}
+function loadGameState() {
+  try {
+    const d=JSON.parse(localStorage.getItem('parlSim2')||'null');
+    if (d) {
+      Object.assign(gameState, { sessionDay:d.sessionDay||1, lsBillsPassed:d.lsBillsPassed||0, rsBillsPassed:d.rsBillsPassed||0, lawsEnacted:d.lawsEnacted||0, billsRejected:d.billsRejected||0, laws:d.laws||[] });
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// ── Init ──────────────────────────────────────────────────────
+const loaded = loadGameState();
+renderContent();
+updateStats();
+refreshUIText();
+if (gameState.speechSynthesis) gameState.speechSynthesis.onvoiceschanged = ()=>{};
+if (!loaded) showAchievement('🇮🇳 Parliament in Session', 'Welcome to the Indian Parliament Simulator');
+else showAchievement('💾 Progress Loaded', '');
+</script>
+</body>
+</html>

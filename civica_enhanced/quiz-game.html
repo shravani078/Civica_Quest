@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SamvidhanKatha – Learn the Indian Constitution</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --saffron:#FF9933; --green:#138808; --navy:#000080;
+  --bg:#FFF8F0; --card:#FFFCF7; --text:#1a1a2e; --muted:#6b6b8a;
+  --note-bg:#1a1a2e; --quiz-bg:#f0f4ff;
+  --correct:#138808; --wrong:#cc2200;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Lato',sans-serif;background:#F5F3FF;color:var(--text);overflow-x:hidden;}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,#FF9933 0%,#cc7a00 40%,#000080 100%);padding:18px 32px;display:flex;align-items:center;gap:18px;box-shadow:0 4px 20px rgba(0,0,0,.3);position:sticky;top:0;z-index:50;}
+.aw{width:46px;height:46px;animation:spin 8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+header h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;text-shadow:2px 2px 8px rgba(0,0,0,.4);}
+header p{color:rgba(255,255,255,.8);font-size:.78rem;letter-spacing:2px;text-transform:uppercase;}
+.tricolor{height:4px;background:linear-gradient(to right,#FF9933 33%,#fff 33% 66%,#138808 66%);}
+
+/* ── TABS ── */
+.tabs{display:flex;justify-content:center;background:var(--navy);overflow-x:auto;gap:0;}
+.tab-btn{padding:13px 22px;background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;font-family:'Lato',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .3s;border-bottom:3px solid transparent;white-space:nowrap;}
+.tab-btn.active,.tab-btn:hover{color:var(--saffron);border-bottom-color:var(--saffron);background:rgba(255,153,51,.1);}
+
+/* ── CONTENT PANELS ── */
+.panel{display:none;animation:fadeUp .4s ease;}
+.panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── HOME ── */
+.home-hero{text-align:center;padding:56px 24px 36px;background:linear-gradient(180deg,#fff3e0,#FFF8F0);}
+.home-hero h2{font-family:'Playfair Display',serif;font-size:2.6rem;color:var(--navy);margin-bottom:14px;line-height:1.2;}
+.home-hero p{font-size:1.05rem;color:var(--muted);max-width:560px;margin:0 auto 28px;line-height:1.8;}
+.stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin-bottom:32px;}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--saffron);font-weight:900;}
+.stat-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
+.cta-btn{border:none;padding:14px 30px;border-radius:30px;font-size:.95rem;font-weight:700;cursor:pointer;margin:6px;transition:transform .2s,box-shadow .2s;}
+.cta-btn:hover{transform:translateY(-2px);}
+.cta-orange{background:var(--saffron);color:#fff;box-shadow:0 4px 14px rgba(255,153,51,.4);}
+.cta-navy{background:var(--navy);color:#fff;box-shadow:0 4px 14px rgba(0,0,128,.3);}
+
+/* ── GRID ── */
+.section-head{text-align:center;padding:22px 20px 8px;}
+.section-head h2{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--navy);}
+.section-head p{color:var(--muted);font-size:.88rem;max-width:520px;margin:6px auto;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;padding:24px 28px;max-width:1400px;margin:0 auto;}
+.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,.07);cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);border:2px solid transparent;}
+.card:hover{transform:translateY(-5px);box-shadow:0 10px 32px rgba(0,0,0,.13);border-color:var(--saffron);}
+.card-art{height:130px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;}
+.card-body{padding:14px;}
+.card-body h3{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:5px;color:var(--navy);}
+.card-body p{font-size:.8rem;color:var(--muted);line-height:1.5;}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;}
+.tag.right{background:#fff0e0;color:#cc6600;}
+.tag.duty{background:#e0f0ff;color:#0044cc;}
+
+/* ══════════════════════════════════════
+   STORY VIEWER  — full viewport overlay
+══════════════════════════════════════ */
+#viewer{
+  position:fixed;inset:0;z-index:9999;
+  display:none;flex-direction:column;
+  background:#fff;
+}
+#viewer.open{display:flex;}
+
+/* top bar */
+.vbar{
+  background:var(--navy);padding:14px 22px;
+  display:flex;align-items:center;gap:14px;
+  flex-shrink:0;min-height:54px;
+}
+.vbar h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.2rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.xbtn{background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+.xbtn:hover{background:rgba(255,153,51,.6);}
+
+/* body = left note + right main */
+.vbody{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* ── NOTE PANEL (left) ── */
+.note{
+  width:280px;flex-shrink:0;
+  background:var(--note-bg);color:#c8c8e0;
+  overflow-y:auto;padding:22px 18px;
+  border-right:2px solid var(--saffron);
+}
+.note h3{font-family:'Playfair Display',serif;color:var(--saffron);font-size:1.05rem;margin-bottom:12px;}
+.note-art{background:rgba(255,153,51,.14);border-left:3px solid var(--saffron);padding:9px 12px;border-radius:0 7px 7px 0;margin-bottom:12px;font-weight:700;color:var(--saffron);font-size:.88rem;}
+.nsec{margin-bottom:16px;}
+.nsec h4{color:var(--saffron);font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px;border-bottom:1px solid rgba(255,153,51,.25);padding-bottom:3px;}
+.nsec p,.nsec li{font-size:.82rem;line-height:1.7;color:#c0c0da;margin-bottom:5px;}
+.nsec ul{padding-left:15px;}
+.nsec li::marker{color:var(--saffron);}
+
+/* ── STORY MAIN (right) ── */
+.vmain{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* animation stage */
+.stage{height:290px;flex-shrink:0;overflow:hidden;background:#87CEEB;}
+.stage svg{width:100%;height:100%;display:block;}
+
+/* scrollable story + quiz */
+.scroll-area{flex:1;overflow-y:auto;background:#fff;}
+
+/* story text */
+.stxt{padding:26px 30px;max-width:780px;margin:0 auto;}
+.stitle{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--navy);margin-bottom:4px;}
+.ssub{color:var(--saffron);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:18px;}
+.sbreak{text-align:center;color:var(--saffron);font-size:1.3rem;margin:8px 0;letter-spacing:7px;}
+.sp{font-size:.98rem;line-height:1.9;color:var(--text);margin-bottom:14px;opacity:0;transform:translateY(10px);animation:rv .55s ease forwards;}
+@keyframes rv{to{opacity:1;transform:translateY(0);}}
+.moral{background:linear-gradient(135deg,#fff8e0,#ffe0a0);border-left:5px solid var(--saffron);border-radius:0 10px 10px 0;padding:15px 18px;margin:18px 0;font-style:italic;font-size:1rem;color:#7a4400;}
+
+/* quiz */
+.quiz{background:var(--quiz-bg);padding:26px 30px;border-top:3px solid var(--saffron);}
+.quiz h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--navy);margin-bottom:18px;}
+.qq{background:#fff;border-radius:10px;padding:18px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.qq p{font-weight:700;margin-bottom:12px;color:var(--navy);font-size:.95rem;}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{padding:9px 15px;border:2px solid #dde;border-radius:7px;cursor:pointer;transition:all .2s;font-size:.88rem;background:#fff;text-align:left;font-family:'Lato',sans-serif;}
+.opt:hover:not(:disabled){border-color:#4169E1;background:#f0f4ff;}
+.opt.correct{border-color:var(--correct)!important;background:#e8f8e8!important;color:#005500!important;font-weight:700;}
+.opt.wrong{border-color:var(--wrong)!important;background:#ffe8e8!important;color:#770000!important;}
+.opt:disabled{cursor:default;}
+.fb{margin-top:9px;font-size:.85rem;font-weight:700;padding:8px 12px;border-radius:6px;display:none;}
+.fb.show{display:block;}
+.fb.ok{background:#e8f8e8;color:#005500;}
+.fb.no{background:#ffe8e8;color:#770000;}
+.score{text-align:center;padding:20px;font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy);display:none;border-top:2px dashed var(--saffron);margin-top:10px;}
+.score.show{display:block;}
+.sbadge{font-size:2.4rem;color:var(--saffron);display:block;margin:8px 0;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--saffron);border-radius:3px;}
+
+/* responsive */
+@media(max-width:700px){
+  .note{display:none;}
+  .stage{height:200px;}
+  .stxt{padding:14px;}
+  .quiz{padding:16px;}
+  header h1{font-size:1.3rem;}
+  .grid{padding:12px;gap:12px;}
+}
+</style>
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#F5F3FF !important;background-color:#F5F3FF !important;}</style>
+</head>
+<body>
+
+<header>
+  <svg class="aw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="4"/>
+    <circle cx="50" cy="50" r="8" fill="white"/>
+    <g stroke="white" stroke-width="2">
+      <line x1="50" y1="5" x2="50" y2="95"/><line x1="5" y1="50" x2="95" y2="50"/>
+      <line x1="18" y1="18" x2="82" y2="82"/><line x1="82" y1="18" x2="18" y2="82"/>
+      <line x1="7" y1="33" x2="93" y2="67"/><line x1="93" y1="33" x2="7" y2="67"/>
+      <line x1="33" y1="7" x2="67" y2="93"/><line x1="67" y1="7" x2="33" y2="93"/>
+      <line x1="12" y1="22" x2="88" y2="78"/><line x1="88" y1="22" x2="12" y2="78"/>
+      <line x1="22" y1="12" x2="78" y2="88"/><line x1="78" y1="12" x2="22" y2="88"/>
+    </g>
+  </svg>
+  <div>
+    <h1>SamvidhanKatha</h1>
+    <p>Stories of the Indian Constitution · Learn Through Living Tales</p>
+  </div>
+</header>
+<div class="tricolor"></div>
+
+<nav class="tabs">
+  <button class="tab-btn active" id="tab-home" onclick="showTab('home',this)">🏠 Home</button>
+  <button class="tab-btn" id="tab-rights" onclick="showTab('rights',this)">⚖️ Fundamental Rights</button>
+  <button class="tab-btn" id="tab-duties" onclick="showTab('duties',this)">🇮🇳 Fundamental Duties</button>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="panel active">
+  <div class="home-hero">
+    <h2>Learn the Constitution<br>Through Living Stories</h2>
+    <p>Every right, every duty — told through the eyes of real people, animals, and the world we share. Animated stories that make the Indian Constitution come alive.</p>
+    <div class="stats">
+      <div><div class="stat-num">6</div><div class="stat-label">Fundamental Rights</div></div>
+      <div><div class="stat-num">11</div><div class="stat-label">Fundamental Duties</div></div>
+      <div><div class="stat-num">17+</div><div class="stat-label">Animated Stories</div></div>
+    </div>
+    <button class="cta-btn cta-orange" onclick="showTab('rights',document.getElementById('tab-rights'))">⚖️ Explore Rights</button>
+    <button class="cta-btn cta-navy" onclick="showTab('duties',document.getElementById('tab-duties'))">🇮🇳 Explore Duties</button>
+  </div>
+</div>
+
+<!-- RIGHTS -->
+<div id="rights" class="panel">
+  <div class="section-head">
+    <h2>Fundamental Rights</h2>
+    <p>Articles 12–35 guarantee six fundamental rights to every citizen of India.</p>
+  </div>
+  <div class="grid" id="rights-grid"></div>
+</div>
+
+<!-- DUTIES -->
+<div id="duties" class="panel">
+  <div class="section-head">
+    <h2>Fundamental Duties</h2>
+    <p>Article 51A lists 11 fundamental duties — the moral obligations of every Indian citizen.</p>
+  </div>
+  <div class="grid" id="duties-grid"></div>
+</div>
+
+<!-- ════ STORY VIEWER ════ -->
+<div id="viewer">
+  <div class="vbar">
+    <h2 id="vtitle">Story</h2>
+    <button class="xbtn" onclick="closeViewer()">✕</button>
+  </div>
+  <div class="vbody">
+    <div class="note" id="note-panel"></div>
+    <div class="vmain">
+      <div class="stage" id="stage"></div>
+      <div class="scroll-area">
+        <div class="stxt" id="story-text"></div>
+        <div class="quiz" id="quiz-area"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STORY DATA
+// ═══════════════════════════════════════════════════════
+const S = [
+/* ────── RIGHTS ────── */
+{id:'r1',type:'right',title:'The Village That Stood Equal',sub:'Right to Equality (Articles 14–18)',emoji:'⚖️',
+ color:'linear-gradient(135deg,#ff9933,#ffcc77)',scene:'equality',
+ note:{art:'Articles 14–18',title:'Right to Equality',
+  overview:'Guarantees equality before law and equal protection of the laws to all persons within India.',
+  pts:['Art.14: Equality before law & equal protection','Art.15: No discrimination on religion, race, caste, sex, birthplace','Art.16: Equal opportunity in public employment','Art.17: Abolition of untouchability','Art.18: Abolition of titles (except military/academic)'],
+  why:'Ensures every citizen is treated the same — wealth, caste, or religion cannot grant privilege or impose punishment.'},
+ story:['In the sun-drenched village of Nandpur, a dusty road divided two worlds. On one side lived the Patils — landowners with large wells. On the other, the Chavans — a family who carried water every morning from a distant pond because the village pumpmaster refused them access.',
+  'Young Aarti Chavan, twelve years old, would walk two kilometres each dawn with a clay pot balanced on her head. One morning, a sparrow fell into her path — exhausted, its wing clipped. Aarti gently cupped it and carried it alongside her pot.',
+  'At school, the teacher Meenakshi Ma\'am — recently returned from the city — noticed the dark circles under Aarti\'s eyes. "Why so tired, child?" she asked. Aarti told her story. The teacher\'s face became still and serious.',
+  'Meenakshi Ma\'am went to the village panchayat that evening and read aloud Article 14: "The State shall not deny to any person equality before the law." She explained that the pumpmaster\'s exclusion was not just unkind — it was unconstitutional.',
+  'The next morning, the well was open. Aarti walked there with her clay pot — the sparrow, healed, perched on her shoulder. When the water rose in the pot, the sparrow dipped its beak and drank too. Aarti laughed for the first time in months.',
+  'The law that day did not only open a well. It opened a village\'s heart. And in the ripples of that water, every face — human, bird, and sky — was reflected equally.'],
+ moral:'True equality is not charity — it is the law. When one person is excluded, the entire village is diminished.',
+ quiz:[
+  {q:'What was Aarti denied access to?',opts:['School','A well/pump','A market','A temple'],ans:1,ex:'Aarti\'s family was denied access to the village pump — a form of discrimination the Constitution forbids.'},
+  {q:'Which Article guarantees equality before law?',opts:['Art.12','Art.14','Art.21','Art.51A'],ans:1,ex:'Article 14 guarantees equality before law and equal protection of laws to all persons in India.'},
+  {q:'Article 17 abolishes which social evil?',opts:['Child labour','Caste hierarchy','Untouchability','Dowry'],ans:2,ex:'Article 17 specifically abolishes untouchability and its practice in any form.'},
+  {q:'What is the moral of the story?',opts:['Wells should be public','No citizen can be excluded based on identity','Birds and humans are equal','Village heads have final say'],ans:1,ex:'The story shows how the Right to Equality prevents discrimination — it is a constitutional guarantee, not a favour.'}]},
+
+{id:'r2',type:'right',title:'The Voice of the Forest',sub:'Right to Freedom (Articles 19–22)',emoji:'🕊️',
+ color:'linear-gradient(135deg,#4169E1,#87CEEB)',scene:'freedom',
+ note:{art:'Articles 19–22',title:'Right to Freedom',
+  overview:'Protecting individual liberty in speech, movement, profession and personal security.',
+  pts:['Art.19: Freedom of speech, assembly, movement, profession','Art.20: Protection against arbitrary conviction','Art.21: Right to life and personal liberty','Art.21A: Free & compulsory education (6–14 yrs)','Art.22: Protection against arbitrary arrest'],
+  why:'Without freedom, equality is hollow. These articles are the shield between the citizen and an overreaching state.'},
+ story:['Deep in the Mahadeo Hills, where sal trees whisper and fireflies speak at dusk, lived a young tribal journalist named Birju Gond. He carried a battered notebook and a second-hand camera — his tools for telling stories the city forgot.',
+  'Birju had been writing about illegal mining in the protected forest. Tigers were losing their corridors. Streams were turning grey. The villagers had no voice on paper — so Birju lent them his.',
+  'One night, officers arrived at his hut. "You are spreading unrest," they said and handcuffed him. An old tiger the locals called Ambabai watched from the treeline, golden eyes unblinking, as Birju was led away.',
+  'A young lawyer named Priya filed a habeas corpus petition immediately. In court she cited Article 19(1)(a) — freedom of speech and expression — and Article 22: no person can be detained without being told the grounds of arrest.',
+  'The judge ordered Birju\'s release within 24 hours. Outside the courthouse, Birju breathed the open air. The story of the illegal mining ran the next morning on the front page.',
+  'In the forest, Ambabai crossed the stream — whole, undisturbed. A family of deer followed. The trees exhaled. The right to speak freely had protected not just one man, but an entire ecosystem that depended on his words.'],
+ moral:'Freedom of expression is not just a personal right — it is a tool that protects communities, forests, and futures.',
+ quiz:[
+  {q:'What was Birju writing about?',opts:['A political rally','Illegal mining in the forest','A caste dispute','Corruption in schools'],ans:1,ex:'Birju was reporting on illegal mining destroying tiger habitats and forest streams.'},
+  {q:'Which Article is Right to Life and Personal Liberty?',opts:['Art.14','Art.19','Art.21','Art.32'],ans:2,ex:'Article 21: "No person shall be deprived of his life or personal liberty except according to procedure established by law."'},
+  {q:'What legal action freed Birju?',opts:['Filed an FIR','Habeas corpus petition','Appeal to President','Filed a PIL'],ans:1,ex:'A habeas corpus petition challenges unlawful detention — a classic remedy under Article 22.'},
+  {q:'What does Article 21A guarantee?',opts:['Free press','Right to vote','Free education ages 6–14','Right to worship'],ans:2,ex:'Article 21A guarantees free and compulsory education to children between 6 and 14 years.'}]},
+
+{id:'r3',type:'right',title:'The Child Freed by Law',sub:'Right Against Exploitation (Articles 23–24)',emoji:'🔗',
+ color:'linear-gradient(135deg,#8B0000,#FF6B6B)',scene:'exploitation',
+ note:{art:'Articles 23–24',title:'Right Against Exploitation',
+  overview:'Prohibits forced labour, human trafficking, and child labour in factories and hazardous industries.',
+  pts:['Art.23: Prohibition of trafficking & forced labour (begar)','Art.24: No child below 14 in factories, mines, hazardous work','Violations are criminal offences','State can impose compulsory service for public purposes'],
+  why:'Exploitation corrodes dignity. These articles ensure no citizen — especially the vulnerable — can be treated as property.'},
+ story:['Twelve-year-old Monu worked in a glass-bangle factory in Firozabad — his nimble fingers shaping hot glass eight hours a day. He earned twenty rupees. His employer kept his family in debt, so leaving felt impossible. Monu had never seen a classroom.',
+  'One afternoon, a government inspector named Kavitha arrived, accompanied by a street mongrel called Bhure who always appeared at her side during rounds.',
+  'Kavitha showed the factory owner Articles 23 and 24. "No child below fourteen may work in hazardous industries," she said quietly. The owner tried to argue. Bhure the dog growled softly.',
+  'Monu was taken to a rehabilitation centre that evening. That night, for the first time, he slept without the smell of molten glass. He looked at the stars — and one of them, he later said, seemed to wink.',
+  'Six months later, Monu was at school. He was terrible at Hindi but extraordinary at maths. His teacher said he could one day be an engineer — building things, not just shaping glass for someone else\'s profit.',
+  'The factory was fined. Bhure the dog was adopted by the centre. He slept at the foot of Monu\'s cot each night, keeping watch.'],
+ moral:'Children are not tools. Debt and fear cannot override the Constitution. Every child under fourteen has the right to grow — in school, in sunlight, in dignity.',
+ quiz:[
+  {q:'Up to what age does Art.24 prohibit child labour in hazardous work?',opts:['10 years','12 years','14 years','16 years'],ans:2,ex:'Article 24 prohibits employment of children below 14 in factories, mines, and hazardous occupations.'},
+  {q:'What is "begar" in Article 23?',opts:['A type of taxation','Forced unpaid labour','Debt recovery','Military service'],ans:1,ex:'Begar = forced, unpaid labour — explicitly prohibited by Article 23.'},
+  {q:'What did Kavitha use to persuade the factory owner?',opts:['A court order','Police force','Articles 23 & 24','Child Labour Act alone'],ans:2,ex:'The story shows Kavitha citing constitutional provisions directly — the law itself was her most powerful tool.'},
+  {q:'What did Monu excel at in school?',opts:['Hindi','Art','Mathematics','Science'],ans:2,ex:'Monu discovered a talent for mathematics — showing the potential that exploitation suppresses.'}]},
+
+{id:'r4',type:'right',title:'The Festival of Many Lamps',sub:'Right to Freedom of Religion (Articles 25–28)',emoji:'🕯️',
+ color:'linear-gradient(135deg,#f5a623,#9b59b6)',scene:'religion',
+ note:{art:'Articles 25–28',title:'Right to Freedom of Religion',
+  overview:'Every person in India has the freedom to profess, practice and propagate any religion.',
+  pts:['Art.25: Freedom of conscience and free profession of religion','Art.26: Religious denominations can manage their own affairs','Art.27: No tax can fund a particular religion','Art.28: No religious instruction in state-funded schools'],
+  why:'India is home to every major religion. Secularism is not absence of religion — it is equal respect for all faiths by the state.'},
+ story:['The town of Gangapur sat at a crossroads — a mosque on one corner, a temple on the second, a church on the third, and a gurudwara on the fourth. Every festival season, someone claimed the main square alone.',
+  'That October, a dispute erupted. The local councillor tried to ban all public celebrations in the square. "Equal silence for all," he declared.',
+  'An old woman named Sakina Bi stood up: "The Constitution does not ask us to be silent. It asks the state to be neutral." She recited Article 25: every person has the right to freely profess, practise, and propagate religion.',
+  'The panchayat agreed to a rotating festival calendar. That Diwali, earthen lamps lined the square. At Eid, lanterns glowed. At Christmas, a star hung from the lamppost. At Gurpurab, kirtan echoed through the night air.',
+  'A peacock had made its nest in the peepal tree at the square\'s centre. It danced every time music rose from any direction.',
+  'The children of the town did not understand the legal articles. But they understood the peacock. And they understood that the square belonged to all of them.'],
+ moral:'Secularism is not about removing faith — it is ensuring the state treats all faiths equally. Shared spaces need shared respect, not enforced silence.',
+ quiz:[
+  {q:'What does Article 25 guarantee?',opts:['State funding for temples','Freedom to profess, practise & propagate religion','Freedom from all religion','Ban on public worship'],ans:1,ex:'Article 25 gives every individual the right to freely hold, practise and spread their religion.'},
+  {q:'What did Sakina Bi argue?',opts:['Silence is the solution','The state must be neutral, not suppressive','Only one religion can use the square','The councillor was wrong'],ans:1,ex:'She argued correctly that the Constitution requires state neutrality, not enforced silence on all religions.'},
+  {q:'Article 27 says taxes cannot be used to...',opts:['Fund infrastructure','Promote a particular religion','Fund schools','Maintain parks'],ans:1,ex:'Article 27 ensures no citizen is compelled to pay taxes specifically for promoting any one religion.'},
+  {q:'What symbolised harmony in the story?',opts:['The councillor','The mosque','A peacock dancing to all festivals','A church bell'],ans:2,ex:'The peacock — India\'s national bird — danced to music from every faith, symbolising secular harmony.'}]},
+
+{id:'r5',type:'right',title:'The School in the Jungle Clearing',sub:'Cultural & Educational Rights (Articles 29–30)',emoji:'📚',
+ color:'linear-gradient(135deg,#138808,#7EE8A2)',scene:'culture',
+ note:{art:'Articles 29–30',title:'Cultural & Educational Rights',
+  overview:'Protects the culture, language and education of minorities — ensuring diversity does not disappear in a democracy.',
+  pts:['Art.29: Any citizen group with a distinct language/culture can preserve it','Art.30: All minorities can establish educational institutions','State cannot discriminate in granting aid to minority institutions','Protects both religious and linguistic minorities'],
+  why:'A nation\'s strength lies in its diversity. No language or tradition should be swallowed by majority pressure.'},
+ story:['In the Santali-speaking villages of Jharkhand, a language was dying. The children were all enrolled in a Hindi-medium school — and Santali, the tongue their grandmothers used to name the stars and rivers, was fading.',
+  'A young teacher, Sushila, came home after a decade in the city. She noticed that the children could not read the tree names their grandparents carved into bark. She decided to open a school in the forest clearing — in Santali.',
+  'The district official said she could not do this without permission. Sushila showed him Article 29: any section of citizens with a distinct language has the right to conserve it. And Article 30: minorities may establish educational institutions.',
+  'The official backed down. The school opened under a mahua tree. Butterflies drifted in. The children learned Santali letters — which look like animal footprints — alongside Hindi and mathematics.',
+  'One boy, Ramu, learned that the Santali word for river — "daa" — also means life. He went home and told his grandmother. She wept quietly — not from sadness, but because something she thought was lost had come home.',
+  'A river ran alongside the clearing. It did not know any language. But it kept flowing, carrying the sound of the children\'s voices toward the sea.'],
+ moral:'Culture is not a relic — it is a living thing. To protect a language is to protect a way of seeing the world.',
+ quiz:[
+  {q:'What language was Sushila trying to preserve?',opts:['Sanskrit','Santali','Hindi','Odia'],ans:1,ex:'Sushila worked to preserve Santali — the language of the Santali tribal communities of Jharkhand.'},
+  {q:'Article 30 gives minorities the right to...',opts:['Seek government jobs','Establish & administer educational institutions','Not pay taxes','Veto government decisions'],ans:1,ex:'Article 30 gives religious and linguistic minorities the right to establish and administer their own educational institutions.'},
+  {q:'Article 29 protects...',opts:['Right to vote','Distinct language or culture of citizen groups','Freedom of movement','Tax exemptions'],ans:1,ex:'Article 29 ensures any group with a distinct language, script, or culture can conserve it.'},
+  {q:'What did the Santali word "daa" mean?',opts:['Rain','River / Life','School','Forest'],ans:1,ex:'In the story, Ramu discovers that "daa" means both river and life — showing the depth embedded in language.'}]},
+
+{id:'r6',type:'right',title:'The Child Who Wrote to the Court',sub:'Right to Constitutional Remedies (Article 32)',emoji:'🔨',
+ color:'linear-gradient(135deg,#000080,#4169E1)',scene:'remedy',
+ note:{art:'Article 32',title:'Right to Constitutional Remedies',
+  overview:'Called the "heart and soul" of the Constitution by Dr. B.R. Ambedkar — allows anyone to approach the Supreme Court if fundamental rights are violated.',
+  pts:['Art.32: Right to move Supreme Court for enforcement of Fundamental Rights','Five writs: Habeas Corpus, Mandamus, Prohibition, Certiorari, Quo Warranto','Habeas Corpus: against illegal detention','Mandamus: order to a public official to perform their duty','PIL (Public Interest Litigation) evolved from this article'],
+  why:'Rights without remedies are empty words. Article 32 is the key that makes all other fundamental rights enforceable.'},
+ story:['Thirteen-year-old Nisha lived in a Delhi slum that had no functional school for three years — the building was locked, the teacher posted elsewhere. Her right to education under Article 21A was being violated silently, every single day.',
+  'Nisha loved writing. She wrote a long letter — on a single sheet of paper she saved for a month — addressed to "The Chief Justice of India." She described the locked school and the children playing in garbage heaps.',
+  'A legal aid lawyer named Arjun read about Nisha\'s letter in a newspaper. He filed a Public Interest Litigation on her behalf, citing Article 32: the right to move the Supreme Court for enforcement of fundamental rights.',
+  'The Supreme Court took cognisance. Officials were summoned. In three weeks, the school was unlocked. A new teacher arrived. The principal personally enrolled 47 children.',
+  'On the first day of school, Nisha sat in the front row. Her notebook cover was a painting of the Supreme Court building. On the first page she wrote: "A right is only real if you can fight for it."',
+  'Outside the window, a kite — the bird — circled high above the city. Below it, 47 children opened books for the first time. The Constitution\'s heart was beating.'],
+ moral:'Article 32 is the promise that the Constitution will fight for you. Even a letter from a child can move the highest court.',
+ quiz:[
+  {q:'What did Nisha do to fight for her right to education?',opts:['Organised a protest','Wrote a letter to the Chief Justice','Filed an FIR','Went to the collector'],ans:1,ex:'Nisha wrote directly to the Chief Justice — showing the right to remedy is accessible to everyone, including children.'},
+  {q:'Who called Article 32 the "heart and soul" of the Constitution?',opts:['Jawaharlal Nehru','Mahatma Gandhi','Dr. B.R. Ambedkar','Sardar Patel'],ans:2,ex:'Dr. B.R. Ambedkar described Article 32 as the "heart and soul" because it makes all other rights enforceable.'},
+  {q:'What writ is used against illegal detention?',opts:['Mandamus','Certiorari','Habeas Corpus','Quo Warranto'],ans:2,ex:'Habeas Corpus ("produce the body") is used to challenge unlawful detention — one of the five writs under Article 32.'},
+  {q:'What is a PIL?',opts:['Personal Interest Litigation','Public Interest Litigation','Primary Inquiry Letter','Provisional Injunction Law'],ans:1,ex:'A Public Interest Litigation allows any public-spirited person to approach the Supreme Court on behalf of rights victims.'}]},
+
+/* ────── DUTIES ────── */
+{id:'d1',type:'duty',title:"Amma's Flag",sub:'Duty 1 – Abide by the Constitution & Respect National Symbols',emoji:'🇮🇳',
+ color:'linear-gradient(135deg,#FF9933,#138808)',scene:'flag',
+ note:{art:'Article 51A(a)',title:'Duty to the Constitution & National Symbols',
+  overview:'Every citizen must abide by the Constitution, respect its ideals and institutions, and honour the National Flag and National Anthem.',
+  pts:['Respect the National Flag — the Tiranga','Stand for the National Anthem — Jana Gana Mana','Uphold the ideals of the Constitution','Respect national institutions: Parliament, Judiciary etc.','The Flag Code of India regulates proper use of the flag'],
+  why:'Symbols unify a diverse nation. Respecting them is not blind patriotism — it is acknowledging the sacrifices and ideals they represent.'},
+ story:['Amma — as the whole colony called her — was ninety-one years old. She had watched independence arrive in 1947 from a rooftop in Lahore, wept during Partition, and rebuilt her life in a small town in Punjab.',
+  'Every Republic Day, she would ask her grandson Veer to unfurl the small Tiranga she kept wrapped in cotton cloth all year. She would stand — slowly, with her walking stick — and sing Jana Gana Mana until tears ran down her face.',
+  'This year, Veer\'s friends thought the ceremony was old-fashioned. "It\'s just a piece of cloth, Amma," one of them said carelessly. Amma was quiet for a long moment.',
+  '"This flag," she said at last, "flew over our shoulders when we had nothing. When we had no country. When we were called subjects, not citizens. Every colour here is a promise. Saffron — courage. White — truth. Green — the earth that feeds us. And the wheel? It says we must keep moving."',
+  'The boy who spoke was silent. Then he asked if he could hold the flag. Amma let him. He stood straighter without realising it.',
+  'A sparrow landed on the windowsill. The morning light caught the flag\'s white strip and turned the room golden. Veer said the Anthem softly. His friends joined one by one.'],
+ moral:'Respecting national symbols is not about ritual — it is about remembering the journey and the promise. The flag is not cloth; it is a covenant.',
+ quiz:[
+  {q:'What are the three colours and their meanings in the story?',opts:['Red, white, blue — courage, peace, sky','Saffron, white, green — courage, truth, earth','Orange, white, green — fire, peace, harvest','Gold, white, green — royalty, truth, nature'],ans:1,ex:'Amma explains: saffron = courage, white = truth, green = the earth. The Ashoka Chakra represents continuous progress.'},
+  {q:'Which Article is the duty to respect the National Flag?',opts:['Art.19','Art.32','Art.51A(a)','Art.14'],ans:2,ex:'Article 51A(a) — the first fundamental duty — asks citizens to abide by the Constitution and respect national symbols.'},
+  {q:'What does the Ashoka Chakra represent in the story?',opts:['The ocean','Continuous movement/progress','The sun','Twenty-four hours'],ans:1,ex:'Amma explains the wheel means "we must keep moving" — representing dharma and the cycle of progress.'},
+  {q:'What convinced Veer\'s friend to respect the flag?',opts:['A government notice','Amma\'s personal explanation','Veer\'s scolding','A teacher\'s lesson'],ans:1,ex:'Amma\'s personal memory and heartfelt explanation — not authority or rules — changed the boy\'s attitude.'}]},
+
+{id:'d2',type:'duty',title:'The River Remembers',sub:'Duty 6 – Protect the Natural Environment',emoji:'🌿',
+ color:'linear-gradient(135deg,#138808,#3CB371)',scene:'environment',
+ note:{art:'Article 51A(g)',title:'Duty to Protect the Environment',
+  overview:'Every citizen has a duty to protect and improve the natural environment — forests, lakes, rivers, wildlife — and to have compassion for living creatures.',
+  pts:['Protect forests and wildlife','Keep rivers and lakes clean','Reduce pollution of air, water, and soil','Show compassion for all living creatures','Environmental protection is enforceable under Art.21 (Right to Life)'],
+  why:'The environment is not just a resource — it is our home. A constitution that speaks of dignity must also protect the air we breathe and the water we drink.'},
+ story:['The Gomti River, once a clear-running stream through Lucknow, had become a ribbon of grey. Factory waste, plastic bags, and sewage had slowly killed the kingfishers and the catfish that children once caught with bamboo rods.',
+  'Tarun, a fourteen-year-old whose grandfather remembered swimming in the Gomti, started a school environment club. Every Sunday, armed with gloves and black garbage bags, they went to the riverbank.',
+  'At first, passers-by laughed. "One club of children cannot clean a river," a man called out. Tarun did not reply. He kept picking up plastic.',
+  'One morning, while clearing reeds, Tarun found a river otter — almost extinct in this stretch — tangled in a plastic net. Working carefully for twenty minutes, he freed it. The otter slipped back into the water. But it surfaced thirty metres downstream and turned its head.',
+  'A journalist photographed the moment. The story went viral. Within a month, three factories were fined. Citizens had filed complaints under Articles 21 and 48A, linking a clean environment with the right to life itself.',
+  'Two years later, a single kingfisher was spotted at the Gomti\'s edge. The old man who saw it wept. Tarun\'s grandmother told him: the river remembers everyone who ever helped it.'],
+ moral:'The natural world cannot speak in court — we must speak for it. Every plastic bag left by a river is a vote against our own future.',
+ quiz:[
+  {q:'Which Article 51A sub-clause covers environmental protection?',opts:['51A(a)','51A(d)','51A(g)','51A(k)'],ans:2,ex:'Article 51A(g): duty to protect and improve the natural environment including forests, lakes, rivers and wildlife.'},
+  {q:'What animal did Tarun rescue?',opts:['A turtle','A river otter','A kingfisher','A catfish'],ans:1,ex:'Tarun freed a river otter — nearly extinct in that stretch — tangled in a plastic net.'},
+  {q:'Environmental protection is linked to which Fundamental Right?',opts:['Art.14','Art.19','Art.21','Art.32'],ans:2,ex:'The Supreme Court has ruled that the right to a clean environment is part of the Right to Life under Article 21.'},
+  {q:'What does "every plastic bag is a vote against our future" mean?',opts:['Voting rights are important','Environmental choices have long-term consequences','Plastic should be banned','Citizens should not litter'],ans:1,ex:'The moral asks us to see small daily choices as having large cumulative effects.'}]},
+
+{id:'d3',type:'duty',title:'The Soldier and the Seed',sub:'Duty 5 – Defend the Country & National Service',emoji:'🌱',
+ color:'linear-gradient(135deg,#4b0082,#9b59b6)',scene:'service',
+ note:{art:'Article 51A(d) & (f)',title:'Duty to Defend & Develop Scientific Temper',
+  overview:'Citizens must defend the country when called upon, and develop a spirit of scientific inquiry, humanism, and reform.',
+  pts:['Art.51A(d): Defend the country and render national service when required','Art.51A(f): Develop scientific temper, humanism, and spirit of inquiry','Service includes disaster relief, community work — not only military','Scientific temper means questioning superstition and seeking evidence-based answers'],
+  why:'A strong nation needs both defenders and thinkers. Defence is not only military — it is defending truth against ignorance.'},
+ story:['After retiring from fifteen years in the Indian Army, Major Sundaram returned to his drought-hit village in Tamil Nadu. He had fought at Kargil; now he faced a different enemy: cracked earth, dry wells, and children who ate once a day.',
+  'Villagers expected him to rest. Instead, he held meetings. He had learned about watershed management from an NGO during a flood relief mission. He taught the village how to build bunds — small earthworks to trap rainwater — using only the tools they had.',
+  'Some elders resisted: "We have prayed for rain for three years. You bring science." The Major replied gently: "Prayer moves the heart. Science moves the water." He was not dismissive of faith — but he knew action was its companion.',
+  'Eighteen months later, three wells were recharged. Paddy grew in two fields that had been dust. A farmer\'s wife planted drumstick trees along the bund edges — in two years, they would provide vegetables and shade.',
+  'On Army Day, the Major organised a camp for young people: "National service," he said, "is not only the uniform. It is this — every hand that fixes what is broken in our country."',
+  'A boy named Karthik, fourteen years old, listened from the last row. He later became an agricultural scientist. He named his first research paper after the Major\'s bund.'],
+ moral:'To serve the nation is not always to carry a rifle. It is to carry knowledge, to carry tools, and to return what the land has lost.',
+ quiz:[
+  {q:'What problem did the Major face after retiring?',opts:['Unemployment','Drought and food scarcity','Political conflict','Lack of electricity'],ans:1,ex:'Major Sundaram returned to a drought-hit village — a different kind of battlefield.'},
+  {q:'Article 51A(f) asks citizens to develop...',opts:['Military skills','Agricultural skills','Scientific temper and humanism','Business acumen'],ans:2,ex:'Article 51A(f) asks every citizen to develop scientific temper, humanism, and the spirit of inquiry.'},
+  {q:'How did the Major respond to elders who preferred prayer?',opts:['He ignored them','He said prayer and science are companions','He left the village','He called government officials'],ans:1,ex:'"Prayer moves the heart. Science moves the water" — 51A(f) is about inquiry, not rejecting faith.'},
+  {q:'What is the story\'s definition of national service?',opts:['Only army service','Paying taxes','Any action that fixes something broken in the country','Voting in every election'],ans:2,ex:'The Major says national service is "every hand that fixes what is broken."'}]},
+
+{id:'d4',type:'duty',title:'The Library Under the Mango Tree',sub:'Duty 7 – Protect Public Property & Avoid Violence',emoji:'🏛️',
+ color:'linear-gradient(135deg,#cc7722,#f5c842)',scene:'property',
+ note:{art:'Article 51A(i)',title:'Duty to Protect Public Property',
+  overview:'Every citizen must safeguard public property and abjure violence — what is public belongs to everyone, and what is destroyed by one affects all.',
+  pts:['Art.51A(i): Protect public property and abstain from violence','Public property: roads, parks, schools, hospitals, buses, statues','Vandalism is a criminal offence','Violence against public infrastructure harms the poorest most','Community stewardship is an extension of this duty'],
+  why:'Public property is the shared inheritance of every citizen. Destroying it is an act against oneself — especially against those who have no private alternatives.'},
+ story:['The public library in Rampur had survived floods, three political changes, and a fire. Its collection of 4,000 books served the children of five surrounding villages who had no access to private schools or internet.',
+  'One afternoon, a political protest turned violent. Someone hurled stones. The library\'s windows shattered. Two shelves were knocked over. Books fell face-down in broken glass.',
+  'The next morning, ten-year-old Dilnaz arrived with her school bag, as she did every Saturday. She stood at the broken entrance. She looked at the books. Then she sat down and began to stack them.',
+  'By afternoon, word had spread. A mason came and patched the windows. A retired teacher catalogued the damaged books. A group of parents formed a night-watch rota.',
+  'The government provided replacement glass within the week — only because a letter signed by 200 families made the news. The library was repaired in nine days.',
+  'Dilnaz put a hand-written sign on the door: "This library belongs to all of us. That means it is our job to protect it." She was ten. She understood Article 51A(i) without ever having read it.'],
+ moral:'What belongs to everyone is easily destroyed by a few — and rebuilt only by many. Public property is not "no one\'s"; it is everyone\'s.',
+ quiz:[
+  {q:'Why was the Rampur library important?',opts:['It had a computer lab','It was the only book access for children of five villages','It had a swimming pool','It was a tourist attraction'],ans:1,ex:'The library served children from five villages with no private schools or internet — public infrastructure is crucial for the most vulnerable.'},
+  {q:'Which Article 51A sub-clause is about protecting public property?',opts:['51A(a)','51A(f)','51A(i)','51A(k)'],ans:2,ex:'Article 51A(i): duty to protect public property and to abjure violence.'},
+  {q:'What did Dilnaz\'s sign say?',opts:['"No entry without ID"','"This library belongs to all of us. That means it is our job to protect it."','"Government Property"','"Books are sacred"'],ans:1,ex:'Dilnaz\'s sign captured the essence of the duty — ownership and responsibility go together.'},
+  {q:'Who suffers most when public property is damaged?',opts:['Politicians','The wealthy','The poorest, who have no private alternatives','Tourism officials'],ans:2,ex:'The story shows that children with no private schools or internet lose the most — public destruction hits the most vulnerable hardest.'}]},
+
+{id:'d5',type:'duty',title:'Priya and the First Star',sub:'Duty 11 – Provide Education to Children',emoji:'⭐',
+ color:'linear-gradient(135deg,#1a1a2e,#4169E1)',scene:'education',
+ note:{art:'Article 51A(k)',title:'Duty to Educate Your Child',
+  overview:'Every parent or guardian has a duty to provide opportunities for education to their child or ward between 6 and 14 years of age.',
+  pts:['Art.51A(k): Duty to provide educational opportunities to children aged 6–14','Linked to Art.21A: Right to free and compulsory education','The Right to Education Act (RTE), 2009 operationalises this','Private schools must reserve 25% seats for economically weaker sections','Keeping a child out of school violates both rights and parental duty'],
+  why:'Education is the multiplier of every other right. A literate child can claim their rights, exercise their duties, and change the trajectory of their family.'},
+ story:['Priya\'s father sold chai at a railway station. Her mother cleaned homes. Priya had been told, since she was eight, that school was a luxury. At eleven, she was helping arrange flower garlands for a nearby temple — earning sixty rupees a day.',
+  'Her neighbour, Sunita Didi, was a young government schoolteacher. Every evening she saw Priya working. One morning she visited Priya\'s father: "Your daughter comes to school with me tomorrow. Under the RTE Act, her schooling is free. Under Article 51A(k), it is also your duty to ensure it."',
+  'The father was not unkind — he was afraid. Afraid that education would take Priya away. Sunita Didi sat with him for an hour, drinking his chai, talking. She told him about women in her school who supported their entire families after completing their education.',
+  'The next morning, Priya came to school in a blue frock Sunita Didi had bought her. She sat nervously in the back row. By noon she had answered three maths questions correctly. The teacher gave her a star sticker.',
+  'She kept that sticker for years. When she was twenty-three and working as a government accountant, she found it in her old notebook. She stuck it on her office wall — next to a small printout of Article 51A(k).',
+  'Her father visited her office once. He saw the sticker. He did not say anything, but he pressed his hand briefly against it. That was enough.'],
+ moral:'The duty to educate your child is not just a law — it is an investment in everything that child might become.',
+ quiz:[
+  {q:'Which article is the Duty to Educate Your Child?',opts:['Art.21A','Art.51A(a)','Art.51A(k)','Art.45'],ans:2,ex:'Article 51A(k) places a duty on parents/guardians to provide educational opportunities for children aged 6–14.'},
+  {q:'What Act operationalises the right to free education?',opts:['Child Labour Act','Right to Education Act 2009','Indian Education Act 1882','National Policy on Education 1986'],ans:1,ex:'The RTE Act, 2009 makes free and compulsory education a legal right for all children between 6 and 14 years.'},
+  {q:'What convinced Priya\'s father to send her to school?',opts:['A government notice','A court order','A patient personal conversation with Sunita Didi','A community protest'],ans:2,ex:'Not authority, but human connection — Sunita Didi sat with the father, drank his chai, and shared real stories.'},
+  {q:'What did Priya put on her office wall as an adult?',opts:['Her degree certificate','A photo of her father','The star sticker and a printout of Article 51A(k)','A poster of the Constitution'],ans:2,ex:'Priya kept the star sticker from her first school day beside Article 51A(k) — a personal and constitutional symbol of her journey.'}]},
+
+{id:'d6',type:'duty',title:'The Harmony Games',sub:'Duty 2 – Cherish the Noble Ideals of the Freedom Struggle',emoji:'🕊️',
+ color:'linear-gradient(135deg,#FF9933,#cc7700)',scene:'harmony',
+ note:{art:'Article 51A(b)',title:'Duty to Cherish Freedom Struggle Ideals',
+  overview:'Every citizen must cherish and follow the noble ideals that inspired our national struggle for freedom.',
+  pts:['Remember the values of the freedom movement: non-violence, truth, unity','Honour freedom fighters not just with memory but with action','Live the values of equality, justice, and brotherhood','Resist communalism, casteism, and division','Carry forward the unfinished work of nation-building'],
+  why:'The freedom struggle was not just about political independence — it was about building a just, equal society. That work continues through every citizen.'},
+ story:['In a school in Nagpur, two groups of students refused to work together. The Marathas sat on one side of the classroom; the Telugus on the other. Old rivalries, whispered at home, had found their way into school desks.',
+  'Their history teacher, Prakash Sir, announced the Annual Day theme: "The Freedom Struggle." He assigned the groups to work together to recreate famous moments — but there was a catch. Each group had to play the heroes of the other\'s community.',
+  'The Maratha students had to portray Alluri Sitarama Raju, the Telugu freedom fighter. The Telugu students had to portray Vinayak Damodar Savarkar and Bal Gangadhar Tilak.',
+  'Slowly, as they researched each other\'s heroes, something shifted. "He fought the British barefoot," one student said quietly, reading about Raju. "How did we not know this?" They sat together that night at the library, poring over old photographs.',
+  'On Annual Day, a sparrow flew in through the open door of the auditorium and sat on the edge of the stage, as if watching. The principal said later that the bird must have heard something worth staying for.',
+  'Prakash Sir read out Article 51A(b): "It shall be the duty of every citizen to cherish and follow the noble ideals which inspired our national struggle for freedom." Then he said: "The ideals were one. The people were one. Only the forgetting divides us."'],
+ moral:'The freedom struggle was not fought by one community — it was fought by India. To cherish its ideals is to remember that unity, not division, is our inheritance.',
+ quiz:[
+  {q:'What is Article 51A(b) about?',opts:['Protecting forests','Cherishing freedom struggle ideals','Paying taxes','Military service'],ans:1,ex:'Article 51A(b) asks every citizen to cherish and follow the noble ideals that inspired the national struggle for freedom.'},
+  {q:'What was the key lesson the students learned?',opts:['History is boring','Freedom fighters came from all communities — India fought as one','Marathas and Telugus cannot cooperate','School assignments are unnecessary'],ans:1,ex:'The students discovered that freedom fighters came from every community, showing that the struggle — and its ideals — belong to all of India.'},
+  {q:'Why did Prakash Sir make groups play heroes of the other community?',opts:['To confuse students','To create empathy and understanding across communities','As punishment','To follow the syllabus'],ans:1,ex:'Swapping roles forced students to research and appreciate each other\'s heroes, breaking down prejudice through knowledge.'},
+  {q:'What does "cherishing freedom struggle ideals" mean in everyday life?',opts:['Visiting museums','Living the values of equality, justice, and unity','Memorising names of freedom fighters','Attending government events'],ans:1,ex:'The duty is not just remembrance — it is active practice of the values those fighters lived and died for: truth, unity, non-violence.'}]},
+
+{id:'d7',type:'duty',title:'One India, One Heart',sub:'Duty 3 – Uphold Sovereignty & Integrity of India',emoji:'🗺️',
+ color:'linear-gradient(135deg,#000080,#4169E1)',scene:'sovereignty',
+ note:{art:'Article 51A(c)',title:'Duty to Uphold Sovereignty & Integrity',
+  overview:'Every citizen must uphold and protect the sovereignty, unity, and integrity of India.',
+  pts:['Sovereignty = India\'s right to govern itself','Unity = all states, religions, and communities form one nation','Integrity = territorial wholeness — India is indivisible','Resist forces that try to divide the nation through hate or violence','This duty is especially important in a diverse democracy'],
+  why:'India\'s unity is hard-won and fragile. Every citizen is a guardian of the idea of India — a nation that holds diversity without division.'},
+ story:['Eleven-year-old Meher lived in Srinagar. Her best friend Anjali had moved there from Chennai for her father\'s posting. They were an unlikely pair — one spoke Kashmiri, the other Tamil.',
+  'One day, someone spray-painted a wall near their school with the words "Outsiders Go Home." Meher saw Anjali\'s face fall. She said nothing. But that evening, she made a plan.',
+  'The next morning, Meher brought a bucket of white paint. "We are going to paint it over," she told Anjali. Together — with three other classmates — they covered the words and painted instead a map of India, with tiny flags of every state.',
+  '"Every state on this map speaks a different language," Meher said, "but they all sing the same national anthem." Anjali painted Tamil Nadu carefully. Meher painted Jammu & Kashmir. They held the brush together for the last stroke.',
+  'Their teacher found them at the wall and quoted Article 51A(c): "It shall be the duty of every citizen to uphold and protect the sovereignty, unity, and integrity of India." Then she said: "You both already understood it before you read it."',
+  'A crow watched from a wire above, head tilted. Two children, two languages, one map. In India, this is not unusual. It is the most natural thing in the world.'],
+ moral:'India\'s unity is not enforced — it is chosen, every day, by its citizens. Every act of inclusion is a vote for the republic.',
+ quiz:[
+  {q:'What does Article 51A(c) ask citizens to do?',opts:['Pay taxes on time','Uphold the sovereignty, unity, and integrity of India','Serve in the military','Vote in elections'],ans:1,ex:'Article 51A(c) asks every citizen to uphold and protect India\'s sovereignty, unity, and integrity.'},
+  {q:'What did Meher and Anjali paint on the wall?',opts:['Their school name','A map of India with flags of every state','Pictures of freedom fighters','The national anthem'],ans:1,ex:'They replaced the divisive message with a map of India showing all states — a symbol of unity in diversity.'},
+  {q:'What does "integrity of India" mean?',opts:['Financial honesty','Territorial wholeness — India is indivisible','Moral values of citizens','Unity of all religions'],ans:1,ex:'Integrity here means India\'s territorial indivisibility — all states together form one nation that cannot be divided.'},
+  {q:'What is the story\'s message about unity?',opts:['Unity requires everyone to be the same','Unity is enforced by the government','Unity is chosen daily by citizens through acts of inclusion','Unity only matters in times of war'],ans:2,ex:'Meher and Anjali show that unity is not a government decree — it is a daily choice made by ordinary citizens.'}]},
+
+{id:'d8',type:'duty',title:'Meena and the Ballot Box',sub:'Duty 4 – Defend India & Render National Service',emoji:'🗳️',
+ color:'linear-gradient(135deg,#1a3a1a,#27AE60)',scene:'vote',
+ note:{art:'Article 51A(d)',title:'Duty to Defend the Country',
+  overview:'Every citizen must defend the country and render national service when required by the state.',
+  pts:['Render national service when required — military or civilian','Obey lawful orders in times of national emergency','Support national institutions and democratic processes','Voting is a form of democratic national service','Jury duty, census participation, disaster volunteering are also service'],
+  why:'Defence is not only military — it is every act that strengthens the democratic fabric and protects India\'s people and institutions.'},
+ story:['Meena, a sixty-eight-year-old woman in rural Rajasthan, had never missed an election in forty years. She walked three kilometres each way to the polling booth, even after her knee surgery.',
+  'This year, her grandson Rohit tried to convince her to stay home. "Nani, one vote doesn\'t matter," he said. She looked at him steadily. "In 1952," she said, "the first election, 85% of Indians had never voted before in their lives. But they walked — some barefoot — because they understood what it meant."',
+  'She told him about her father, who had served in the Indian Army during the 1965 war. "He defended India with a rifle. I defend it with a ballot. Both are service." Rohit was quiet.',
+  'At the polling booth, the officer recognised Meena. "You are here again!" he laughed. "Every election since 1982. You have not missed once." He stamped her voter ID with a kind of reverence.',
+  'Rohit voted for the first time that day, standing beside his grandmother. He pressed the button slowly, as if it were something precious.',
+  'On the way home, a peacock crossed the road in front of them — unhurried, magnificent. Meena said: "Even the peacock votes for the monsoon by dancing. Everything in India participates."'],
+ moral:'Democracy is not a spectator sport. Every vote is a act of national service — as real as any uniform.',
+ quiz:[
+  {q:'How many years had Meena been voting without missing an election?',opts:['10 years','20 years','40 years','50 years'],ans:2,ex:'Meena had voted in every election for forty years — showing the duty to participate in democracy as a form of national service.'},
+  {q:'Article 51A(d) asks citizens to...',opts:['Develop scientific temper','Defend the country and render national service','Protect public property','Educate their children'],ans:1,ex:'Article 51A(d) asks every citizen to defend the country and render national service when required by the state.'},
+  {q:'How does Meena compare voting to army service?',opts:['She says voting is more important','She says both are forms of defending India','She says army service is more important','She says neither matters much'],ans:1,ex:'Meena says: "He defended India with a rifle. I defend it with a ballot. Both are service." — expanding our understanding of national defence.'},
+  {q:'What is the story\'s message about voting?',opts:['Only young people should vote','Voting is optional in democracy','Every vote is an act of national service — as real as any uniform','Voting only matters in big elections'],ans:2,ex:'The story shows that democracy needs active participation from all citizens — voting is civic defence.'}]},
+
+{id:'d9',type:'duty',title:'The Science Fair and the Superstition',sub:'Duty 6 – Develop Scientific Temper & Humanism',emoji:'🔬',
+ color:'linear-gradient(135deg,#1a4a6e,#3498DB)',scene:'science',
+ note:{art:'Article 51A(f)',title:'Duty to Develop Scientific Temper',
+  overview:'Every citizen must develop scientific temper, humanism, and the spirit of inquiry and reform.',
+  pts:['Question claims before accepting them as true','Seek evidence-based explanations','Practice humanism — treat all people with dignity regardless of religion, caste, gender','Support social reform through reason','Reject superstitions that harm people, especially the vulnerable'],
+  why:'Scientific temper is not about rejecting tradition — it is about thinking carefully, asking questions, and not allowing fear or superstition to harm others.'},
+ story:['In a village in Bihar, a series of crop failures had led to a rumour: a young widow named Radha was "bad luck." Villagers began avoiding her. A healer announced she must be driven out.',
+  'Fourteen-year-old Arjun had just returned from his school\'s district science fair, where he had won second prize for a project on soil erosion. He knew the crop failures had a real cause: overuse of chemical fertilisers and two years of erratic monsoon.',
+  'He went to the panchayat with his project report. He showed photographs of the soil, data from the agricultural office, weather records. "Radha is not bad luck," he said. "This is soil science and climate data."',
+  'Some elders laughed. But the village schoolteacher stood up. She reminded the assembly of Article 51A(f): "It shall be the duty of every citizen to develop scientific temper, humanism, and the spirit of inquiry and reform."',
+  '"This boy," she said, pointing to Arjun, "is practising his duty. What are the rest of you practising?" The assembly grew silent.',
+  'Radha stayed in her village. The panchayat applied for drought-resistant seeds from the agricultural department. The next harvest was better. Arjun\'s science project became the village\'s farming plan.'],
+ moral:'Scientific temper is courage — the courage to ask questions when it is easier to blame. Humanism is its companion: the refusal to let superstition harm the innocent.',
+ quiz:[
+  {q:'What was the real cause of the crop failures in the story?',opts:['Bad luck','A widow\'s presence','Soil erosion and erratic monsoon','Government neglect'],ans:2,ex:'Arjun proved through data that the crop failures were caused by soil erosion from chemical fertilisers and two poor monsoon years — not any person.'},
+  {q:'Article 51A(f) asks citizens to develop...',opts:['Military skills','Scientific temper, humanism, and spirit of inquiry','Business acumen','Agricultural skills'],ans:1,ex:'Article 51A(f) asks every citizen to develop scientific temper, humanism, and the spirit of inquiry and reform.'},
+  {q:'What did Arjun bring to the panchayat?',opts:['A petition','His science project report, soil photos, and climate data','A letter from the government','Just his own testimony'],ans:1,ex:'Arjun brought evidence — photographs, agricultural data, and weather records — showing that scientific temper means reasoning from facts.'},
+  {q:'What does "scientific temper" mean in daily life?',opts:['Being good at physics','Working in a laboratory','Questioning claims, seeking evidence, and not allowing superstition to harm others','Winning science competitions'],ans:2,ex:'Scientific temper is the habit of mind that questions before accepting, seeks evidence, and refuses to blame the powerless.'}]},
+
+{id:'d10',type:'duty',title:'The Craft of Many Hands',sub:'Duty 8 – Develop Excellence & Strive Towards Achievement',emoji:'🏆',
+ color:'linear-gradient(135deg,#8B4513,#F39C12)',scene:'excellence',
+ note:{art:'Article 51A(h)',title:'Duty to Develop Excellence',
+  overview:'Every citizen must develop excellence in all spheres of individual and collective activity, so that the nation constantly rises to higher levels of endeavour and achievement.',
+  pts:['Strive for excellence in your chosen field — art, science, sports, service','Collective excellence: lift the community, not just yourself','Constant improvement benefits not just the individual but the nation','Excellence includes character — honesty, diligence, creativity','Education, skill-building, and craftsmanship are paths to national excellence'],
+  why:'A great nation is built by great citizens — and greatness comes not from birth but from effort, discipline, and the relentless pursuit of doing one thing well.'},
+ story:['In the pottery town of Khurja, Uttar Pradesh, a thirteen-year-old girl named Deepa watched her father throw clay on the wheel every morning before school. He had won a national award for his blue pottery. She had never touched the wheel.',
+  '"Will you teach me?" she asked him one evening. He handed her a lump of clay. "First, feel it," he said. She pressed her fingers in. The clay was cool and alive.',
+  'For six months, every evening after homework, Deepa practiced. Her first pot collapsed. Her second was lopsided. Her tenth was almost round. Her father never said "very good" — he only said "again."',
+  'At the national pottery competition for school students, Deepa\'s blue vase was described by a judge as "showing the patient hand of someone who has been trained not to be satisfied with almost good enough."',
+  'She won first place. But she told the interviewer something more interesting: "My father taught me that excellence is not a thing you have. It is a thing you keep doing."',
+  'A sparrow had built a nest in the corner of their workshop — from clay dust and straw, perfectly round. Her father pointed at it: "Even the sparrow strives for excellence in its one craft."'],
+ moral:'Excellence is not talent — it is the willingness to try again, and again, until the thing you make reflects the best of what you are.',
+ quiz:[
+  {q:'What does Article 51A(h) require of citizens?',opts:['To join the army','To pay taxes','To develop excellence in individual and collective activity','To respect elders'],ans:2,ex:'Article 51A(h) asks every citizen to develop excellence in all spheres so the nation constantly rises to higher levels of achievement.'},
+  {q:'What was Deepa\'s father\'s approach to teaching her?',opts:['He praised her every attempt','He only said "again" — never satisfied with almost good enough','He told her pottery was not for girls','He sent her to a professional school'],ans:1,ex:'Her father\'s teaching style reflects the heart of excellence: the refusal to settle, and the discipline of constant practice.'},
+  {q:'What did Deepa say excellence is?',opts:['A talent you are born with','A certificate you earn','Something you keep doing — not a thing you have','The ability to beat others'],ans:2,ex:'"Excellence is not a thing you have. It is a thing you keep doing." — excellence as practice, not possession.'},
+  {q:'Why does the story include the sparrow\'s nest?',opts:['To show sparrows are clever','Nature also demonstrates excellence — even the smallest creature strives to do its one craft perfectly','To show the workshop had pests','As decoration'],ans:1,ex:'The sparrow\'s perfectly round nest built from clay and straw shows that excellence is a universal principle — not just human.'}]},
+
+{id:'d11',type:'duty',title:'The Bridge of Brotherhood',sub:'Duty 10 – Renounce Practices Derogatory to Women',emoji:'🤝',
+ color:'linear-gradient(135deg,#c0392b,#e74c3c)',scene:'dignity',
+ note:{art:'Article 51A(e) & (j)',title:'Duty of Brotherhood & Dignity of Women',
+  overview:'Every citizen must promote harmony, brotherhood among all sections of society, and renounce practices derogatory to the dignity of women.',
+  pts:['Art.51A(e): Promote harmony and the spirit of common brotherhood','Transcend religious, linguistic, regional, or sectional diversities','Art.51A(j): Renounce practices derogatory to the dignity of women','This includes dowry, domestic violence, child marriage, gender-based mockery','Linked to Art.15: No discrimination on the basis of sex'],
+  why:'A free country must be free for everyone in it. Brotherhood without women\'s dignity is incomplete. Dignity without brotherhood is isolated. Both together make a just society.'},
+ story:['In a small town in Haryana, a girl named Kiran had topped her class in mathematics for three years. When she applied to study engineering at a college in another city, her neighbours said: "What will a girl do with engineering? Better to find her a husband."',
+  'Her younger brother Aryan, fifteen years old, overheard this. He was angry. Not just for his sister — but because he recognised the same dismissal he had watched happen to his mother, his aunt, and every woman who had tried to grow beyond what the town expected.',
+  'At school, Aryan organised a debate: "Is it our duty to oppose practices that demean women?" He invited teachers, parents, and students. He quoted Article 51A(j): every citizen must renounce practices derogatory to the dignity of women.',
+  '"A society that tells half its people to sit down," he said, "will always run at half its strength." The hall was silent for a moment. Then, slowly, applause.',
+  'Kiran went to study engineering. She video-called her brother every Sunday. He became a teacher.',
+  'A kite — the bird — was spotted nesting above the school\'s main entrance that year. The children said it had chosen the school because it was the highest point around. Aryan thought: the highest point is where everyone is welcome.'],
+ moral:'Brotherhood is not brotherhood if it excludes half of humanity. Dignity for women is not a favour — it is a duty of every citizen, in every home and every street.',
+ quiz:[
+  {q:'Article 51A(j) asks citizens to...',opts:['Join the army','Renounce practices derogatory to the dignity of women','Protect public property','Develop scientific temper'],ans:1,ex:'Article 51A(j) explicitly asks every citizen to renounce practices derogatory to the dignity of women — making gender dignity a civic duty.'},
+  {q:'What did Aryan say about a society that tells half its people to sit down?',opts:['It is traditional and should be respected','It will always run at half its strength','It is a government matter, not citizens\'','It only affects women, not men'],ans:1,ex:'Aryan\'s statement captures why women\'s dignity is a national issue — a country cannot reach its potential if half its citizens are suppressed.'},
+  {q:'Article 51A(e) asks citizens to promote...',opts:['Scientific temper','Harmony and common brotherhood transcending all diversities','Military readiness','Environmental protection'],ans:1,ex:'Article 51A(e) asks citizens to promote harmony and the spirit of common brotherhood, transcending religious, linguistic, regional, and sectional diversities.'},
+  {q:'What is the moral of the story?',opts:['Girls should not study engineering','Brotherhood excludes gender issues','Dignity for women is a duty of every citizen, not a favour','Boys should not interfere in women\'s decisions'],ans:2,ex:'The story shows that renouncing practices that harm women is a constitutional duty — and that young people can lead this change.'}]}
+];
+
+// ═══════════════════════════════════════════════════════
+// ANIMATED SVG SCENES
+// ═══════════════════════════════════════════════════════
+function getScene(id){
+const scenes={
+equality:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyE" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#E0F4FF"/></linearGradient></defs>
+  <rect width="900" height="200" fill="url(#skyE)"/>
+  <circle cx="820" cy="50" r="38" fill="#FFD700" opacity="0.9"><animate attributeName="r" values="38;42;38" dur="4s" repeatCount="indefinite"/></circle>
+  <g opacity="0.85"><ellipse cx="150" cy="55" rx="55" ry="26" fill="white"/><ellipse cx="188" cy="48" rx="36" ry="22" fill="white"/><ellipse cx="118" cy="48" rx="30" ry="18" fill="white"/><animateTransform attributeName="transform" type="translate" values="0,0;20,0;0,0" dur="12s" repeatCount="indefinite"/></g>
+  <g opacity="0.75"><ellipse cx="500" cy="75" rx="44" ry="20" fill="white"/><ellipse cx="534" cy="68" rx="28" ry="16" fill="white"/><animateTransform attributeName="transform" type="translate" values="0,0;-15,0;0,0" dur="9s" repeatCount="indefinite"/></g>
+  <rect y="198" width="900" height="92" fill="#7EC850"/>
+  <rect y="228" width="900" height="62" fill="#8B6914"/>
+  <rect x="378" y="145" width="84" height="56" rx="4" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  <rect x="368" y="140" width="104" height="11" rx="5" fill="#8B4513"/>
+  <ellipse cx="420" cy="200" rx="42" ry="10" fill="#1E90FF" opacity="0.7"/>
+  <rect x="388" y="160" width="22" height="18" rx="4" fill="#999" stroke="#666" stroke-width="2"/>
+  <path d="M393 160 Q399 148 405 160" stroke="#666" stroke-width="3" fill="none"/>
+  <g><circle cx="420" cy="198" r="5" fill="none" stroke="#87CEEB" stroke-width="2"><animate attributeName="r" values="5;22;5" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.8;0;0.8" dur="3s" repeatCount="indefinite"/></circle></g>
+  <g transform="translate(195,135)"><circle cx="0" cy="0" r="17" fill="#FDBCB4"/><rect x="-11" y="17" width="22" height="32" rx="6" fill="#E74C3C"/><rect x="-7" y="49" width="6" height="20" rx="3" fill="#4a2c00"/><rect x="2" y="49" width="6" height="20" rx="3" fill="#4a2c00"/><ellipse cx="0" cy="-20" rx="13" ry="7" fill="#D2691E"/><animateTransform attributeName="transform" type="translate" values="195,135;200,135;195,135" dur="3s" repeatCount="indefinite"/></g>
+  <g transform="translate(208,130)"><ellipse cx="0" cy="0" rx="6" ry="4" fill="#8B6914"/><circle cx="-3" cy="-3" r="3.5" fill="#6B4F2A"/><polygon points="0,-2 4,-1 0,0" fill="#FF8C00"/><animateTransform attributeName="transform" type="translate" values="208,130;208,126;208,130" dur="2s" repeatCount="indefinite"/></g>
+  <g transform="translate(575,132)"><circle cx="0" cy="0" r="17" fill="#FDBCB4"/><rect x="-11" y="17" width="22" height="36" rx="6" fill="#6A0DAD"/><rect x="-7" y="53" width="6" height="20" rx="3" fill="#4a2c00"/><rect x="2" y="53" width="6" height="20" rx="3" fill="#4a2c00"/><rect x="15" y="17" width="22" height="26" rx="3" fill="#FF9933"/><text x="17" y="28" font-size="5" fill="white" font-weight="bold">Const.</text></g>
+  <g transform="translate(58,108)"><rect x="-6" y="38" width="12" height="60" fill="#8B4513"/><ellipse cx="0" cy="0" rx="36" ry="46" fill="#228B22"/><animateTransform attributeName="transform" type="rotate" values="0 0 98;1 0 98;0 0 98;-1 0 98;0 0 98" dur="5s" repeatCount="indefinite"/></g>
+  <g transform="translate(828,105)"><rect x="-5" y="38" width="10" height="65" fill="#8B4513"/><ellipse cx="0" cy="0" rx="28" ry="40" fill="#2E8B22"/><animateTransform attributeName="transform" type="rotate" values="0 0 103;-1 0 103;0 0 103;1 0 103;0 0 103" dur="6s" repeatCount="indefinite"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold" font-family="Georgia">Right to Equality — No gate can be locked against any citizen</text>
+</svg>`,
+
+freedom:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyFr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a0533"/><stop offset="60%" stop-color="#4a1060"/><stop offset="100%" stop-color="#6B3F8C"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyFr)"/>
+  <circle cx="820" cy="55" r="33" fill="#fffce0"/>
+  <circle cx="832" cy="47" r="26" fill="#4a1060"/>
+  <rect y="175" width="900" height="115" fill="#0d3a0d"/>
+  <g transform="translate(48,85)"><rect x="-8" y="75" width="16" height="100" fill="#3d2006"/><ellipse cx="0" cy="18" rx="50" ry="76" fill="#0d4a0d"/></g>
+  <g transform="translate(175,65)"><rect x="-7" y="85" width="14" height="110" fill="#3d2006"/><ellipse cx="0" cy="18" rx="43" ry="84" fill="#0a3d0a"/></g>
+  <g transform="translate(718,75)"><rect x="-8" y="80" width="16" height="110" fill="#3d2006"/><ellipse cx="0" cy="18" rx="46" ry="78" fill="#0d4a0d"/></g>
+  <circle cx="100" cy="28" r="2" fill="white" opacity="0.9"><animate attributeName="opacity" values="0.9;0.3;0.9" dur="3s" repeatCount="indefinite"/></circle>
+  <circle cx="200" cy="14" r="1.5" fill="white" opacity="0.7"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="4s" repeatCount="indefinite"/></circle>
+  <circle cx="400" cy="24" r="2" fill="white"><animate attributeName="opacity" values="1;0.4;1" dur="2.5s" repeatCount="indefinite"/></circle>
+  <circle cx="640" cy="38" r="1.5" fill="white" opacity="0.8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="5s" repeatCount="indefinite"/></circle>
+  <circle cx="300" cy="195" r="4" fill="#FFFF00" opacity="0.9"><animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.5s" repeatCount="indefinite"/></circle>
+  <circle cx="450" cy="225" r="3" fill="#ADFF2F" opacity="0.8"><animate attributeName="opacity" values="0.8;0.2;0.8" dur="2.2s" repeatCount="indefinite"/></circle>
+  <circle cx="600" cy="205" r="4" fill="#FFFF00" opacity="0.7"><animate attributeName="opacity" values="0.7;0.15;0.7" dur="1.8s" repeatCount="indefinite"/></circle>
+  <g transform="translate(350,148)"><circle cx="0" cy="0" r="17" fill="#8D5524"/><rect x="-11" y="17" width="22" height="36" rx="6" fill="#2C3E50"/><rect x="-7" y="53" width="6" height="22" rx="3" fill="#1a1a1a"/><rect x="2" y="53" width="6" height="22" rx="3" fill="#1a1a1a"/><rect x="13" y="19" width="20" height="14" rx="3" fill="#333"/><circle cx="23" cy="26" r="5" fill="#87CEEB" stroke="#555" stroke-width="1.5"/></g>
+  <g transform="translate(598,168)"><ellipse cx="0" cy="0" rx="43" ry="20" fill="#FFA500"/><ellipse cx="-28" cy="-9" rx="19" ry="17" fill="#FFA500"/><circle cx="-40" cy="-15" r="13" fill="#FFA500"/><line x1="-8" y1="-18" x2="-8" y2="14" stroke="#333" stroke-width="3" opacity="0.6"/><line x1="6" y1="-18" x2="6" y2="14" stroke="#333" stroke-width="3" opacity="0.6"/><circle cx="-46" cy="-19" r="4" fill="#FFD700"/><circle cx="-34" cy="-19" r="4" fill="#FFD700"/><animateTransform attributeName="transform" type="translate" values="598,168;600,166;598,168" dur="4s" repeatCount="indefinite"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#fffce0" font-weight="bold">Right to Freedom — The forest watches when voices are silenced</text>
+</svg>`,
+
+exploitation:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyEx" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFD580"/><stop offset="100%" stop-color="#FFB347"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyEx)"/>
+  <rect y="215" width="900" height="75" fill="#8B6914"/>
+  <rect x="50" y="75" width="300" height="148" fill="#555" stroke="#333" stroke-width="3"/>
+  <rect x="80" y="55" width="48" height="28" fill="#444"/><rect x="178" y="50" width="48" height="33" fill="#444"/>
+  <rect x="70" y="95" width="38" height="28" rx="2" fill="#FF6600" opacity="0.8"><animate attributeName="opacity" values="0.8;0.4;0.8" dur="1.5s" repeatCount="indefinite"/></rect>
+  <rect x="128" y="95" width="38" height="28" rx="2" fill="#FF6600" opacity="0.6"><animate attributeName="opacity" values="0.6;0.9;0.6" dur="2s" repeatCount="indefinite"/></rect>
+  <rect x="188" y="95" width="38" height="28" rx="2" fill="#FF8800" opacity="0.7"><animate attributeName="opacity" values="0.7;0.3;0.7" dur="1.8s" repeatCount="indefinite"/></rect>
+  <ellipse cx="104" cy="42" rx="14" ry="11" fill="#666"><animate attributeName="cy" values="42;22;42" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite"/></ellipse>
+  <ellipse cx="202" cy="36" rx="11" ry="9" fill="#777"><animate attributeName="cy" values="36;16;36" dur="2.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="2.5s" repeatCount="indefinite"/></ellipse>
+  <g transform="translate(158,168)"><circle cx="0" cy="0" r="12" fill="#FDBCB4"/><rect x="-8" y="12" width="16" height="26" rx="5" fill="#CC4400"/><rect x="-5" y="38" width="5" height="16" rx="2" fill="#4a2c00"/><rect x="1" y="38" width="5" height="16" rx="2" fill="#4a2c00"/><line x1="-14" y1="22" x2="17" y2="22" stroke="#87CEEB" stroke-width="4" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="158,168;158,165;158,168" dur="2s" repeatCount="indefinite"/></g>
+  <g transform="translate(528,138)"><circle cx="0" cy="0" r="17" fill="#8D5524"/><rect x="-11" y="17" width="22" height="40" rx="6" fill="#1a5276"/><rect x="-7" y="57" width="6" height="23" rx="3" fill="#1a1a1a"/><rect x="2" y="57" width="6" height="23" rx="3" fill="#1a1a1a"/><rect x="13" y="19" width="24" height="30" rx="3" fill="#f5e6c8" stroke="#ccc" stroke-width="1"/><text x="15" y="31" font-size="5" fill="#8B4513">Art. 23</text><text x="15" y="39" font-size="5" fill="#8B4513">Art. 24</text><animateTransform attributeName="transform" type="translate" values="528,138;522,138;528,138" dur="3s" repeatCount="indefinite"/></g>
+  <g transform="translate(468,198)"><ellipse cx="0" cy="0" rx="24" ry="13" fill="#C4A35A"/><circle cx="-21" cy="-7" r="11" fill="#C4A35A"/><circle cx="-37" cy="-7" r="2" fill="#333"/><path d="M-42,-3 Q-48,2 -40,4" fill="#ffb6c1"/><path d="M19,0 Q33,-9 36,4" stroke="#C4A35A" stroke-width="5" fill="none" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" values="0 19 0;15 19 0;0 19 0" dur="0.5s" repeatCount="indefinite"/></path><animateTransform attributeName="transform" type="translate" values="468,198;470,196;468,198" dur="1.5s" repeatCount="indefinite"/></g>
+  <circle cx="750" cy="48" r="3" fill="#FFD700"><animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/></circle>
+  <circle cx="798" cy="28" r="2" fill="#FFD700"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="3s" repeatCount="indefinite"/></circle>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Right Against Exploitation — Every child deserves school, not a factory</text>
+</svg>`,
+
+religion:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyRl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a1a3e"/><stop offset="100%" stop-color="#3d2b6e"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyRl)"/>
+  <circle cx="450" cy="48" r="26" fill="#fffce0" opacity="0.95"/>
+  <circle cx="463" cy="40" r="20" fill="#3d2b6e"/>
+  <circle cx="100" cy="32" r="2" fill="white" opacity="0.8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="2.5s" repeatCount="indefinite"/></circle>
+  <circle cx="250" cy="18" r="1.5" fill="white" opacity="0.7"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="3s" repeatCount="indefinite"/></circle>
+  <circle cx="700" cy="28" r="2" fill="white"><animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/></circle>
+  <rect y="228" width="900" height="62" fill="#5d4037"/>
+  <rect x="28" y="125" width="98" height="108" fill="#2980B9" stroke="#1a5276" stroke-width="2"/>
+  <ellipse cx="77" cy="125" rx="38" ry="33" fill="#2980B9"/>
+  <line x1="77" y1="92" x2="77" y2="72" stroke="#2980B9" stroke-width="4"/>
+  <circle cx="77" cy="70" r="6" fill="#fffce0"/>
+  <circle cx="81" cy="67" r="5" fill="#2980B9"/>
+  <circle cx="45" cy="225" r="7" fill="#FF9933"><animate attributeName="r" values="7;9;7" dur="1s" repeatCount="indefinite"/></circle>
+  <circle cx="68" cy="225" r="7" fill="#FF9933"><animate attributeName="r" values="7;9;7" dur="1.3s" repeatCount="indefinite"/></circle>
+  <circle cx="91" cy="225" r="7" fill="#FF9933"><animate attributeName="r" values="7;9;7" dur="0.9s" repeatCount="indefinite"/></circle>
+  <rect x="198" y="148" width="88" height="83" fill="#E8A830"/>
+  <polygon points="198,148 242,100 286,148" fill="#D4891A"/>
+  <text x="242" y="143" text-anchor="middle" font-size="16" fill="#FFD700">ॐ</text>
+  <rect x="358" y="153" width="98" height="78" fill="#E8E8E8"/>
+  <polygon points="358,153 407,108 456,153" fill="#CCCCCC"/>
+  <rect x="399" y="85" width="7" height="34" fill="white"/>
+  <rect x="393" y="97" width="20" height="7" fill="white"/>
+  <rect x="538" y="138" width="98" height="93" fill="#FF9933"/>
+  <ellipse cx="587" cy="138" rx="48" ry="43" fill="#FF8800"/>
+  <ellipse cx="587" cy="138" rx="28" ry="26" fill="#FFB347"/>
+  <text x="587" y="148" text-anchor="middle" font-size="18" fill="#FFD700">☬</text>
+  <rect x="698" y="133" width="10" height="97" fill="#8B4513"/>
+  <ellipse cx="703" cy="93" rx="58" ry="66" fill="#228B22" opacity="0.88"/>
+  <g transform="translate(703,93)"><ellipse cx="0" cy="0" rx="9" ry="5" fill="#1a6e1a"/><circle cx="-6" cy="-4" r="6" fill="#006400"/><path d="M0,0 Q18,-23 13,-32" stroke="#4169E1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M0,0 Q22,-18 20,-29" stroke="#9B59B6" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M0,0 Q20,-25 16,-36" stroke="#27AE60" stroke-width="3" fill="none" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="703,93;703,89;703,93" dur="3s" repeatCount="indefinite"/></g>
+  <ellipse cx="420" cy="108" rx="9" ry="15" fill="#FFD700" stroke="#cc9900" stroke-width="1" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite"/></ellipse>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#fffce0" font-weight="bold">Right to Religion — In India's square, every lamp belongs</text>
+</svg>`,
+
+culture:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyCl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#c8e6f5"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyCl)"/>
+  <rect y="212" width="900" height="78" fill="#5d8a3c"/>
+  <rect x="418" y="95" width="16" height="135" fill="#8B4513"/>
+  <ellipse cx="426" cy="56" rx="88" ry="72" fill="#2E8B22" opacity="0.85"/>
+  <ellipse cx="388" cy="75" rx="52" ry="48" fill="#228B22" opacity="0.7"/>
+  <ellipse cx="466" cy="70" rx="48" ry="50" fill="#3CB371" opacity="0.7"/>
+  <g transform="translate(308,95)"><ellipse cx="-11" cy="0" rx="11" ry="7" fill="#FF69B4" opacity="0.8"/><ellipse cx="11" cy="0" rx="11" ry="7" fill="#FF1493" opacity="0.8"/><line x1="0" y1="-4" x2="0" y2="7" stroke="#333" stroke-width="1.5"/><animateTransform attributeName="transform" type="translate" values="308,95;313,86;308,95;303,90;308,95" dur="4s" repeatCount="indefinite"/></g>
+  <g transform="translate(538,86)"><ellipse cx="-9" cy="0" rx="9" ry="6" fill="#9B59B6" opacity="0.8"/><ellipse cx="9" cy="0" rx="9" ry="6" fill="#8E44AD" opacity="0.8"/><line x1="0" y1="-4" x2="0" y2="6" stroke="#333" stroke-width="1.5"/><animateTransform attributeName="transform" type="translate" values="538,86;543,78;538,86;533,81;538,86" dur="5s" repeatCount="indefinite"/></g>
+  <line x1="298" y1="148" x2="298" y2="232" stroke="#C4A35A" stroke-width="5" stroke-linecap="round"/>
+  <line x1="558" y1="148" x2="558" y2="232" stroke="#C4A35A" stroke-width="5" stroke-linecap="round"/>
+  <g transform="translate(338,193)"><circle cx="0" cy="0" r="12" fill="#FDBCB4"/><rect x="-8" y="12" width="16" height="23" rx="5" fill="#E74C3C"/></g>
+  <g transform="translate(372,197)"><circle cx="0" cy="0" r="12" fill="#8D5524"/><rect x="-8" y="12" width="16" height="23" rx="5" fill="#3498DB"/></g>
+  <g transform="translate(406,193)"><circle cx="0" cy="0" r="12" fill="#D2A679"/><rect x="-8" y="12" width="16" height="23" rx="5" fill="#27AE60"/></g>
+  <g transform="translate(440,197)"><circle cx="0" cy="0" r="12" fill="#FDBCB4"/><rect x="-8" y="12" width="16" height="23" rx="5" fill="#9B59B6"/></g>
+  <g transform="translate(518,170)"><circle cx="0" cy="0" r="16" fill="#8D5524"/><rect x="-10" y="16" width="20" height="40" rx="6" fill="#E74C3C"/><rect x="-28" y="19" width="20" height="26" rx="3" fill="#FFD700" stroke="#cc9900" stroke-width="1"/><text x="-26" y="31" font-size="6" fill="#4a2c00">ᱥᱟᱱᱛᱟᱲᱤ</text></g>
+  <text x="200" y="125" font-size="20" fill="#FF9933" opacity="0.7">ᱚ</text>
+  <text x="228" y="110" font-size="16" fill="#9B59B6" opacity="0.6">ᱛ</text>
+  <text x="656" y="118" font-size="20" fill="#27AE60" opacity="0.7">ᱤ</text>
+  <path d="M648,252 Q698,242 748,252 Q798,262 848,250 Q898,240 900,250" stroke="#4169E1" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.8"><animate attributeName="d" values="M648,252 Q698,242 748,252 Q798,262 848,250;M648,250 Q698,247 748,254 Q798,257 848,247;M648,252 Q698,242 748,252 Q798,262 848,250" dur="4s" repeatCount="indefinite"/></path>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#1a4a1a" font-weight="bold">Cultural Rights — A language is a way of seeing the world</text>
+</svg>`,
+
+remedy:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyRm" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#B0D4E8"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyRm)"/>
+  <rect y="222" width="900" height="68" fill="#8B7355"/>
+  <rect x="298" y="92" width="304" height="142" fill="#F5F5DC" stroke="#D4C5A9" stroke-width="3"/>
+  <rect x="318" y="107" width="14" height="127" fill="#E8DCC8"/>
+  <rect x="356" y="107" width="14" height="127" fill="#E8DCC8"/>
+  <rect x="394" y="107" width="14" height="127" fill="#E8DCC8"/>
+  <rect x="432" y="107" width="14" height="127" fill="#E8DCC8"/>
+  <rect x="470" y="107" width="14" height="127" fill="#E8DCC8"/>
+  <rect x="508" y="107" width="14" height="127" fill="#E8DCC8"/>
+  <polygon points="288,97 602,97 597,77 293,77" fill="#E8DCC8" stroke="#D4C5A9" stroke-width="2"/>
+  <text x="450" y="90" text-anchor="middle" font-size="10" fill="#8B7355" font-weight="bold">SUPREME COURT OF INDIA</text>
+  <g transform="translate(450,132)"><line x1="0" y1="-18" x2="0" y2="18" stroke="#B8860B" stroke-width="3"/><line x1="-28" y1="0" x2="28" y2="0" stroke="#B8860B" stroke-width="2.5"><animateTransform attributeName="transform" type="rotate" values="0 0 0;3 0 0;0 0 0;-3 0 0;0 0 0" dur="3s" repeatCount="indefinite"/></line><circle cx="-28" cy="4" r="11" fill="#D4AF37" opacity="0.8"/><circle cx="28" cy="4" r="11" fill="#D4AF37" opacity="0.8"/><polygon points="0,-28 -5,-18 5,-18" fill="#B8860B"/></g>
+  <g transform="translate(148,178)"><circle cx="0" cy="0" r="13" fill="#FDBCB4"/><rect x="-8" y="13" width="16" height="30" rx="5" fill="#FF69B4"/><rect x="-5" y="43" width="5" height="18" rx="2" fill="#4a2c00"/><rect x="1" y="43" width="5" height="18" rx="2" fill="#4a2c00"/><rect x="11" y="15" width="20" height="15" rx="2" fill="white" stroke="#ccc" stroke-width="1"/><line x1="13" y1="20" x2="29" y2="20" stroke="#aaa" stroke-width="1"/><line x1="13" y1="25" x2="29" y2="25" stroke="#aaa" stroke-width="1"/><rect x="10" y="14" width="22" height="17" rx="3" fill="none" stroke="#FF9933" stroke-width="1.5" opacity="0.6"><animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/></rect><animateTransform attributeName="transform" type="translate" values="148,178;151,176;148,178" dur="3s" repeatCount="indefinite"/></g>
+  <g transform="translate(700,65)"><ellipse cx="0" cy="0" rx="20" ry="8" fill="#8B4513"/><path d="M-20,0 Q-36,-13 -32,-22" stroke="#8B4513" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M20,0 Q36,-9 32,-20" stroke="#8B4513" stroke-width="3.5" fill="none" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="700,65;718,56;736,65;718,74;700,65" dur="6s" repeatCount="indefinite"/></g>
+  <g transform="translate(718,188)"><circle cx="0" cy="0" r="10" fill="#FDBCB4"/><rect x="-6" y="10" width="12" height="24" rx="4" fill="#3498DB"/></g>
+  <g transform="translate(744,191)"><circle cx="0" cy="0" r="10" fill="#8D5524"/><rect x="-6" y="10" width="12" height="24" rx="4" fill="#E74C3C"/></g>
+  <g transform="translate(770,188)"><circle cx="0" cy="0" r="10" fill="#D2A679"/><rect x="-6" y="10" width="12" height="24" rx="4" fill="#27AE60"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Article 32 — Even one letter can move the highest court</text>
+</svg>`,
+
+flag:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyFl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFD580"/><stop offset="70%" stop-color="#FFB347"/><stop offset="100%" stop-color="#cc8800"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyFl)"/>
+  <rect y="238" width="900" height="52" fill="#8B7355"/>
+  <rect x="198" y="74" width="504" height="178" rx="10" fill="rgba(255,255,255,0.13)" stroke="rgba(255,255,255,0.28)" stroke-width="2"/>
+  <rect x="576" y="93" width="88" height="78" rx="4" fill="rgba(255,220,100,0.32)"/>
+  <line x1="620" y1="93" x2="620" y2="171" stroke="rgba(200,160,60,.45)" stroke-width="2"/>
+  <line x1="576" y1="132" x2="664" y2="132" stroke="rgba(200,160,60,.45)" stroke-width="2"/>
+  <line x1="576" y1="93" x2="298" y2="232" stroke="rgba(255,220,100,.18)" stroke-width="38"/>
+  <line x1="418" y1="54" x2="418" y2="232" stroke="#8B4513" stroke-width="5" stroke-linecap="round"/>
+  <rect x="418" y="54" width="128" height="42" fill="#FF9933"/>
+  <rect x="418" y="96" width="128" height="42" fill="white"/>
+  <rect x="418" y="138" width="128" height="42" fill="#138808"/>
+  <circle cx="482" cy="117" r="15" fill="none" stroke="#000080" stroke-width="2.2"/>
+  <circle cx="482" cy="117" r="4" fill="#000080"/>
+  <g stroke="#000080" stroke-width="1.1"><line x1="482" y1="102" x2="482" y2="132"/><line x1="467" y1="117" x2="497" y2="117"/><line x1="471" y1="106" x2="493" y2="128"/><line x1="493" y1="106" x2="471" y2="128"/><line x1="468" y1="111" x2="496" y2="123"/><line x1="496" y1="111" x2="468" y2="123"/></g>
+  <g transform="translate(278,168)"><circle cx="0" cy="0" r="16" fill="#C4A35A"/><rect x="-11" y="16" width="22" height="36" rx="6" fill="#8B4513"/><rect x="-17" y="39" width="34" height="11" rx="4" fill="#8B4513"/><rect x="-17" y="50" width="13" height="18" rx="3" fill="#4a2c00"/><rect x="5" y="50" width="13" height="18" rx="3" fill="#4a2c00"/><line x1="17" y1="19" x2="26" y2="70" stroke="#5d3a00" stroke-width="3" stroke-linecap="round"/></g>
+  <g transform="translate(348,158)"><circle cx="0" cy="0" r="15" fill="#FDBCB4"/><rect x="-10" y="15" width="20" height="43" rx="6" fill="#1a5276"/><rect x="-6" y="58" width="6" height="23" rx="3" fill="#1a1a1a"/><rect x="1" y="58" width="6" height="23" rx="3" fill="#1a1a1a"/><line x1="10" y1="24" x2="21" y2="14" stroke="#FDBCB4" stroke-width="5" stroke-linecap="round"/><circle cx="21" cy="12" r="6" fill="#FDBCB4"/></g>
+  <g transform="translate(393,165)"><circle cx="0" cy="0" r="13" fill="#8D5524"/><rect x="-8" y="13" width="16" height="38" rx="5" fill="#E74C3C"/></g>
+  <g transform="translate(425,163)"><circle cx="0" cy="0" r="13" fill="#D2A679"/><rect x="-8" y="13" width="16" height="38" rx="5" fill="#27AE60"/></g>
+  <g transform="translate(618,158)"><ellipse cx="0" cy="0" rx="8" ry="5" fill="#8B6914"/><circle cx="-4" cy="-4" r="4.5" fill="#6B4F2A"/><polygon points="0,-2 4,-1 0,1" fill="#FF8C00"/><animateTransform attributeName="transform" type="translate" values="618,158;618,154;618,158" dur="2s" repeatCount="indefinite"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Duty 1 — The flag is not cloth; it is a covenant</text>
+</svg>`,
+
+environment:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyEv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#B0E0E6"/></linearGradient><linearGradient id="waterEv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2196F3"/><stop offset="100%" stop-color="#0D47A1"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyEv)"/>
+  <path d="M0,202 Q100,192 200,208 Q300,222 400,202 Q500,188 600,208 Q700,222 800,202 Q850,192 900,208 L900,290 L0,290 Z" fill="url(#waterEv)" opacity="0.85"/>
+  <rect y="232" width="400" height="58" fill="#6B8E23" opacity="0.7"/>
+  <rect x="500" y="232" width="400" height="58" fill="#228B22" opacity="0.9"/>
+  <path d="M0,212 Q100,207 200,215" stroke="#666" stroke-width="7" fill="none" opacity="0.4"/>
+  <path d="M600,210 Q700,204 900,210" stroke="#87CEEB" stroke-width="7" fill="none" opacity="0.5"/>
+  <g transform="translate(618,112)"><rect x="-6" y="58" width="12" height="96" fill="#8B4513"/><ellipse cx="0" cy="0" rx="43" ry="62" fill="#228B22"/><animateTransform attributeName="transform" type="rotate" values="0 0 118;1 0 118;0 0 118;-1 0 118;0 0 118" dur="5s" repeatCount="indefinite"/></g>
+  <g transform="translate(718,132)"><rect x="-5" y="48" width="10" height="76" fill="#8B4513"/><ellipse cx="0" cy="0" rx="36" ry="52" fill="#2E8B22"/><animateTransform attributeName="transform" type="rotate" values="0 0 86;-1 0 86;0 0 86;1 0 86;0 0 86" dur="4s" repeatCount="indefinite"/></g>
+  <g transform="translate(818,122)"><rect x="-5" y="52" width="10" height="86" fill="#8B4513"/><ellipse cx="0" cy="0" rx="33" ry="55" fill="#228B22"/><animateTransform attributeName="transform" type="rotate" values="0 0 107;1 0 107;0 0 107;-1 0 107;0 0 107" dur="6s" repeatCount="indefinite"/></g>
+  <g transform="translate(78,142)" opacity="0.55"><rect x="-5" y="28" width="10" height="88" fill="#5d3a00"/><line x1="0" y1="28" x2="-18" y2="8" stroke="#5d3a00" stroke-width="4"/><line x1="0" y1="44" x2="18" y2="24" stroke="#5d3a00" stroke-width="3"/></g>
+  <g transform="translate(348,188)"><circle cx="0" cy="0" r="14" fill="#8D5524"/><rect x="-9" y="14" width="18" height="36" rx="5" fill="#FF9933"/><rect x="-5" y="50" width="5" height="20" rx="3" fill="#4a2c00"/><rect x="1" y="50" width="5" height="20" rx="3" fill="#4a2c00"/><path d="M11 20 Q17 28 15 40" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="15" cy="41" rx="7" ry="5" fill="#333"/><animateTransform attributeName="transform" type="translate" values="348,188;351,186;348,188" dur="2s" repeatCount="indefinite"/></g>
+  <g transform="translate(498,218)"><ellipse cx="0" cy="0" rx="26" ry="11" fill="#8B6914"/><circle cx="-23" cy="-5" r="10" fill="#A0784A"/><circle cx="-28" cy="-9" r="3" fill="#333"/><circle cx="-18" cy="-9" r="3" fill="#333"/><path d="M43,0 Q53,-7 50,4" stroke="#8B6914" stroke-width="5" fill="none" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="498,218;503,215;508,218;503,221;498,218" dur="4s" repeatCount="indefinite"/></g>
+  <g transform="translate(678,178)"><ellipse cx="0" cy="0" rx="13" ry="7" fill="#4169E1"/><circle cx="-10" cy="-4" r="7" fill="#00CED1"/><polygon points="0,-3 7,-1 0,3" fill="#FF8C00"/><animateTransform attributeName="transform" type="translate" values="678,178;683,173;688,178;683,183;678,178" dur="3s" repeatCount="indefinite"/></g>
+  <circle cx="498" cy="221" r="7" fill="none" stroke="#87CEEB" stroke-width="2" opacity="0.6"><animate attributeName="r" values="7;23;7" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite"/></circle>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Duty 6 — The river remembers everyone who helped it</text>
+</svg>`,
+
+service:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skySv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF8C42"/><stop offset="100%" stop-color="#FFC87A"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skySv)"/>
+  <circle cx="450" cy="52" r="42" fill="#FF4500" opacity="0.85"><animate attributeName="r" values="42;45;42" dur="4s" repeatCount="indefinite"/></circle>
+  <rect y="222" width="450" height="68" fill="#C4A35A"/>
+  <rect x="450" y="222" width="450" height="68" fill="#5d8a3c"/>
+  <path d="M50,232 Q80,242 100,237 Q120,232 150,247" stroke="#8B7355" stroke-width="3" fill="none" opacity="0.7"/>
+  <path d="M200,240 Q230,230 260,242 Q280,250 300,237" stroke="#8B7355" stroke-width="2.5" fill="none" opacity="0.7"/>
+  <ellipse cx="118" cy="227" rx="28" ry="11" fill="#A08050" stroke="#8B7355" stroke-width="2"/>
+  <rect x="104" y="194" width="28" height="38" fill="#C4A35A" stroke="#A08050" stroke-width="2"/>
+  <rect x="398" y="210" width="104" height="21" rx="5" fill="#8B4513"/>
+  <rect x="393" y="212" width="114" height="8" rx="4" fill="#A0522D"/>
+  <g transform="translate(550,207)"><line x1="0" y1="0" x2="0" y2="38" stroke="#228B22" stroke-width="3"/><ellipse cx="0" cy="0" rx="11" ry="6" fill="#32CD32"/></g>
+  <g transform="translate(588,212)"><line x1="0" y1="0" x2="0" y2="33" stroke="#228B22" stroke-width="3"/><ellipse cx="0" cy="0" rx="9" ry="5" fill="#32CD32"/></g>
+  <g transform="translate(626,210)"><line x1="0" y1="0" x2="0" y2="36" stroke="#228B22" stroke-width="3"/><ellipse cx="0" cy="0" rx="10" ry="5" fill="#228B22"/></g>
+  <g transform="translate(748,157)"><rect x="-4" y="48" width="8" height="68" fill="#8B4513"/><ellipse cx="0" cy="13" rx="26" ry="40" fill="#228B22" opacity="0.9"/><animateTransform attributeName="transform" type="rotate" values="0 0 83;1 0 83;0 0 83;-1 0 83;0 0 83" dur="5s" repeatCount="indefinite"/></g>
+  <g transform="translate(418,158)"><circle cx="0" cy="0" r="17" fill="#8D5524"/><rect x="-11" y="17" width="22" height="40" rx="6" fill="#4B5320"/><rect x="-7" y="57" width="6" height="23" rx="3" fill="#2F3A13"/><rect x="2" y="57" width="6" height="23" rx="3" fill="#2F3A13"/><rect x="-12" y="17" width="5" height="4" fill="#FFD700"/><rect x="8" y="17" width="5" height="4" fill="#FFD700"/><line x1="15" y1="21" x2="30" y2="55" stroke="#8B4513" stroke-width="4" stroke-linecap="round"/><ellipse cx="30" cy="59" rx="7" ry="5" fill="#8B4513"/><animateTransform attributeName="transform" type="translate" values="418,158;421,156;418,158" dur="3s" repeatCount="indefinite"/></g>
+  <g transform="translate(348,188)"><circle cx="0" cy="0" r="12" fill="#FDBCB4"/><rect x="-7" y="12" width="14" height="28" rx="5" fill="#E74C3C"/></g>
+  <g transform="translate(478,185)"><circle cx="0" cy="0" r="12" fill="#C4A35A"/><rect x="-7" y="12" width="14" height="28" rx="5" fill="#F39C12"/></g>
+  <g transform="translate(198,193)"><circle cx="0" cy="0" r="11" fill="#8D5524"/><rect x="-7" y="11" width="14" height="26" rx="5" fill="#3498DB"/><rect x="-18" y="13" width="13" height="17" rx="2" fill="#F5E6C8" stroke="#ccc" stroke-width="1"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Duty 5 — National service is every hand that fixes what is broken</text>
+</svg>`,
+
+property:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyPr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#B0D4E8"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyPr)"/>
+  <rect y="232" width="900" height="58" fill="#7EC850"/>
+  <rect x="248" y="84" width="404" height="160" fill="#F5F5DC" stroke="#D4C5A9" stroke-width="3"/>
+  <polygon points="238,89 652,89 642,60 258,60" fill="#D4C5A9"/>
+  <text x="450" y="76" text-anchor="middle" font-size="10" fill="#8B7355" font-weight="bold">RAMPUR PUBLIC LIBRARY</text>
+  <rect x="398" y="163" width="104" height="82" rx="5" fill="#8B4513"/>
+  <circle cx="497" cy="203" r="5" fill="#FFD700"/>
+  <rect x="268" y="113" width="78" height="58" rx="4" fill="#D4E8F5" stroke="#B0C8D8" stroke-width="2"/>
+  <rect x="548" y="113" width="78" height="58" rx="4" fill="#D4E8F5" stroke="#B0C8D8" stroke-width="2"/>
+  <rect x="276" y="125" width="9" height="38" rx="1" fill="#E74C3C"/>
+  <rect x="287" y="121" width="9" height="42" rx="1" fill="#3498DB"/>
+  <rect x="298" y="128" width="9" height="35" rx="1" fill="#27AE60"/>
+  <rect x="309" y="123" width="9" height="40" rx="1" fill="#9B59B6"/>
+  <rect x="556" y="125" width="9" height="38" rx="1" fill="#F39C12"/>
+  <rect x="567" y="121" width="9" height="42" rx="1" fill="#E74C3C"/>
+  <rect x="578" y="128" width="9" height="35" rx="1" fill="#1ABC9C"/>
+  <g transform="translate(378,198)"><circle cx="0" cy="0" r="12" fill="#FDBCB4"/><rect x="-8" y="12" width="16" height="28" rx="5" fill="#FF69B4"/><rect x="-5" y="40" width="5" height="18" rx="2" fill="#4a2c00"/><rect x="1" y="40" width="5" height="18" rx="2" fill="#4a2c00"/><rect x="9" y="14" width="24" height="7" rx="2" fill="#E74C3C"/><rect x="9" y="22" width="24" height="7" rx="2" fill="#3498DB"/><rect x="9" y="30" width="24" height="7" rx="2" fill="#27AE60"/><animateTransform attributeName="transform" type="translate" values="378,198;380,196;378,198" dur="2.5s" repeatCount="indefinite"/></g>
+  <rect x="308" y="240" width="284" height="28" rx="5" fill="#FFD700" stroke="#cc9900" stroke-width="1.5"/>
+  <text x="450" y="258" text-anchor="middle" font-size="9" fill="#4a2c00" font-weight="bold">This library belongs to all of us — our job to protect it</text>
+  <g transform="translate(638,158)"><circle cx="0" cy="0" r="14" fill="#8D5524"/><rect x="-9" y="14" width="18" height="36" rx="5" fill="#666"/><line x1="11" y1="17" x2="28" y2="33" stroke="#999" stroke-width="4" stroke-linecap="round"/><polygon points="28,33 36,28 34,40" fill="#BBB"/><animateTransform attributeName="transform" type="translate" values="638,158;640,156;638,158" dur="3s" repeatCount="indefinite"/></g>
+  <g transform="translate(98,112)"><rect x="-6" y="58" width="12" height="98" fill="#8B4513"/><ellipse cx="0" cy="0" rx="53" ry="67" fill="#228B22"/><animateTransform attributeName="transform" type="rotate" values="0 0 125;1 0 125;0 0 125;-1 0 125;0 0 125" dur="6s" repeatCount="indefinite"/></g>
+  <ellipse cx="76" cy="75" rx="8" ry="9" fill="#FFD700" opacity="0.9"/>
+  <ellipse cx="110" cy="90" rx="7" ry="8" fill="#FF8C00" opacity="0.8"/>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Duty 7 — Public property is everyone's — everyone must protect it</text>
+</svg>`,
+
+education:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyEd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#FFFDE7"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyEd)"/>
+  <rect y="238" width="900" height="52" fill="#7EC850"/>
+  <rect x="348" y="94" width="304" height="156" fill="#FFFDE7" stroke="#FFD700" stroke-width="3"/>
+  <polygon points="338,99 652,99 646,68 352,68" fill="#FFB347"/>
+  <text x="500" y="84" text-anchor="middle" font-size="10" fill="white" font-weight="bold">GOVERNMENT SCHOOL</text>
+  <rect x="368" y="118" width="68" height="52" rx="4" fill="#D4E8F5" stroke="#87CEEB" stroke-width="2"/>
+  <rect x="456" y="118" width="68" height="52" rx="4" fill="#D4E8F5" stroke="#87CEEB" stroke-width="2"/>
+  <rect x="544" y="118" width="68" height="52" rx="4" fill="#D4E8F5" stroke="#87CEEB" stroke-width="2"/>
+  <circle cx="397" cy="138" r="7" fill="#FDBCB4"/><circle cx="420" cy="141" r="7" fill="#8D5524"/>
+  <circle cx="484" cy="138" r="7" fill="#D2A679"/><circle cx="507" cy="141" r="7" fill="#FDBCB4"/>
+  <rect x="452" y="178" width="88" height="68" rx="4" fill="#FF9933" stroke="#cc7700" stroke-width="2"/>
+  <circle cx="535" cy="212" r="4" fill="#FFD700"/>
+  <g transform="translate(328,178)"><circle cx="0" cy="0" r="14" fill="#FDBCB4"/><rect x="-9" y="14" width="18" height="40" rx="6" fill="#4169E1"/><rect x="-5" y="54" width="5" height="23" rx="3" fill="#1a1a1a"/><rect x="1" y="54" width="5" height="23" rx="3" fill="#1a1a1a"/><rect x="-24" y="16" width="17" height="23" rx="4" fill="#E74C3C" stroke="#cc0000" stroke-width="1"/><animateTransform attributeName="transform" type="translate" values="328,178;333,176;328,178" dur="2s" repeatCount="indefinite"/></g>
+  <g transform="translate(218,172)"><circle cx="0" cy="0" r="16" fill="#8D5524"/><rect x="-11" y="16" width="22" height="43" rx="6" fill="#9B59B6"/><rect x="-7" y="59" width="6" height="23" rx="3" fill="#1a1a1a"/><rect x="2" y="59" width="6" height="23" rx="3" fill="#1a1a1a"/><rect x="12" y="19" width="20" height="28" rx="3" fill="#FF9933"/><text x="13" y="30" font-size="4.5" fill="white" font-weight="bold">Art.</text><text x="13" y="38" font-size="4.5" fill="white" font-weight="bold">51A(k)</text><animateTransform attributeName="transform" type="translate" values="218,172;222,170;218,172" dur="3s" repeatCount="indefinite"/></g>
+  <text x="678" y="155" font-size="30" fill="#FFD700" opacity="0.9">⭐</text>
+  <g transform="translate(758,178)"><circle cx="0" cy="0" r="15" fill="#8D5524"/><rect x="-10" y="15" width="20" height="40" rx="6" fill="#E67E22"/><rect x="-6" y="55" width="5" height="23" rx="3" fill="#4a2c00"/><rect x="2" y="55" width="5" height="23" rx="3" fill="#4a2c00"/><rect x="-20" y="19" width="13" height="16" rx="2" fill="#D4AF37" stroke="#B8860B" stroke-width="1"/></g>
+  <rect x="738" y="220" width="78" height="15" rx="3" fill="#8B4513"/>
+  <g transform="translate(118,56)"><ellipse cx="0" cy="0" rx="16" ry="7" fill="#8B4513"/><path d="M-16,0 Q-29,-11 -25,-19" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M16,0 Q29,-8 25,-17" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="118,56;136,47;154,56;136,65;118,56" dur="7s" repeatCount="indefinite"/></g>
+  <circle cx="98" cy="242" r="7" fill="#FF69B4"/><circle cx="112" cy="239" r="7" fill="#FF1493"/>
+  <circle cx="818" cy="242" r="7" fill="#FFD700"/><circle cx="832" cy="239" r="7" fill="#FFA500"/>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#1a4a1a" font-weight="bold">Duty 11 — Education is the multiplier of every other right</text>
+</svg>`,
+
+harmony:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyHm" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#E8F4FF"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyHm)"/>
+  <rect y="228" width="900" height="62" fill="#7EC850"/>
+  <!-- School stage / auditorium -->
+  <rect x="148" y="88" width="604" height="152" fill="#FFF8F0" stroke="#D4C5A9" stroke-width="2"/>
+  <polygon points="138,92 762,92 752,62 148,62" fill="#E8DCC8"/>
+  <text x="450" y="78" text-anchor="middle" font-size="10" fill="#8B7355" font-weight="bold">ANNUAL DAY — THE FREEDOM STRUGGLE</text>
+  <!-- Stage -->
+  <rect x="298" y="178" width="304" height="62" fill="#8B4513" rx="4"/>
+  <rect x="298" y="172" width="304" height="12" fill="#A0522D" rx="2"/>
+  <!-- Costumes / performers — mixing cultures -->
+  <g transform="translate(368,162)"><circle cx="0" cy="0" r="14" fill="#8D5524"/><rect x="-9" y="14" width="18" height="38" rx="6" fill="#FF9933"/><text x="-8" y="30" font-size="7" fill="#8B4513">Tilak</text></g>
+  <g transform="translate(418,158)"><circle cx="0" cy="0" r="14" fill="#FDBCB4"/><rect x="-9" y="14" width="18" height="38" rx="6" fill="#27AE60"/><text x="-8" y="30" font-size="7" fill="white">Raju</text></g>
+  <g transform="translate(468,162)"><circle cx="0" cy="0" r="14" fill="#D2A679"/><rect x="-9" y="14" width="18" height="38" rx="6" fill="#3498DB"/></g>
+  <g transform="translate(518,158)"><circle cx="0" cy="0" r="14" fill="#C4A35A"/><rect x="-9" y="14" width="18" height="38" rx="6" fill="#9B59B6"/></g>
+  <!-- Teacher -->
+  <g transform="translate(618,158)"><circle cx="0" cy="0" r="16" fill="#8D5524"/><rect x="-10" y="16" width="20" height="42" rx="6" fill="#1a5276"/><rect x="12" y="18" width="20" height="28" rx="3" fill="#FF9933"/><text x="13" y="29" font-size="5" fill="white">51A(b)</text></g>
+  <!-- Sparrow on stage edge -->
+  <g transform="translate(450,178)"><ellipse cx="0" cy="0" rx="8" ry="5" fill="#8B6914"/><circle cx="-5" cy="-4" r="4.5" fill="#6B4F2A"/><polygon points="0,-2 4,-1 0,1" fill="#FF8C00"/><animateTransform attributeName="transform" type="translate" values="450,178;450,174;450,178" dur="2s" repeatCount="indefinite"/></g>
+  <!-- Audience (sitting) -->
+  <g transform="translate(200,188)"><circle cx="0" cy="0" r="10" fill="#FDBCB4"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#E74C3C"/></g>
+  <g transform="translate(225,192)"><circle cx="0" cy="0" r="10" fill="#8D5524"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#3498DB"/></g>
+  <g transform="translate(250,188)"><circle cx="0" cy="0" r="10" fill="#D2A679"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#27AE60"/></g>
+  <g transform="translate(660,188)"><circle cx="0" cy="0" r="10" fill="#FDBCB4"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#9B59B6"/></g>
+  <g transform="translate(685,192)"><circle cx="0" cy="0" r="10" fill="#8D5524"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#E67E22"/></g>
+  <!-- Indian flag on stage -->
+  <line x1="298" y1="120" x2="298" y2="178" stroke="#8B4513" stroke-width="3"/>
+  <rect x="298" y="120" width="50" height="17" fill="#FF9933"/>
+  <rect x="298" y="137" width="50" height="17" fill="white"/>
+  <rect x="298" y="154" width="50" height="17" fill="#138808"/>
+  <circle cx="323" cy="146" r="6" fill="none" stroke="#000080" stroke-width="1.5"/>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#1a4a1a" font-weight="bold">Duty 2 — The freedom struggle belongs to all of India</text>
+</svg>`,
+
+sovereignty:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skySov" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#FFFDE7"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skySov)"/>
+  <rect y="238" width="900" height="52" fill="#7EC850"/>
+  <!-- Wall before (with graffiti text crossed out) -->
+  <rect x="248" y="108" width="404" height="138" fill="#D4C5A9" stroke="#BBB" stroke-width="2"/>
+  <!-- India map outline (simplified) -->
+  <path d="M380,138 Q400,128 430,130 Q460,132 488,140 Q510,148 518,165 Q524,180 515,198 Q505,215 490,222 Q475,228 460,225 Q445,220 435,210 Q420,218 408,215 Q395,210 385,198 Q375,182 376,168 Q377,152 380,138 Z" fill="#FF9933" opacity="0.6" stroke="#cc6600" stroke-width="2"/>
+  <!-- Paint brushes / hands -->
+  <g transform="translate(358,175)"><circle cx="0" cy="0" r="13" fill="#FDBCB4"/><rect x="-8" y="13" width="16" height="32" rx="5" fill="#4169E1"/><line x1="12" y1="16" x2="26" y2="30" stroke="#FF9933" stroke-width="5" stroke-linecap="round"/></g>
+  <g transform="translate(522,175)"><circle cx="0" cy="0" r="13" fill="#8D5524"/><rect x="-8" y="13" width="16" height="32" rx="5" fill="#E74C3C"/><line x1="-12" y1="16" x2="-26" y2="30" stroke="#138808" stroke-width="5" stroke-linecap="round"/></g>
+  <!-- Paint bucket -->
+  <rect x="430" y="210" width="40" height="28" rx="4" fill="white" stroke="#888" stroke-width="2"/>
+  <rect x="430" y="210" width="40" height="10" rx="2" fill="#87CEEB"/>
+  <!-- State flags / labels on map -->
+  <text x="395" y="165" font-size="7" fill="#000080" font-weight="bold">J&amp;K</text>
+  <text x="460" y="195" font-size="7" fill="#000080" font-weight="bold">TN</text>
+  <!-- Crow on wire above -->
+  <line x1="200" y1="88" x2="700" y2="88" stroke="#888" stroke-width="2"/>
+  <g transform="translate(448,82)"><ellipse cx="0" cy="0" rx="12" ry="7" fill="#222"/><circle cx="-9" cy="-4" r="6" fill="#222"/><polygon points="0,-2 5,0 0,2" fill="#333"/><line x1="0" y1="7" x2="-3" y2="14" stroke="#222" stroke-width="2"/><line x1="0" y1="7" x2="3" y2="14" stroke="#222" stroke-width="2"/></g>
+  <!-- Teacher -->
+  <g transform="translate(708,170)"><circle cx="0" cy="0" r="16" fill="#D2A679"/><rect x="-10" y="16" width="20" height="42" rx="6" fill="#9B59B6"/><rect x="-26" y="18" width="18" height="26" rx="3" fill="#FF9933"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#1a4a1a" font-weight="bold">Duty 3 — Unity is chosen daily by citizens</text>
+</svg>`,
+
+vote:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyVt" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF3E0"/><stop offset="100%" stop-color="#FFE0B2"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyVt)"/>
+  <rect y="235" width="900" height="55" fill="#8B7355"/>
+  <!-- Polling booth -->
+  <rect x="298" y="88" width="304" height="158" fill="#F5F5DC" stroke="#D4C5A9" stroke-width="3"/>
+  <polygon points="288,92 602,92 596,65 294,65" fill="#D4C5A9"/>
+  <text x="450" y="80" text-anchor="middle" font-size="10" fill="#8B7355" font-weight="bold">POLLING BOOTH — ELECTION DAY</text>
+  <!-- Ballot box -->
+  <rect x="388" y="165" width="124" height="78" rx="6" fill="#1a5276" stroke="#0d3560" stroke-width="2"/>
+  <rect x="432" y="160" width="36" height="12" rx="3" fill="#0d3560"/>
+  <rect x="444" y="152" width="12" height="22" rx="2" fill="#888"/>
+  <!-- EVM / voting machine -->
+  <rect x="358" y="128" width="184" height="48" rx="6" fill="#2C3E50" stroke="#1a252f" stroke-width="2"/>
+  <circle cx="398" cy="152" r="8" fill="#27AE60"/>
+  <circle cx="450" cy="152" r="8" fill="#27AE60"/>
+  <circle cx="502" cy="152" r="8" fill="#27AE60"/>
+  <!-- Meena (old woman) voting -->
+  <g transform="translate(255,175)"><circle cx="0" cy="0" r="16" fill="#C4A35A"/><rect x="-10" y="16" width="20" height="40" rx="6" fill="#E74C3C"/><rect x="-7" y="56" width="6" height="22" rx="3" fill="#4a2c00"/><rect x="2" y="56" width="6" height="22" rx="3" fill="#4a2c00"/><line x1="14" y1="18" x2="22" y2="70" stroke="#5d3a00" stroke-width="3" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="255,175;258,173;255,175" dur="3s" repeatCount="indefinite"/></g>
+  <!-- Rohit (grandson) -->
+  <g transform="translate(588,168)"><circle cx="0" cy="0" r="14" fill="#8D5524"/><rect x="-9" y="14" width="18" height="40" rx="6" fill="#3498DB"/><rect x="-6" y="54" width="5" height="22" rx="3" fill="#1a1a1a"/><rect x="2" y="54" width="5" height="22" rx="3" fill="#1a1a1a"/></g>
+  <!-- Voter ID stamps -->
+  <rect x="168" y="148" width="58" height="38" rx="5" fill="#FF9933" stroke="#cc6600" stroke-width="1.5"/>
+  <text x="197" y="165" text-anchor="middle" font-size="7" fill="white" font-weight="bold">VOTER</text>
+  <text x="197" y="178" text-anchor="middle" font-size="7" fill="white" font-weight="bold">ID</text>
+  <!-- Peacock crossing road -->
+  <g transform="translate(710,205)"><ellipse cx="0" cy="0" rx="22" ry="10" fill="#1a6e1a"/><circle cx="-17" cy="-6" r="10" fill="#006400"/><path d="M6,0 Q22,-22 18,-30" stroke="#4169E1" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M6,0 Q26,-16 23,-26" stroke="#9B59B6" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M6,0 Q24,-24 20,-34" stroke="#27AE60" stroke-width="4" fill="none" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="710,205;714,203;718,205;714,207;710,205" dur="4s" repeatCount="indefinite"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#4a2c00" font-weight="bold">Duty 4 — Democracy needs you — every vote defends India</text>
+</svg>`,
+
+science:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skySc" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#87CEEB"/><stop offset="100%" stop-color="#E8F4FF"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skySc)"/>
+  <rect y="225" width="900" height="65" fill="#7EC850"/>
+  <!-- Panchayat meeting hall -->
+  <rect x="178" y="84" width="544" height="152" fill="#FFF8F0" stroke="#D4C5A9" stroke-width="2"/>
+  <polygon points="168,88 722,88 714,60 176,60" fill="#E8A830"/>
+  <text x="450" y="75" text-anchor="middle" font-size="10" fill="white" font-weight="bold">VILLAGE PANCHAYAT MEETING</text>
+  <!-- Arjun with science project board -->
+  <g transform="translate(420,155)"><circle cx="0" cy="0" r="14" fill="#8D5524"/><rect x="-9" y="14" width="18" height="38" rx="6" fill="#3498DB"/><rect x="-7" y="52" width="6" height="22" rx="3" fill="#1a1a1a"/><rect x="2" y="52" width="6" height="22" rx="3" fill="#1a1a1a"/><animateTransform attributeName="transform" type="translate" values="420,155;422,153;420,155" dur="3s" repeatCount="indefinite"/></g>
+  <!-- Science project board -->
+  <rect x="448" y="112" width="114" height="78" rx="4" fill="white" stroke="#3498DB" stroke-width="2"/>
+  <text x="505" y="128" text-anchor="middle" font-size="7" fill="#1a5276" font-weight="bold">SOIL EROSION DATA</text>
+  <rect x="458" y="134" width="18" height="12" rx="1" fill="#E74C3C"/>
+  <rect x="480" y="126" width="18" height="20" rx="1" fill="#F39C12"/>
+  <rect x="502" y="120" width="18" height="26" rx="1" fill="#27AE60"/>
+  <rect x="524" y="130" width="18" height="16" rx="1" fill="#3498DB"/>
+  <line x1="456" y1="146" x2="544" y2="146" stroke="#ccc" stroke-width="1"/>
+  <!-- Teacher standing (pointing to article) -->
+  <g transform="translate(622,158)"><circle cx="0" cy="0" r="15" fill="#D2A679"/><rect x="-10" y="15" width="20" height="40" rx="6" fill="#9B59B6"/><rect x="-7" y="55" width="6" height="22" rx="3" fill="#1a1a1a"/><rect x="2" y="55" width="6" height="22" rx="3" fill="#1a1a1a"/><line x1="10" y1="17" x2="26" y2="12" stroke="#D2A679" stroke-width="4" stroke-linecap="round"/><rect x="26" y="8" width="22" height="28" rx="3" fill="#FF9933"/><text x="28" y="19" font-size="5" fill="white">Art.</text><text x="28" y="27" font-size="5" fill="white">51A(f)</text></g>
+  <!-- Radha (woman, victim of superstition) far side, grateful -->
+  <g transform="translate(248,175)"><circle cx="0" cy="0" r="14" fill="#FDBCB4"/><rect x="-9" y="14" width="18" height="40" rx="6" fill="#E74C3C"/></g>
+  <!-- Elders seated -->
+  <g transform="translate(318,195)"><circle cx="0" cy="0" r="11" fill="#C4A35A"/><rect x="-7" y="11" width="14" height="28" rx="4" fill="#8B4513"/></g>
+  <g transform="translate(345,192)"><circle cx="0" cy="0" r="11" fill="#D2A679"/><rect x="-7" y="11" width="14" height="28" rx="4" fill="#555"/></g>
+  <g transform="translate(372,195)"><circle cx="0" cy="0" r="11" fill="#8D5524"/><rect x="-7" y="11" width="14" height="28" rx="4" fill="#8B4513"/></g>
+  <!-- Cracked field (outside, through window) -->
+  <rect x="178" y="192" width="78" height="44" fill="#C4A35A"/>
+  <path d="M188,202 Q200,208 215,204" stroke="#8B7355" stroke-width="2" fill="none"/>
+  <path d="M198,215 Q210,210 225,218" stroke="#8B7355" stroke-width="1.5" fill="none"/>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#1a4a1a" font-weight="bold">Duty 6 — Scientific temper protects the innocent</text>
+</svg>`,
+
+excellence:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyEx2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFD580"/><stop offset="100%" stop-color="#FFF3E0"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyEx2)"/>
+  <rect y="235" width="900" height="55" fill="#8B7355"/>
+  <!-- Pottery workshop -->
+  <rect x="178" y="88" width="404" height="158" fill="#FFF8F0" stroke="#D4C5A9" stroke-width="2"/>
+  <polygon points="168,92 582,92 574,64 176,64" fill="#cc7722"/>
+  <text x="380" y="78" text-anchor="middle" font-size="10" fill="white" font-weight="bold">KHURJA POTTERY WORKSHOP</text>
+  <!-- Pottery wheel -->
+  <ellipse cx="340" cy="198" rx="52" ry="18" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  <ellipse cx="340" cy="188" rx="52" ry="18" fill="#C4A35A" stroke="#8B4513" stroke-width="1"/>
+  <ellipse cx="340" cy="198" rx="28" ry="9" fill="#E8C8A0"/>
+  <!-- Clay vase being shaped -->
+  <ellipse cx="340" cy="170" rx="18" ry="8" fill="#D2691E"/>
+  <path d="M322,170 Q318,145 326,132 Q334,120 340,118 Q346,120 354,132 Q362,145 358,170" fill="#D2691E" stroke="#8B4513" stroke-width="1"/>
+  <!-- Blue pottery pattern on vase -->
+  <path d="M328,145 Q340,138 352,145" stroke="#4169E1" stroke-width="2" fill="none" opacity="0.8"/>
+  <circle cx="340" cy="132" r="4" fill="#4169E1" opacity="0.7"/>
+  <!-- Deepa's hands on wheel -->
+  <g transform="translate(340,188)"><ellipse cx="-20" cy="0" rx="10" ry="6" fill="#FDBCB4" transform="rotate(-20 -20 0)"/><ellipse cx="20" cy="0" rx="10" ry="6" fill="#FDBCB4" transform="rotate(20 20 0)"/></g>
+  <!-- Deepa -->
+  <g transform="translate(340,152)"><circle cx="0" cy="0" r="14" fill="#FDBCB4"/><rect x="-9" y="14" width="18" height="35" rx="6" fill="#9B59B6"/></g>
+  <!-- Father watching -->
+  <g transform="translate(508,165)"><circle cx="0" cy="0" r="16" fill="#8D5524"/><rect x="-10" y="16" width="20" height="42" rx="6" fill="#E67E22"/><rect x="-7" y="58" width="6" height="24" rx="3" fill="#4a2c00"/><rect x="2" y="58" width="6" height="24" rx="3" fill="#4a2c00"/></g>
+  <!-- Award / trophy -->
+  <polygon points="638,145 648,162 668,162" fill="#FFD700"/>
+  <rect x="648" y="162" width="12" height="24" fill="#D4AF37"/>
+  <rect x="638" y="186" width="32" height="6" rx="2" fill="#8B4513"/>
+  <circle cx="654" cy="158" r="12" fill="#FFD700" stroke="#cc9900" stroke-width="2"/>
+  <text x="654" y="162" text-anchor="middle" font-size="10" fill="#8B4513" font-weight="bold">1st</text>
+  <!-- Sparrow nest in corner -->
+  <ellipse cx="228" cy="118" rx="18" ry="10" fill="#C4A35A" stroke="#8B6914" stroke-width="1.5"/>
+  <g transform="translate(228,110)"><ellipse cx="0" cy="0" rx="7" ry="4" fill="#8B6914"/><circle cx="-4" cy="-3" r="4" fill="#6B4F2A"/><polygon points="0,-2 3,-1 0,0" fill="#FF8C00"/><animateTransform attributeName="transform" type="translate" values="228,110;228,107;228,110" dur="2s" repeatCount="indefinite"/></g>
+  <!-- Clay pots on shelf -->
+  <rect x="198" y="198" width="58" height="8" rx="2" fill="#8B4513"/>
+  <path d="M208,198 Q214,182 220,198" fill="#D2691E"/>
+  <path d="M224,198 Q230,185 236,198" fill="#C4A35A"/>
+  <path d="M240,198 Q246,178 252,198" fill="#D2691E"/>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#4a2c00" font-weight="bold">Duty 8 — Excellence is not a thing you have; it's a thing you keep doing</text>
+</svg>`,
+
+dignity:`<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+  <defs><linearGradient id="skyDg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFE8E8"/><stop offset="100%" stop-color="#FFF0F0"/></linearGradient></defs>
+  <rect width="900" height="290" fill="url(#skyDg)"/>
+  <rect y="235" width="900" height="55" fill="#7EC850"/>
+  <!-- School hall -->
+  <rect x="128" y="84" width="644" height="162" fill="white" stroke="#D4C5A9" stroke-width="2"/>
+  <polygon points="118,88 772,88 762,58 128,58" fill="#c0392b"/>
+  <text x="450" y="74" text-anchor="middle" font-size="10" fill="white" font-weight="bold">SCHOOL DEBATE — ART. 51A(e) &amp; 51A(j)</text>
+  <!-- Podium / debate stage -->
+  <rect x="348" y="165" width="204" height="78" rx="4" fill="#F5F5DC" stroke="#ccc" stroke-width="2"/>
+  <!-- Aryan at podium -->
+  <g transform="translate(450,155)"><circle cx="0" cy="0" r="15" fill="#8D5524"/><rect x="-10" y="15" width="20" height="42" rx="6" fill="#3498DB"/><rect x="-7" y="57" width="6" height="23" rx="3" fill="#1a1a1a"/><rect x="2" y="57" width="6" height="23" rx="3" fill="#1a1a1a"/><line x1="-10" y1="20" x2="-22" y2="14" stroke="#8D5524" stroke-width="4" stroke-linecap="round"/><circle cx="-22" cy="12" r="6" fill="#8D5524"/><animateTransform attributeName="transform" type="translate" values="450,155;452,153;450,155" dur="3s" repeatCount="indefinite"/></g>
+  <!-- Banner -->
+  <rect x="278" y="108" width="344" height="32" rx="4" fill="#c0392b"/>
+  <text x="450" y="126" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Is it our duty to oppose practices that demean women?</text>
+  <!-- Kiran (sister, in background, grateful) -->
+  <g transform="translate(655,175)"><circle cx="0" cy="0" r="13" fill="#FDBCB4"/><rect x="-8" y="13" width="16" height="35" rx="6" fill="#4169E1"/></g>
+  <!-- Constitution article display -->
+  <rect x="148" y="148" width="108" height="58" rx="4" fill="#FF9933" stroke="#cc6600" stroke-width="1.5"/>
+  <text x="202" y="165" text-anchor="middle" font-size="6.5" fill="white" font-weight="bold">Art. 51A(j)</text>
+  <text x="202" y="176" text-anchor="middle" font-size="5.5" fill="white">Renounce practices</text>
+  <text x="202" y="186" text-anchor="middle" font-size="5.5" fill="white">derogatory to women</text>
+  <rect x="648" y="148" width="108" height="58" rx="4" fill="#000080" stroke="#000060" stroke-width="1.5"/>
+  <text x="702" y="165" text-anchor="middle" font-size="6.5" fill="white" font-weight="bold">Art. 51A(e)</text>
+  <text x="702" y="176" text-anchor="middle" font-size="5.5" fill="white">Promote harmony</text>
+  <text x="702" y="186" text-anchor="middle" font-size="5.5" fill="white">and brotherhood</text>
+  <!-- Audience -->
+  <g transform="translate(228,195)"><circle cx="0" cy="0" r="10" fill="#FDBCB4"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#E74C3C"/></g>
+  <g transform="translate(253,192)"><circle cx="0" cy="0" r="10" fill="#8D5524"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#27AE60"/></g>
+  <g transform="translate(278,195)"><circle cx="0" cy="0" r="10" fill="#D2A679"/><rect x="-6" y="10" width="12" height="22" rx="4" fill="#9B59B6"/></g>
+  <!-- Kite above school -->
+  <g transform="translate(450,42)"><ellipse cx="0" cy="0" rx="18" ry="7" fill="#8B4513"/><path d="M-18,0 Q-30,-10 -26,-18" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M18,0 Q30,-8 26,-16" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/><animateTransform attributeName="transform" type="translate" values="450,42;465,35;480,42;465,49;450,42" dur="6s" repeatCount="indefinite"/></g>
+  <text x="450" y="280" text-anchor="middle" font-size="13" fill="#770000" font-weight="bold">Duty 10 — Dignity for women is a duty of every citizen</text>
+</svg>`
+};
+return scenes[id] || scenes['equality'];
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER GRIDS
+// ═══════════════════════════════════════════════════════
+function renderGrid(type){
+  const gid = type==='right'?'rights-grid':'duties-grid';
+  const el = document.getElementById(gid);
+  if(!el) return;
+  el.innerHTML = S.filter(s=>s.type===type).map(s=>`
+    <div class="card" onclick="openStory('${s.id}')">
+      <div class="card-art" style="background:${s.color}">
+        <span style="font-size:3rem;filter:drop-shadow(2px 2px 6px rgba(0,0,0,.28))">${s.emoji}</span>
+      </div>
+      <div class="card-body">
+        <div class="tag ${s.type}">${s.type==='right'?'⚖️ Fundamental Right':'🇮🇳 Fundamental Duty'}</div>
+        <h3>${s.title}</h3>
+        <p>${s.sub}</p>
+      </div>
+    </div>`).join('');
+}
+renderGrid('right');
+renderGrid('duty');
+
+// ═══════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+function showTab(id, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.getElementById('tab-'+id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// STORY VIEWER
+// ═══════════════════════════════════════════════════════
+let _currentStory = null;
+
+function openStory(id){
+  const s = S.find(x=>x.id===id);
+  if(!s) return;
+  _currentStory = s;
+
+  // Title
+  document.getElementById('vtitle').textContent = s.title;
+
+  // Note panel
+  document.getElementById('note-panel').innerHTML = `
+    <h3>📋 ${s.note.title}</h3>
+    <div class="note-art">${s.note.art}</div>
+    <div class="nsec"><h4>Overview</h4><p>${s.note.overview}</p></div>
+    <div class="nsec"><h4>Key Points</h4><ul>${s.note.pts.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+    <div class="nsec"><h4>Why It Matters</h4><p>${s.note.why}</p></div>`;
+
+  // Scene
+  document.getElementById('stage').innerHTML = getScene(s.scene);
+
+  // Story text
+  document.getElementById('story-text').innerHTML = `
+    <div class="tag ${s.type}">${s.type==='right'?'⚖️ Fundamental Right':'🇮🇳 Fundamental Duty'}</div>
+    <h2 class="stitle">${s.title}</h2>
+    <div class="ssub">${s.sub}</div>
+    <div class="sbreak">· · ·</div>
+    ${s.story.map((p,i)=>`<p class="sp" style="animation-delay:${0.08+i*0.18}s">${p}</p>`).join('')}
+    <div class="moral">💡 <strong>Moral:</strong> ${s.moral}</div>`;
+
+  // Quiz — build HTML, use data attributes instead of inline onclick with params
+  const qHTML = s.quiz.map((q,qi)=>`
+    <div class="qq" id="qq${qi}" data-qi="${qi}" data-ans="${q.ans}" data-ex="${encodeURIComponent(q.ex)}">
+      <p>Q${qi+1}. ${q.q}</p>
+      <div class="opts">
+        ${q.opts.map((opt,oi)=>`
+          <button class="opt" data-oi="${oi}" onclick="answerQ(this)">${opt}</button>`).join('')}
+      </div>
+      <div class="fb" id="fb${qi}"></div>
+    </div>`).join('');
+  document.getElementById('quiz-area').innerHTML = `
+    <h3>🧠 Test Your Understanding</h3>
+    ${qHTML}
+    <div class="score" id="score-box"></div>`;
+
+  // Open viewer
+  const viewer = document.getElementById('viewer');
+  viewer.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Scroll to top of scroll-area
+  const sa = viewer.querySelector('.scroll-area');
+  if(sa) sa.scrollTop = 0;
+}
+
+function answerQ(btn){
+  const qq = btn.closest('.qq');
+  if(qq.dataset.done) return; // already answered
+  qq.dataset.done = '1';
+
+  const qi     = parseInt(qq.dataset.qi);
+  const correct= parseInt(qq.dataset.ans);
+  const ex     = decodeURIComponent(qq.dataset.ex);
+  const oi     = parseInt(btn.dataset.oi);
+  const isRight= (oi===correct);
+
+  // Disable all options in this question
+  qq.querySelectorAll('.opt').forEach((b,i)=>{
+    b.disabled = true;
+    if(i===correct) b.classList.add('correct');
+    else if(i===oi)  b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById(`fb${qi}`);
+  fb.textContent = (isRight?'✅ Correct! ':'❌ Not quite. ') + ex;
+  fb.className = 'fb show ' + (isRight?'ok':'no');
+
+  // Check if all answered
+  const total = _currentStory.quiz.length;
+  const doneCount = document.querySelectorAll('#quiz-area .qq[data-done]').length;
+  if(doneCount===total){
+    const rightCount = document.querySelectorAll('#quiz-area .opt.correct').length;
+    // rightCount may double-count if correct was also wrong — no, classes are exclusive. Safe.
+    // Actually: each qq has exactly ONE .correct button marked. Count qq where selected was correct.
+    let score = 0;
+    document.querySelectorAll('#quiz-area .qq[data-done]').forEach(q=>{
+      const sel = q.querySelector('.opt.correct');
+      // Was the selected button the correct one? Check if the chosen button got .correct (not just marked correct)
+      const chosen = q.querySelector('.opt[data-oi="'+q.dataset._chosen+'"]');
+    });
+    // Simpler: count qq where .opt.correct is NOT .opt.wrong (i.e., user picked correct)
+    score = 0;
+    document.querySelectorAll('#quiz-area .qq[data-done]').forEach(q=>{
+      const correctBtn = q.querySelector('.opt.correct');
+      if(correctBtn && !correctBtn.classList.contains('wrong')) score++;
+    });
+
+    setTimeout(()=>{
+      const sb = document.getElementById('score-box');
+      const msg = score===total?'🌟 Perfect! Outstanding!':score>=Math.ceil(total/2)?'👏 Great effort! Keep learning.':'📖 Review the notes and try again!';
+      sb.innerHTML = `<span class="sbadge">${score}/${total}</span>${score} out of ${total} correct!<br><small>${msg}</small>`;
+      sb.classList.add('show');
+    },400);
+  }
+}
+
+function closeViewer(){
+  document.getElementById('viewer').classList.remove('open');
+  document.body.style.overflow = '';
+  _currentStory = null;
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeViewer(); });
+</script>
+</body>
+</html>

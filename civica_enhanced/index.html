@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicaQuest — India's Civic Learning Platform</title>
+  <meta name="description" content="India's first gamified civics platform. EVM, Parliament debates, Constitution quiz & more.">
+  <!-- React 18 via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Google Fonts: Indian Scripts + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&family=Noto+Sans+Gurmukhi:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="static/css/cq_lang.css">
+  <link rel="stylesheet" href="static/css/cq_ai_enhanced.css">
+  <style>
+    /* ======= CANVAS ======= */
+    #bgCanvas {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      z-index:0; pointer-events:none;
+    }
+
+    /* ======= HERO ======= */
+    .hero-section {
+      min-height:100vh;
+      display:flex; flex-direction:column; justify-content:center;
+      align-items:center; text-align:center;
+      padding:100px 28px 60px;
+      position:relative; z-index:1;
+    }
+    .hero-title {
+      font-family: 'Syne', var(--font-display), sans-serif;
+      font-size:clamp(2.6rem, 7vw, 5.2rem);
+      font-weight:900; letter-spacing:-0.03em; line-height:1.05;
+      margin-bottom:22px;
+    }
+    .hero-title .t1 { display:block; color:var(--text-primary); }
+    .hero-title .t2 {
+      display:block;
+      background:linear-gradient(90deg, var(--royal-light) 0%, var(--sky) 50%, var(--gold) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .hero-sub {
+      font-size:1.08rem; color:var(--text-secondary);
+      max-width:540px; margin:0 auto 36px; line-height:1.75;
+    }
+    .hero-cta { display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:center; margin-bottom:52px; }
+    .hero-stats { display:flex; gap:32px; flex-wrap:wrap; align-items:center; justify-content:center; }
+    .hero-stat-num { font-size:1.5rem; font-weight:800; display:block; line-height:1; margin-bottom:3px; }
+    .hero-stat-lbl { font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; }
+    .hero-divider  { width:1px; height:36px; background:var(--border); }
+
+    /* ======= IMPACT STRIP ======= */
+    .impact-strip {
+      background:linear-gradient(135deg, var(--surface), var(--surface2));
+      border:1px solid var(--border);
+      border-radius:var(--r-xl);
+      padding:28px 36px;
+      display:flex; align-items:center; flex-wrap:wrap;
+      position:relative; z-index:1;
+      margin:0 0 40px;
+      overflow:hidden;
+    }
+    .impact-strip::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, var(--royal-dark), var(--royal-light), transparent 80%);
+    }
+    .impact-stat {
+      flex:1; min-width:130px; text-align:center;
+      padding:0 20px; border-right:1px solid var(--border);
+    }
+    .impact-stat:last-child { border-right:none; }
+    .impact-num {
+      font-size:2rem; font-weight:900; display:block; line-height:1; margin-bottom:5px;
+      background:linear-gradient(135deg, var(--royal-light), var(--sky));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .impact-lbl { font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; }
+
+    /* ======= WELCOME STRIP ======= */
+    .welcome-strip {
+      background:linear-gradient(135deg, rgba(105, 140, 214, 0.08), rgba(180, 150, 98, 0.05));
+      border:1px solid var(--royal-border);
+      border-radius:var(--r-lg);
+      padding:20px 28px;
+      display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+      position:relative; z-index:1; margin-bottom:8px;
+    }
+    .welcome-avatar {
+      width:52px; height:52px; border-radius:50%;
+      background:linear-gradient(135deg, var(--royal), var(--royal-light));
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; font-weight:800; color:#fff;
+      border:2px solid var(--royal-border); flex-shrink:0;
+    }
+    .welcome-text h3 { font-size:1.08rem; font-weight:700; }
+    .welcome-text p  { font-size:0.84rem; color:var(--text-secondary); margin-top:2px; }
+    .welcome-badges  { display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+
+    /* ======= CONNECTED GAME PATH ======= */
+    .path-section {
+      position:relative; z-index:1;
+      margin-bottom:40px;
+    }
+    .path-row {
+      display:flex; align-items:center;
+      overflow-x:auto; gap:0; padding-bottom:4px;
+    }
+    .path-step {
+      display:flex; flex-direction:column; align-items:center;
+      gap:7px; min-width:80px; cursor:pointer;
+    }
+    .path-step:hover .path-node { transform:scale(1.15); }
+    .path-node {
+      width:44px; height:44px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem;
+      border:2px solid var(--border-bright);
+      background:var(--surface2);
+      transition:all 0.3s var(--ease-spring);
+      position:relative; z-index:1;
+    }
+    .path-node.step-done   { background:linear-gradient(135deg,var(--royal-dark),var(--royal)); border-color:var(--royal); box-shadow:0 0 16px rgba(26,86,219,0.45); }
+    .path-node.step-active { background:linear-gradient(135deg,var(--gold),var(--gold-light)); border-color:var(--gold); box-shadow:0 0 16px rgba(245,158,11,0.45); animation:cq-pulse 2s infinite; }
+    .path-label { font-size:0.65rem; color:var(--text-muted); font-weight:600; text-align:center; text-transform:uppercase; letter-spacing:0.04em; }
+    .path-label.done   { color:var(--royal-lighter); }
+    .path-label.active { color:var(--gold); }
+    .path-connector {
+      flex:1; height:2px; min-width:24px;
+      background:linear-gradient(90deg, var(--royal), var(--royal-light));
+      opacity:0.2; margin-bottom:28px;
+    }
+    .path-connector.done { opacity:0.65; }
+
+    /* ======= DASHBOARD GAMES ======= */
+    .dashboard-section { position:relative; z-index:1; padding-bottom:80px; }
+    .games-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:20px;
+    }
+    .game-card {
+      position:relative; border-radius:var(--r-lg); overflow:hidden;
+      cursor:pointer; text-decoration:none; color:inherit;
+      aspect-ratio:1.1/1; display:flex; flex-direction:column; justify-content:flex-end;
+      border:1px solid var(--border); min-height:220px;
+      transition:transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease);
+    }
+    /* Backgrounds */
+    .gc-voting    { background:linear-gradient(145deg,#84c1ec,#507da2,#5f9ccd); }
+    .gc-budget    { background:linear-gradient(145deg,#5fca68,#c8e6c9,#5dc460); }
+    .gc-quiz      { background:linear-gradient(145deg,#c177cc,#c57fd1,#c471d3); }
+    .gc-parliament{ background:linear-gradient(145deg,#d2527d,#d85396,#db5c86); }
+    .gc-classroom { background:linear-gradient(145deg,#5e6ab3,#5f6ab3,#5061c2); }
+    .gc-portfolio { background:linear-gradient(145deg,#588388,#40757c,#5ac3d0); }
+
+    .game-card::before { /* noise texture */
+      content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+      background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+    .game-card::after { /* glow on hover */
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(circle at 50% 110%, rgba(26,86,219,0.18), transparent 55%);
+      opacity:0; transition:opacity 0.35s var(--ease); pointer-events:none; z-index:0;
+    }
+    .game-card:hover::after { opacity:1; }
+    .game-card:hover {
+      transform:translateY(-9px) scale(1.01);
+      border-color:rgba(26,86,219,0.3);
+      box-shadow:0 20px 60px rgba(0,0,0,0.6), var(--shadow-royal);
+    }
+    .game-card.locked { cursor:default; filter:grayscale(0.25); }
+    .game-card.locked:hover { transform:none; box-shadow:none; }
+
+    /* Card accent line top */
+    .gc-accent { position:absolute; top:0; left:0; right:0; height:3px; z-index:2; }
+    .gc-voting    .gc-accent { background:linear-gradient(90deg,var(--royal),var(--royal-light)); }
+    .gc-budget    .gc-accent { background:linear-gradient(90deg,#059669,var(--emerald)); }
+    .gc-quiz      .gc-accent { background:linear-gradient(90deg,var(--violet),#a78bfa); }
+    .gc-parliament .gc-accent{ background:linear-gradient(90deg,var(--gold),var(--gold-light)); }
+    .gc-classroom .gc-accent  { background:linear-gradient(90deg,var(--teal),#2dd4bf); }
+    .gc-portfolio .gc-accent  { background:linear-gradient(90deg,var(--amber),#fca5a5); }
+
+    /* Card icon */
+    .gc-icon {
+      position:absolute; top:22px; left:22px;
+      width:50px; height:50px; border-radius:var(--r-sm);
+      display:flex; align-items:center; justify-content:center;
+      font-size:3rem; z-index:2;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.12);
+      backdrop-filter:blur(12px);
+      transition:transform 0.3s var(--ease-spring);
+    }
+    .game-card:hover .gc-icon { transform:scale(1.12) rotate(-4deg); }
+
+    /* Lock overlay */
+    .gc-lock {
+      position:absolute; inset:0; z-index:5;
+      background:rgba(0,0,0,0.5); backdrop-filter:blur(3px);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity 0.25s;
+    }
+    .game-card.locked .gc-lock { opacity:1; }
+    .gc-lock-circle {
+      width:50px; height:50px; border-radius:50%;
+      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; backdrop-filter:blur(12px);
+    }
+
+    /* Card content */
+    .gc-content {
+      position:relative; z-index:2;
+      padding:18px 20px 20px;
+      background:linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%);
+    }
+    .gc-title { font-size:1rem; font-weight:700; color:#fff; margin-bottom:5px; line-height:1.2; }
+    .gc-desc  { font-size:0.76rem; color:rgba(255,255,255,0.6); line-height:1.4; margin-bottom:12px; }
+    .gc-meta  { display:flex; align-items:center; gap:7px; }
+    .gc-tag {
+      padding:3px 9px; border-radius:var(--r-full);
+      font-size:0.66rem; font-weight:700;
+      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+      color:rgba(255,255,255,0.85); text-transform:uppercase; letter-spacing:0.04em;
+    }
+    .gc-arrow {
+      margin-left:auto; width:26px; height:26px; border-radius:50%;
+      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+      display:flex; align-items:center; justify-content:center; font-size:0.8rem;
+      transition:all 0.25s var(--ease-spring);
+    }
+    .game-card:hover .gc-arrow { background:rgba(26,86,219,0.4); border-color:rgba(26,86,219,0.5); transform:translateX(3px); }
+
+    /* Featured (wider) */
+    .gc-featured { grid-column:span 2; aspect-ratio:2.2/1; }
+    .gc-featured .gc-title { font-size:1.35rem; }
+    .gc-featured .gc-desc  { font-size:0.88rem; max-width:340px; }
+    .gc-featured .gc-content { padding:24px 28px; }
+
+    /* ======= RESPONSIVE ======= */
+    @media(max-width:900px) {
+      .games-grid { grid-template-columns:repeat(2,1fr); }
+      .gc-featured { grid-column:span 2; }
+      .impact-stat { min-width:110px; padding:8px 12px; }
+    }
+    @media(max-width:600px) {
+      .games-grid { grid-template-columns:1fr; }
+      .gc-featured { grid-column:span 1; aspect-ratio:1.1/1; }
+      .hero-section { padding-top:80px; }
+      .impact-strip { padding:22px 18px; }
+      .hero-stats { gap:20px; }
+    }
+  </style>
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#F5F3FF !important;background-color:#F5F3FF !important;}</style>
+</head>
+<body>
+
+<!-- Layers -->
+<canvas id="bgCanvas"></canvas>
+<div class="cq-grid"></div>
+<div class="cq-ambient"></div>
+
+<!-- Loading -->
+<div id="cqLoading" class="cq-loading">
+  <div class="cq-ring"></div>
+  <div class="cq-loading-brand">Civica<span>Quest</span></div>
+  <div class="cq-loading-sub"><span data-i18n="ui.loading">India's Civic Learning Platform</span></div>
+</div>
+
+<!-- Auth Modal -->
+<div id="authModal" class="cq-overlay">
+  <div class="cq-modal">
+    <span style="font-size:2.8rem;display:block;margin-bottom:14px;">🏛️</span>
+    <h2>Join CivicaQuest</h2>
+    <p>Create a free account or log in to unlock all 7 interactive civic modules and track your XP.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
+      <a href="auth.html" class="cq-btn cq-btn-primary cq-btn-lg">Login / Sign Up</a>
+      <button onclick="enableDemoMode()" class="cq-btn cq-btn-ghost cq-btn-lg">🎮 Try Demo</button>
+    </div>
+    <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0;">Demo mode lets you explore without an account</p>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="cq-nav" id="cqNav">
+  <div class="cq-nav-underline"></div>
+  <a href="index.html" class="cq-brand">
+    <div class="cq-brand-icon">🏛️</div>
+    Civica<span>Quest</span>
+  </a>
+  <div class="cq-nav-links">
+    <a href="quiz-game.html" class="cq-nav-link" data-i18n="nav.quiz">📜 Constitution</a>
+    <a href="voting-simulator.html" class="cq-nav-link" data-i18n="nav.elections">🗳️ Elections</a>
+    <a href="parliament-simulator.html" class="cq-nav-link" data-i18n="nav.parliament">🏛️ Parliament</a>
+    <a href="classroom.html" class="cq-nav-link" data-i18n="nav.classroom">🤖 Classroom</a>
+    <a href="student-portfolio.html" class="cq-nav-link" data-i18n="nav.portfolio">🎓 Portfolio</a>
+  </div>
+  <div class="cq-nav-right">
+    <!-- Logged in -->
+    <div id="navUserBlock" style="display:none;align-items:center;gap:10px;">
+      <div class="cq-avatar" id="navAvatar">?</div>
+      <span style="color:var(--text-secondary);font-size:0.84rem;" id="navName"></span>
+      <div class="cq-xp-chip" id="navXp">⚡ 0 XP</div>
+      <button class="cq-logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+    <!-- Logged out -->
+    <div id="navLoginBlock" style="display:none;">
+      <a href="auth.html" class="cq-btn cq-btn-primary cq-btn-sm">Login / Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN (must NOT have overflow:hidden so scroll works) -->
+<main style="position:relative;z-index:1;min-height:100vh;">
+
+  <!-- HERO (shown when logged out) -->
+  <div class="hero-section" id="heroSection" style="display:none;">
+    <!-- Animated orbs -->
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="cq-eyebrow anim-up">
+      <span class="pulse"></span>
+      <span>🇮🇳</span>
+      <span style="background:rgba(16,185,129,0.2);color:#34d399;border:1px solid rgba(16,185,129,0.3);border-radius:99px;padding:1px 8px;font-size:0.65rem;font-weight:700;margin-left:4px;">v5 NEW</span>
+    </div>
+    <h1 class="hero-title anim-up d1">
+      <span class="t1" data-i18n="hero.title1">Learn Democracy.</span>
+      <span class="t2" data-i18n="hero.title2">Play. Debate. Lead.</span>
+    </h1>
+    
+    <div class="hero-langs anim-up" style="animation-delay:0.35s;">
+      <span>हिन्दी</span><span>தமிழ்</span><span>తెలుగు</span><span>বাংলা</span><span>मराठी</span><span>ગુજ</span><span>+17 more 🌐</span>
+    </div>
+    <div class="hero-cta anim-up d3">
+      <a href="auth.html" class="cq-btn cq-btn-primary cq-btn-lg">Get Started Free 🚀</a>
+      <button onclick="enableDemoMode()" class="cq-btn cq-btn-ghost cq-btn-lg">Try Demo First</button>
+    </div>
+    <div class="hero-stats anim-up d4">
+      <div>
+        <span class="hero-stat-num" style="color:var(--royal-light);">7</span>
+        <span class="hero-stat-lbl">Modules</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div>
+        <span class="hero-stat-num" style="color:var(--sky);">500+</span>
+        <span class="hero-stat-lbl">Quiz Questions</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div>
+        <span class="hero-stat-num" style="color:var(--gold);">22</span>
+        <span class="hero-stat-lbl">Languages</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div>
+        <span class="hero-stat-num" style="color:var(--emerald);">Free</span>
+        <span class="hero-stat-lbl">Forever</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cq-container" style="padding-top:32px;padding-bottom:80px;">
+
+    <!-- Demo Banner -->
+    <div id="demoBanner" class="cq-demo-banner" style="display:none;margin-bottom:20px;">
+      🎮 <div><strong>Demo Mode</strong> — Exploring as guest. <a href="auth.html">Sign up free</a> to save progress.</div>
+    </div>
+
+    <!-- Welcome Strip (logged in) -->
+    <div id="welcomeStrip" class="welcome-strip" style="display:none;margin-bottom:28px;">
+      <div class="welcome-avatar" id="welcomeAvatar">?</div>
+      <div class="welcome-text">
+        <h3>Welcome back, <span id="welcomeName">Learner</span>! 👋</h3>
+        <p>Continue your civic journey. Keep earning XP!</p>
+      </div>
+      <div class="welcome-badges">
+        <span class="cq-badge badge-royal" id="welcomeXp">⚡ 0 XP</span>
+        <span class="cq-badge badge-gold" id="welcomeLevel">🏅 Level 1</span>
+      </div>
+    </div>
+
+    
+
+    <!-- Connected Game Path -->
+    <div class="path-section">
+      <div class="cq-section-title" style="margin-bottom:18px;" data-i18n="dash.journey">Your Civic Journey</div>
+      <div class="cq-card" style="padding:22px 28px;">
+        <div class="path-row" id="pathRow">
+          <!-- JS rendered -->
+        </div>
+        <div style="margin-top:14px;font-size:0.78rem;color:var(--text-muted);">
+          Complete each module in order to unlock the next. Your progress is saved to your account. 🔓
+        </div>
+      </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div class="dashboard-section">
+      <div class="flex-between" style="margin-bottom:24px;">
+        <div class="cq-section-title" style="margin-bottom:0;flex:1;" data-i18n="dash.modules">Learning Modules</div>
+        <span class="cq-badge badge-royal">7 Experiences</span>
+      </div>
+
+      <div class="games-grid" id="gamesGrid">
+
+        <!-- Featured: Parliament -->
+        <a href="parliament-simulator.html" class="game-card gc-parliament gc-featured anim-up d1 locked" data-feature="parliament" id="card-parliament">
+          <div class="gc-accent"></div>
+          <div class="gc-icon" style="top:26px;left:26px;width:56px;height:56px;font-size:1.7rem;">🏛️</div>
+          <div class="gc-lock"><div class="gc-lock-circle">🔒</div></div>
+          <div class="gc-content">
+            <div class="gc-title" data-i18n="card.parliament.title">Parliament Simulator</div>
+            <div class="gc-desc">Experience bicameral law-making with live voice debates. Become a parliamentarian.</div>
+            <div class="gc-meta">
+              <span class="gc-tag">🎤 Voice Debates</span>
+              <span class="gc-tag">⭐ Showstopper</span>
+              <div class="gc-arrow">→</div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Voting -->
+        <a href="voting-simulator.html" class="game-card gc-voting anim-up d2 locked" data-feature="voting" id="card-voting">
+          <div class="gc-accent"></div>
+          <div class="gc-icon">🗳️</div>
+          <div class="gc-lock"><div class="gc-lock-circle">🔒</div></div>
+          <div class="gc-content">
+            <div class="gc-title" data-i18n="card.voting.title">Voting Simulator</div>
+            <div class="gc-desc">EVM & VVPAT voting experience</div>
+            <div class="gc-meta">
+              <span class="gc-tag">EVM</span>
+              <span class="gc-tag">VVPAT</span>
+              <div class="gc-arrow">→</div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Budget -->
+        <a href="budget-game.html" class="game-card gc-budget anim-up d3 locked" data-feature="budget" id="card-budget">
+          <div class="gc-accent"></div>
+          <div class="gc-icon">💰</div>
+          <div class="gc-lock"><div class="gc-lock-circle">🔒</div></div>
+          <div class="gc-content">
+            <div class="gc-title">Taxes</div>
+            <div class="gc-desc">Manage your finances </div>
+            <div class="gc-meta">
+              <span class="gc-tag">Strategy</span>
+              <div class="gc-arrow">→</div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Constitution Quiz -->
+        <a href="quiz-game.html" class="game-card gc-quiz anim-up d4 locked" data-feature="quiz" id="card-quiz">
+          <div class="gc-accent"></div>
+          <div class="gc-icon">📜</div>
+          <div class="gc-lock"><div class="gc-lock-circle">🔒</div></div>
+          <div class="gc-content">
+            <div class="gc-title" data-i18n="card.quiz.title">Constitution </div>
+            <div class="gc-desc">Test your constitutional knowledge</div>
+            <div class="gc-meta">
+              <span class="gc-tag">500+ Qs</span>
+              <div class="gc-arrow">→</div>
+            </div>
+          </div>
+        </a>
+
+       
+        <!-- AI Classroom -->
+        <a href="classroom.html" class="game-card gc-classroom anim-up d6 locked" data-feature="classroom" id="card-classroom">
+          <div class="gc-accent"></div>
+          <div class="gc-icon">🤖</div>
+          <div class="gc-lock"><div class="gc-lock-circle">🔒</div></div>
+          <div class="gc-content">
+            <div class="gc-title">AI Classroom</div>
+            <div class="gc-desc">AI Teacher, tasks & performance analytics</div>
+            <div class="gc-meta">
+              <span class="gc-tag">🤖 AI Powered</span>
+              <div class="gc-arrow">→</div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Portfolio -->
+        <a href="student-portfolio.html" class="game-card gc-portfolio anim-up d6 locked" data-feature="portfolio" id="card-portfolio">
+          <div class="gc-accent"></div>
+          <div class="gc-icon">🎓</div>
+          <div class="gc-lock"><div class="gc-lock-circle">🔒</div></div>
+          <div class="gc-content">
+            <div class="gc-title">My Portfolio</div>
+            <div class="gc-desc">Achievements, XP & civic growth stats</div>
+            <div class="gc-meta">
+              <span class="gc-tag">Progress</span>
+              <div class="gc-arrow">→</div>
+            </div>
+          </div>
+        </a>
+
+      </div><!-- /games-grid -->
+    </div>
+
+  </div><!-- /container -->
+</main>
+
+<!-- TOAST -->
+<div id="cq-toast-global"></div>
+
+<script src="static/js/cq_ai_enhanced.js"></script>
+<script src="static/js/cq_lang.js"></script>
+
+<script type="module">
+import { auth, db } from './firebase.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+/* ===== PARTICLE CANVAS ===== */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+function resizeCanvas() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const COLORS = ['rgba(26,86,219,','rgba(59,130,246,','rgba(56,189,248,','rgba(245,158,11,'];
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 2.2 + 0.4,
+    vx: (Math.random() - 0.5) * 0.28,
+    vy: (Math.random() - 0.5) * 0.28,
+    c: COLORS[Math.floor(Math.random() * COLORS.length)],
+    a: Math.random() * 0.35 + 0.05
+  });
+}
+(function anim() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1;
+    if (p.y < 0 || p.y > H) p.vy *= -1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.c + p.a + ')';
+    ctx.fill();
+  });
+  requestAnimationFrame(anim);
+})();
+
+/* ===== CONNECTED PATH ===== */
+const PATH_STEPS = [
+  { id:'quiz',       icon:'📜', label:'Constitution' },
+  { id:'voting',     icon:'🗳️', label:'Voting' },
+  { id:'budget',     icon:'💰', label:'Tax' },
+  { id:'parliament', icon:'🏛️', label:'Parliament' },
+  { id:'classroom',  icon:'🤖', label:'AI Class' },
+  { id:'portfolio',  icon:'🎓', label:'Portfolio' }
+];
+
+function renderPath(completedSet) {
+  const row = document.getElementById('pathRow');
+  row.innerHTML = '';
+  PATH_STEPS.forEach((step, i) => {
+    const isDone = completedSet.has(step.id);
+    const isActive = !isDone && (i === 0 || completedSet.has(PATH_STEPS[i-1]?.id));
+    const stepEl = document.createElement('div');
+    stepEl.className = 'path-step';
+    stepEl.innerHTML = `
+      <div class="path-node ${isDone?'step-done':isActive?'step-active':''}">${step.icon}</div>
+      <div class="path-label ${isDone?'done':isActive?'active':''}">${step.label}</div>
+    `;
+    stepEl.onclick = () => {
+      const url = { civics:'civics.html', quiz:'quiz-game.html', voting:'voting-simulator.html', budget:'budget-game.html', parliament:'parliament-simulator.html', classroom:'classroom.html', portfolio:'student-portfolio.html' }[step.id];
+      if (url) window.location.href = url;
+    };
+    row.appendChild(stepEl);
+    if (i < PATH_STEPS.length - 1) {
+      const line = document.createElement('div');
+      line.className = 'path-connector' + (isDone ? ' done' : '');
+      row.appendChild(line);
+    }
+  });
+}
+
+/* ===== DEMO MODE ===== */
+let demoMode = false;
+window.enableDemoMode = function() {
+  demoMode = true;
+  document.getElementById('authModal').classList.remove('open');
+  document.getElementById('demoBanner').style.display = 'flex';
+  document.getElementById('heroSection').style.display = 'none';
+  document.getElementById('navLoginBlock').style.display = 'none';
+  unlockAll();
+  renderPath(new Set());
+  showToast('🎮 Demo Mode Active — Explore freely!');
+};
+
+/* ===== AUTH STATE ===== */
+onAuthStateChanged(auth, async (user) => {
+  await new Promise(r => setTimeout(r, 900));
+  const loader = document.getElementById('cqLoading');
+
+  if (user) {
+    let userData = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        userData = snap.data();
+        await updateDoc(doc(db, 'users', user.uid), { lastLogin: serverTimestamp() });
+      } else {
+        userData = {
+          uid: user.uid,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          createdAt: serverTimestamp(), lastLogin: serverTimestamp(),
+          scores: { budget:0, quiz:0, voting:0, parliament:0, total:0 },
+          xp: 0, level: 1, badges: [], gamesPlayed: 0,
+          completedModules: []
+        };
+        await setDoc(doc(db, 'users', user.uid), userData);
+      }
+    } catch(e) {
+      console.error(e);
+    }
+
+    const name  = userData?.name || user.displayName || user.email.split('@')[0];
+    const xp    = userData?.xp   || 0;
+    const level = userData?.level || 1;
+    const init  = name.charAt(0).toUpperCase();
+    const completedModules = new Set(userData?.completedModules || []);
+
+    // Navbar
+    document.getElementById('navAvatar').textContent = init;
+    document.getElementById('navName').textContent   = name;
+    document.getElementById('navXp').textContent     = `⚡ ${xp} XP`;
+    document.getElementById('navUserBlock').style.display = 'flex';
+    document.getElementById('navLoginBlock').style.display = 'none';
+
+    // Welcome strip
+    document.getElementById('welcomeAvatar').textContent = init;
+    document.getElementById('welcomeName').textContent   = name;
+    document.getElementById('welcomeXp').textContent     = `⚡ ${xp} XP`;
+    document.getElementById('welcomeLevel').textContent  = `🏅 Level ${level}`;
+    document.getElementById('welcomeStrip').style.display = 'flex';
+    document.getElementById('heroSection').style.display  = 'none';
+
+    unlockAll();
+    renderPath(completedModules);
+
+  } else {
+    // Not logged in
+    document.getElementById('heroSection').style.display = 'flex';
+    document.getElementById('welcomeStrip').style.display = 'none';
+    document.getElementById('navLoginBlock').style.display = 'block';
+    document.getElementById('navUserBlock').style.display  = 'none';
+    lockAll();
+    renderPath(new Set());
+    setTimeout(() => {
+      document.getElementById('authModal').classList.add('open');
+    }, 1300);
+  }
+
+  loader.classList.add('out');
+  setTimeout(() => loader.style.display = 'none', 600);
+});
+
+function unlockAll() {
+  document.querySelectorAll('.game-card').forEach(card => {
+    card.classList.remove('locked');
+  });
+}
+function lockAll() {
+  document.querySelectorAll('.game-card').forEach(card => {
+    card.classList.add('locked');
+    card.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('authModal').classList.add('open');
+    }, { once: false });
+  });
+}
+
+// Close modal on backdrop click
+document.getElementById('authModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+window.doLogout = async function() {
+  if (!confirm('Log out of CivicaQuest?')) return;
+  try { await auth.signOut(); window.location.reload(); } catch(e) {}
+};
+
+/* ===== TOAST ===== */
+window.showToast = function(msg) {
+  const t = document.getElementById('cq-toast-global');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+};
+</script>
+<script src="static/js/cq_lang.js"></script>
+</body>
+</html>

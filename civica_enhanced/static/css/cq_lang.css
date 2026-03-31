@@ -1,0 +1,311 @@
+/* ================================================================
+   CivicaQuest Language Picker — Indian Languages Support
+================================================================ */
+
+/* Apply lang font when set */
+:root {
+  --lang-font: inherit;
+}
+
+/* When a non-Latin script font is active, use it as fallback */
+body {
+  font-family: var(--font, 'Plus Jakarta Sans', sans-serif), var(--lang-font, sans-serif);
+}
+
+/* RTL support */
+[dir="rtl"] .cq-nav { flex-direction: row-reverse; }
+[dir="rtl"] .cq-nav-links { margin-left: 0; margin-right: 14px; }
+[dir="rtl"] .cq-nav-right { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .cq-back { flex-direction: row-reverse; }
+[dir="rtl"] .cq-section-title::before { order: 3; }
+[dir="rtl"] .cq-section-title::after { display: none; }
+[dir="rtl"] body { letter-spacing: 0; }
+
+/* ================================================================
+   LANGUAGE PICKER BUTTON
+================================================================ */
+.cq-lang-picker {
+  position: relative;
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+
+.cq-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: rgba(26, 86, 219, 0.1);
+  border: 1px solid rgba(26, 86, 219, 0.3);
+  border-radius: 20px;
+  color: #8899bb;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.cq-lang-btn:hover {
+  background: rgba(26, 86, 219, 0.22);
+  color: #60a5fa;
+  border-color: rgba(26, 86, 219, 0.5);
+}
+
+.cq-lang-globe {
+  font-size: 0.85rem;
+}
+
+.cq-lang-caret {
+  font-size: 0.6rem;
+  opacity: 0.6;
+  transition: transform 0.2s;
+}
+
+.cq-lang-dropdown.open ~ .cq-lang-btn .cq-lang-caret,
+.cq-lang-picker:has(.open) .cq-lang-caret {
+  transform: rotate(180deg);
+}
+
+/* ================================================================
+   DROPDOWN
+================================================================ */
+.cq-lang-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #0d1630;
+  border: 1px solid rgba(26, 86, 219, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
+  z-index: 99999;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.97);
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.cq-lang-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+.cq-lang-search-wrap {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cq-lang-search {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(26, 86, 219, 0.2);
+  border-radius: 10px;
+  color: #e8eeff;
+  font-size: 0.756rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.cq-lang-search:focus {
+  border-color: rgba(26, 86, 219, 0.6);
+}
+
+.cq-lang-search::placeholder {
+  color: #3d5075;
+}
+
+.cq-lang-ai-note {
+  padding: 7px 14px;
+  font-size: 0.63rem;
+  color: #3b82f6;
+  background: rgba(26, 86, 219, 0.08);
+  border-bottom: 1px solid rgba(26, 86, 219, 0.12);
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+/* ================================================================
+   LANGUAGE GRID
+================================================================ */
+.cq-lang-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.cq-lang-grid::-webkit-scrollbar { width: 4px; }
+.cq-lang-grid::-webkit-scrollbar-track { background: transparent; }
+.cq-lang-grid::-webkit-scrollbar-thumb { background: rgba(26, 86, 219, 0.3); border-radius: 2px; }
+
+.cq-lang-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.cq-lang-option:hover {
+  background: rgba(26, 86, 219, 0.14);
+  border-color: rgba(26, 86, 219, 0.25);
+}
+
+.cq-lang-option.active {
+  background: rgba(26, 86, 219, 0.22);
+  border-color: rgba(26, 86, 219, 0.5);
+}
+
+.cq-lang-native {
+  font-size: 0.855rem;
+  font-weight: 700;
+  color: #e8eeff;
+  line-height: 1.2;
+  font-family: 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Telugu', 'Noto Sans Tamil',
+               'Noto Sans Gujarati', 'Noto Sans Kannada', 'Noto Sans Malayalam',
+               'Noto Sans Gurmukhi', 'Noto Nastaliq Urdu', inherit;
+}
+
+.cq-lang-en {
+  font-size: 0.648rem;
+  color: #8899bb;
+  margin-top: 1px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.cq-lang-option.active .cq-lang-native {
+  color: #60a5fa;
+}
+
+.cq-lang-option.active .cq-lang-en {
+  color: #3b82f6;
+}
+
+/* ================================================================
+   TRANSLATING INDICATOR
+================================================================ */
+#cq-translating {
+  animation: cq-fadeIn 0.3s ease both;
+}
+
+/* ================================================================
+   FONT OVERRIDE FOR SELECTED LANGUAGE
+================================================================ */
+:root[lang="hi"] body,
+:root[lang="mr"] body,
+:root[lang="ne"] body,
+:root[lang="mai"] body,
+:root[lang="kon"] body,
+:root[lang="sa"] body,
+:root[lang="doi"] body,
+:root[lang="bo"] body,
+:root[lang="ks"] body {
+  font-family: 'Noto Sans Devanagari', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="bn"] body,
+:root[lang="as"] body,
+:root[lang="mni"] body {
+  font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="te"] body {
+  font-family: 'Noto Sans Telugu', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="ta"] body {
+  font-family: 'Noto Sans Tamil', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="gu"] body {
+  font-family: 'Noto Sans Gujarati', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="kn"] body {
+  font-family: 'Noto Sans Kannada', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="ml"] body {
+  font-family: 'Noto Sans Malayalam', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="pa"] body {
+  font-family: 'Noto Sans Gurmukhi', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="ur"] body,
+:root[lang="sd"] body {
+  font-family: 'Noto Nastaliq Urdu', 'Plus Jakarta Sans', sans-serif;
+}
+
+:root[lang="or"] body {
+  font-family: 'Noto Sans Oriya', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ================================================================
+   RTL ADJUSTMENTS
+================================================================ */
+[dir="rtl"] .cq-lang-dropdown {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .cq-lang-option {
+  text-align: right;
+  align-items: flex-end;
+}
+
+[dir="rtl"] .cq-lang-ai-note {
+  text-align: right;
+}
+
+/* ================================================================
+   MOBILE RESPONSIVE
+================================================================ */
+@media (max-width: 640px) {
+  .cq-lang-dropdown {
+    width: 280px;
+    right: -10px;
+  }
+
+  .cq-lang-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cq-lang-btn span.cq-lang-current {
+    display: none;
+  }
+}
+
+/* ================================================================
+   LANGUAGE PICKER IN LIGHT-THEME PAGES (classroom.html etc.)
+================================================================ */
+.top-nav .cq-lang-picker .cq-lang-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+}
+
+.top-nav .cq-lang-picker .cq-lang-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+html, body { background: #F5F3FF !important; }

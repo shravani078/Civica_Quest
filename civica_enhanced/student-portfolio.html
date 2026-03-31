@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio — CivicaQuest</title>
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="static/css/cq_lang.css">
+  <style>
+    /* Hero profile */
+    .pf-hero {
+      background:linear-gradient(135deg, var(--bg3) 0%, #0c1535 50%, #0a1240 100%);
+      border-bottom:1px solid var(--border);
+      padding:48px 28px 36px; text-align:center; position:relative; overflow:hidden;
+    }
+    .pf-hero::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--royal-dark), var(--royal-light), var(--gold)); }
+    .pf-hero::after  { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% -20%, rgba(26,86,219,0.18), transparent 60%); pointer-events:none; }
+    .pf-avatar {
+      width:100px; height:100px; border-radius:50%;
+      background:linear-gradient(135deg, var(--royal), var(--royal-light));
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.4rem; font-weight:800; color:#fff;
+      margin:0 auto 16px; border:4px solid rgba(26,86,219,0.4);
+      box-shadow:0 0 32px rgba(26,86,219,0.4); position:relative; z-index:1;
+    }
+    .pf-hero h1 { font-family:var(--font-display); font-size:2rem; font-weight:800; margin-bottom:6px; position:relative; z-index:1; }
+    .pf-hero p  { color:var(--text-secondary); font-size:0.9rem; margin-bottom:20px; position:relative; z-index:1; }
+    .pf-badges-row { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:22px; position:relative; z-index:1; }
+    .pf-stats-row  { display:flex; justify-content:center; gap:36px; flex-wrap:wrap; position:relative; z-index:1; }
+    .pf-stat-val   { font-size:1.8rem; font-weight:800; color:var(--royal-light); display:block; line-height:1; margin-bottom:3px; }
+    .pf-stat-lbl   { font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.07em; }
+
+    /* Skills bar */
+    .skill-row { margin-bottom:14px; }
+    .skill-top { display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.84rem; }
+    .skill-name { font-weight:500; }
+    .skill-pct  { font-weight:700; }
+
+    /* Achievements */
+    .achievement-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .achievement {
+      background:var(--surface2); border-radius:var(--r-md); padding:16px; text-align:center;
+      border:1px solid var(--border); transition:all 0.2s;
+    }
+    .achievement.earned { border-color:var(--royal-border); background:var(--royal-subtle); box-shadow:var(--shadow-royal); }
+    .achievement.locked { opacity:0.35; }
+    .ach-icon { font-size:2rem; display:block; margin-bottom:7px; }
+    .ach-name { font-size:0.78rem; font-weight:700; }
+    .ach-desc { font-size:0.68rem; color:var(--text-muted); margin-top:2px; }
+
+    /* Timeline */
+    .tl-item { display:flex; gap:13px; padding:13px 0; border-bottom:1px solid var(--border); }
+    .tl-item:last-child { border-bottom:none; }
+    .tl-icon { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem; background:var(--surface2); border:1px solid var(--border); }
+    .tl-title { font-weight:500; font-size:0.88rem; }
+    .tl-date  { font-size:0.74rem; color:var(--text-muted); margin-top:2px; }
+
+    /* AI insight */
+    .ai-insight {
+      background:linear-gradient(135deg, var(--surface), #0d1840);
+      border:1px solid var(--royal-border);
+      border-radius:var(--r-lg); padding:20px;
+    }
+    .ai-insight-lbl { font-size:0.72rem; color:var(--royal-lighter); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; }
+    .ai-insight-text { font-size:0.88rem; line-height:1.65; color:var(--text-secondary); }
+
+    /* Dimension bars */
+    .dim-row { display:flex; align-items:center; gap:13px; padding:11px 0; border-bottom:1px solid var(--border); }
+    .dim-row:last-child { border-bottom:none; }
+    .dim-name { width:110px; font-size:0.84rem; font-weight:500; flex-shrink:0; }
+    .dim-bar  { flex:1; height:10px; background:var(--surface3); border-radius:var(--r-full); overflow:hidden; }
+    .dim-fill { height:100%; border-radius:var(--r-full); }
+    .dim-val  { width:40px; text-align:right; font-size:0.84rem; font-weight:700; }
+
+    .next-steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .next-card {
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:var(--r-lg); padding:20px; text-decoration:none; color:inherit;
+      transition:all 0.25s var(--ease); cursor:pointer;
+    }
+    .next-card:hover { border-color:var(--royal-border); transform:translateY(-3px); box-shadow:var(--shadow-royal); }
+
+    @media(max-width:900px){ .achievement-grid{grid-template-columns:repeat(2,1fr);} .next-steps-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px){ .achievement-grid,.next-steps-grid{grid-template-columns:1fr;} .pf-stats-row{gap:22px;} }
+  </style>
+  <!-- React 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <link rel="stylesheet" href="static/css/cq_ai_enhanced.css">
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#F5F3FF !important;background-color:#F5F3FF !important;}</style>
+</head>
+<body>
+<div class="cq-grid"></div>
+<div class="cq-ambient"></div>
+
+<nav class="cq-nav">
+  <div class="cq-nav-underline"></div>
+  <a href="index.html" class="cq-brand"><div class="cq-brand-icon">🏛️</div>Civica<span>Quest</span></a>
+  <div class="cq-nav-links">
+    <a href="index.html" class="cq-nav-link">🏠 Dashboard</a>
+    <a href="civics.html" class="cq-nav-link">📚 <span data-i18n="nav.civics.label">Civics</span></a>
+    <a href="quiz-game.html" class="cq-nav-link">📜 Quiz</a>
+    <a href="parliament-simulator.html" class="cq-nav-link">🏛️ Parliament</a>
+    <a href="classroom.html" class="cq-nav-link">🤖 Classroom</a>
+  </div>
+  <div class="cq-nav-right">
+    <div id="navUserBlock" style="display:none;align-items:center;gap:10px;">
+      <div class="cq-avatar" id="navAvatar">?</div>
+      <div class="cq-xp-chip" id="navXp">⚡ 0 XP</div>
+    </div>
+    <a href="index.html" class="cq-back">← Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="pf-hero" id="pfHero">
+  <div class="pf-avatar" id="pfAvatar">?</div>
+  <h1 id="pfName">Loading…</h1>
+  <p id="pfTitle">Civic Learner • CivicaQuest Student</p>
+  <div class="pf-badges-row" id="pfBadgesRow"></div>
+  <div class="pf-stats-row">
+    <div><span class="pf-stat-val" id="pfXp">0</span><span class="pf-stat-lbl">Total XP</span></div>
+    <div><span class="pf-stat-val" id="pfLevel">1</span><span class="pf-stat-lbl">Level</span></div>
+    <div><span class="pf-stat-val" id="pfGames">0</span><span class="pf-stat-lbl">Games Played</span></div>
+    <div><span class="pf-stat-val" id="pfScore">0</span><span class="pf-stat-lbl">Avg Score</span></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div style="max-width:1100px;margin:0 auto;padding:32px 24px 80px;">
+
+  <!-- Stats Grid -->
+  <div class="cq-section-title">My Statistics</div>
+  <div class="cq-g4 mb-8" id="statsGrid">
+    <div class="cq-stat-box"><span class="cq-stat-icon">⚡</span><span class="cq-stat-val" id="s-xp">0</span><span class="cq-stat-label">Total XP Earned</span></div>
+    <div class="cq-stat-box gold"><span class="cq-stat-icon">🎯</span><span class="cq-stat-val" id="s-quiz">0</span><span class="cq-stat-label">Quiz Score</span></div>
+    <div class="cq-stat-box green"><span class="cq-stat-icon">💰</span><span class="cq-stat-val" id="s-budget">0</span><span class="cq-stat-label">Budget Score</span></div>
+    <div class="cq-stat-box violet"><span class="cq-stat-icon">🏛️</span><span class="cq-stat-val" id="s-games">0</span><span class="cq-stat-label">Games Played</span></div>
+  </div>
+
+  <div class="cq-g2 mb-8">
+    <!-- Skills -->
+    <div class="cq-card">
+      <div class="cq-card-hd"><h3>📊 Civic Skills</h3></div>
+      <div class="cq-card-bd" id="skillsPanel"></div>
+    </div>
+    <!-- Decision Profile -->
+    <div class="cq-card">
+      <div class="cq-card-hd"><h3>🧠 Decision Profile</h3></div>
+      <div class="cq-card-bd" id="decisionPanel"></div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="cq-section-title">Achievements</div>
+  <div class="achievement-grid mb-8" id="achievementsGrid"></div>
+
+  <div class="cq-g2 mb-8">
+    <!-- Activity log -->
+    <div class="cq-card">
+      <div class="cq-card-hd"><h3>📅 Recent Activity</h3></div>
+      <div class="cq-card-bd" id="activityLog"></div>
+    </div>
+    <!-- AI Assessment -->
+    <div>
+      <div class="ai-insight mb-4">
+        <div class="ai-insight-lbl">🤖 AI Assessment</div>
+        <div class="ai-insight-text" id="aiAssessment">Generating personalised assessment…</div>
+      </div>
+      <div class="cq-card">
+        <div class="cq-card-hd"><h3>📤 Share Portfolio</h3></div>
+        <div class="cq-card-bd">
+          <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:14px;">Share your civic learning achievements with teachers, parents, or friends.</p>
+          <button onclick="sharePortfolio()" class="cq-btn cq-btn-primary w-full">Share My Portfolio</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next Steps -->
+  <div class="cq-section-title">Continue Your Journey</div>
+  <div class="next-steps-grid" id="nextSteps"></div>
+
+</div>
+<div id="cq-toast-global"></div>
+
+<script type="module">
+import { auth, db } from './firebase.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+
+  let userData = {};
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) userData = snap.data();
+  } catch(e) {}
+
+  const name  = userData.name  || user.displayName || user.email.split('@')[0];
+  const xp    = userData.xp    || 0;
+  const level = userData.level || 1;
+  const games = userData.gamesPlayed || 0;
+  const scores= userData.scores || {};
+  const quizScore = scores.quiz || 0;
+  const budgetScore = scores.budget || 0;
+  const avgScore = games > 0 ? Math.round((quizScore + budgetScore) / 2) : 0;
+  const init = name.charAt(0).toUpperCase();
+
+  // Hero
+  document.getElementById('pfAvatar').textContent = init;
+  document.getElementById('pfName').textContent   = name;
+  document.getElementById('pfTitle').textContent  = `Civic Learner • Level ${level} • CivicaQuest`;
+  document.getElementById('pfXp').textContent    = xp;
+  document.getElementById('pfLevel').textContent = level;
+  document.getElementById('pfGames').textContent = games;
+  document.getElementById('pfScore').textContent = avgScore;
+
+  // Nav
+  document.getElementById('navAvatar').textContent = init;
+  document.getElementById('navXp').textContent     = `⚡ ${xp} XP`;
+  document.getElementById('navUserBlock').style.display = 'flex';
+
+  // Stats
+  document.getElementById('s-xp').textContent     = xp;
+  document.getElementById('s-quiz').textContent   = quizScore;
+  document.getElementById('s-budget').textContent = budgetScore;
+  document.getElementById('s-games').textContent  = games;
+
+  // Badges row
+  const badges = userData.badges || [];
+  const pBadges = [
+    { icon:'🏆', name:'Active Learner', cond: xp > 0 },
+    { icon:'📜', name:'Quiz Taker',    cond: quizScore > 0 },
+    { icon:'💰', name:'Budget Boss',   cond: budgetScore > 0 },
+    { icon:'🏅', name:`Level ${level}`, cond: true }
+  ];
+  document.getElementById('pfBadgesRow').innerHTML = pBadges.filter(b=>b.cond).map(b=>`<span class="cq-badge badge-royal">${b.icon} ${b.name}</span>`).join('');
+
+  // Skills
+  const skills = [
+    {name:'Constitutional Knowledge', val:Math.min(100, quizScore), color:'var(--royal-light)'},
+    {name:'Budget Management',         val:Math.min(100, budgetScore), color:'var(--gold)'},
+    {name:'Election Understanding',    val:Math.min(100, (scores.voting||0)*2), color:'var(--sky)'},
+    {name:'Parliamentary Process',     val:Math.min(100, (scores.parliament||0)), color:'var(--violet)'},
+  ];
+  document.getElementById('skillsPanel').innerHTML = skills.map(s => `
+    <div class="skill-row">
+      <div class="skill-top"><span class="skill-name">${s.name}</span><span class="skill-pct" style="color:${s.color};">${s.val}%</span></div>
+      <div class="cq-progress" style="height:8px;"><div class="cq-progress-bar" style="width:${s.val}%;background:${s.color};"></div></div>
+    </div>
+  `).join('');
+
+  // Decision profile
+  const dec = Math.min(100, Math.floor((quizScore + budgetScore) / 2));
+  const dims = [
+    {name:'Analytical',    val:Math.min(100,dec+8),  color:'var(--royal-light)'},
+    {name:'Ethical',       val:Math.min(100,dec+12), color:'var(--emerald)'},
+    {name:'Strategic',     val:Math.min(100,dec-5),  color:'var(--gold)'},
+    {name:'Collaborative', val:Math.min(100,dec+6),  color:'var(--sky)'},
+  ];
+  document.getElementById('decisionPanel').innerHTML = dims.map(d => `
+    <div class="dim-row">
+      <div class="dim-name">${d.name}</div>
+      <div class="dim-bar"><div class="dim-fill" style="width:${d.val}%;background:${d.color};"></div></div>
+      <div class="dim-val" style="color:${d.color};">${d.val}%</div>
+    </div>
+  `).join('');
+
+  // Achievements
+  const allAch = [
+    {icon:'🏆',name:'Top Scorer',       desc:'Earn 1000+ XP',           earned:xp>=1000},
+    {icon:'📜',name:'Constitution Pro',  desc:'Score 80%+ in quiz',      earned:quizScore>=80},
+    {icon:'🗳️',name:'Election Expert',  desc:'Complete voting sim',      earned:(scores.voting||0)>0},
+    {icon:'💰',name:'Budget Master',    desc:'Complete budget game',     earned:budgetScore>0},
+    {icon:'⚖️',name:'Rights Champion',  desc:'Score 90%+ in quiz',      earned:quizScore>=90},
+    {icon:'🌟',name:'Rising Star',      desc:'Complete first game',      earned:games>=1},
+    {icon:'🏛️',name:'Parliament Pro',  desc:'Earn 500+ XP',             earned:xp>=500},
+    {icon:'🎓',name:'Civic Graduate',   desc:'Reach Level 5+',          earned:level>=5},
+    {icon:'💎',name:'Perfect Score',    desc:'100% quiz accuracy',      earned:quizScore>=100},
+  ];
+  document.getElementById('achievementsGrid').innerHTML = allAch.map(a => `
+    <div class="achievement ${a.earned?'earned':'locked'}">
+      <span class="ach-icon">${a.icon}</span>
+      <div class="ach-name">${a.name}</div>
+      <div class="ach-desc">${a.desc}</div>
+      ${a.earned?'<div style="margin-top:5px;"><span class="cq-badge badge-royal">Earned ✓</span></div>':''}
+    </div>
+  `).join('');
+
+  // Activity log
+  const activities = [
+    {icon:'📝',title:'Constitution Quiz Attempted',date:'Today',xp:80,bg:'var(--royal-subtle)'},
+    {icon:'💰',title:'Budget Game Completed',date:'Yesterday',xp:100,bg:'var(--gold-glow)'},
+    {icon:'🗳️',title:'Voting Simulator Explored',date:'2 days ago',xp:60,bg:'rgba(16,185,129,0.1)'},
+    {icon:'🏛️',title:'Parliament Session Joined',date:'3 days ago',xp:120,bg:'rgba(139,92,246,0.1)'},
+    {icon:'⚡',title:'Daily Login Bonus',date:'1 week ago',xp:20,bg:'rgba(56,189,248,0.1)'},
+  ];
+  document.getElementById('activityLog').innerHTML = activities.slice(0, Math.max(2, Math.min(5, games+2))).map(a => `
+    <div class="tl-item">
+      <div class="tl-icon" style="background:${a.bg};">${a.icon}</div>
+      <div style="flex:1;"><div class="tl-title">${a.title}</div><div class="tl-date">${a.date}</div></div>
+      <span class="cq-badge badge-royal">+${a.xp} XP</span>
+    </div>
+  `).join('');
+
+  // Next steps
+  const steps = [
+    {icon:'📜',title:'Constitution Quiz',   desc:'Test constitutional knowledge',  link:'quiz-game.html',   color:'var(--royal-light)'},
+    {icon:'🏛️',title:'Parliament Sim',      desc:'Debate policies live',           link:'parliament-simulator.html', color:'var(--gold)'},
+    {icon:'💰',title:'Budget Challenge',    desc:'Allocate city funds wisely',     link:'budget-game.html', color:'var(--emerald)'},
+  ];
+  document.getElementById('nextSteps').innerHTML = steps.map(s => `
+    <a href="${s.link}" class="next-card">
+      <div style="font-size:2rem;margin-bottom:10px;">${s.icon}</div>
+      <div style="font-weight:700;margin-bottom:6px;">${s.title}</div>
+      <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;">${s.desc}</div>
+      <span style="color:${s.color};font-size:0.84rem;font-weight:600;">Start Now →</span>
+    </a>
+  `).join('');
+
+  // AI assessment
+  generateAIAssessment(name, xp, level, games, dec);
+});
+
+async function generateAIAssessment(name, xp, level, tasks, decision) {
+  const el = document.getElementById('aiAssessment');
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514", max_tokens:280,
+        messages:[{role:"user",content:`Write a 3-sentence personalised civic education portfolio assessment for a student named ${name} with: XP=${xp}, Level=${level}, Tasks=${tasks}, Decision Score=${decision}%. Be encouraging and mention areas to improve. Professional and warm tone.`}]
+      })
+    });
+    const data = await res.json();
+    el.textContent = data.content?.[0]?.text || fallback(name, level);
+  } catch(e) { el.textContent = fallback(name, level); }
+}
+
+function fallback(name, level) {
+  return `${name} demonstrates commendable progress in civic education, reaching Level ${level} through consistent engagement. Your participation in elections and constitutional quizzes reflects a growing understanding of democratic processes. To advance further, focus on the Budget Challenge and Parliament Simulator to develop a well-rounded civic skill set.`;
+}
+
+window.sharePortfolio = function() {
+  if (navigator.share) navigator.share({title:'My CivicaQuest Portfolio', url:window.location.href});
+  else { navigator.clipboard.writeText(window.location.href); showToast('📋 Link copied to clipboard!'); }
+};
+
+function showToast(msg) {
+  const t = document.getElementById('cq-toast-global');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+window.doLogout = async function() {
+  if (!confirm('Log out?')) return;
+  const { signOut } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+  const { auth } = await import('./firebase.js');
+  await signOut(auth); window.location.href = 'index.html';
+};
+</script>
+<script src="static/js/cq_ai_enhanced.js"></script>
+<script src="static/js/cq_lang.js"></script>
+</body>
+</html>
