@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Simulator - CivicaQuest</title>
+    <link rel="stylesheet" href="election-simulator/css/styles.css">
+  <link rel="stylesheet" href="static/css/cq_lang.css">
+    <link rel="stylesheet" href="static/css/cq_ai.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* Override election simulator to work under our nav */
+    body { padding-top: 0 !important; }
+    .app-container { padding-top: 0 !important; }
+  </style>
+  <!-- React 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <link rel="stylesheet" href="static/css/cq_ai_enhanced.css">
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#F5F3FF !important;background-color:#F5F3FF !important;}</style>
+</head>
+<body>
+
+<!-- CivicaQuest Unified Nav -->
+<nav class="cq-nav">
+  <div class="cq-nav-underline"></div>
+  <a href="index.html" class="cq-brand"><div class="cq-brand-icon">🏛️</div>Civica<span>Quest</span></a>
+  <div class="cq-nav-links">
+    <a href="index.html" class="cq-nav-link">🏠 Dashboard</a>
+    <a href="quiz-game.html" class="cq-nav-link">📜 <span data-i18n="nav.quiz.label">Quiz</span></a>
+    <a href="budget-game.html" class="cq-nav-link">💰 Budget</a>
+    <a href="parliament-simulator.html" class="cq-nav-link">🏛️ Parliament</a>
+    <a href="classroom.html" class="cq-nav-link">🤖 Classroom</a>
+  </div>
+  <div class="cq-nav-right">
+    <a href="index.html" class="cq-back">← Dashboard</a>
+  </div>
+</nav>
+<!-- Connected journey hint -->
+<div style="position:fixed;bottom:22px;left:22px;z-index:9000;background:var(--surface);border:1px solid var(--royal-border);border-radius:var(--r-md);padding:10px 15px;font-size:0.78rem;color:var(--text-secondary);max-width:240px;box-shadow:var(--shadow-md);">
+  🎮 <strong style="color:var(--royal-light);">Connected Journey</strong><br>
+  After voting → Complete <a href="budget-game.html" style="color:var(--gold);">Budget Game</a>
+</div>
+
+<!-- Toast Notification -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Loading Screen (preserved from original) -->
+<div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+        <div class="ashoka-chakra-container">
+            <svg class="ashoka-chakra rotating" viewBox="0 0 200 200" width="150" height="150">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#000080" stroke-width="3"/>
+                <circle cx="100" cy="100" r="15" fill="#000080"/>
+                <g id="spokes"></g>
+            </svg>
+        </div>
+        <h2>CivicaQuest Election Simulator</h2>
+        <p id="loadingText">Initialising Democracy Engine...</p>
+        <div class="progress-bar"><div class="progress-fill" id="loadProgress"></div></div>
+    </div>
+</div>
+
+<!-- Main App -->
+<div id="app" class="app-container" style="display:none;">
+
+    <!-- Header (preserves original structure) -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FF9933'/%3E%3Ccircle cx='50' cy='50' r='30' fill='%23FFFFFF'/%3E%3Ccircle cx='50' cy='50' r='15' fill='%23138808'/%3E%3C/svg%3E" alt="Logo" class="logo">
+                <div class="title-group">
+                    <h1>CivicaQuest</h1>
+                    <p class="subtitle">Indian Election Simulator v2.0</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="phase-badge" id="headerPhaseBadge">
+                    <i class="fas fa-circle-dot pulse-dot"></i>
+                    <span id="headerPhaseText">Announcement Phase</span>
+                </div>
+                <button class="btn-icon" id="userMenuBtn" onclick="toggleUserMenu()">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="currentUserName">Guest</span>
+                    <i class="fas fa-chevron-down" style="font-size:0.7rem"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <a href="#" onclick="showUserProfile()"><i class="fas fa-id-card"></i> My Voter Card</a>
+                    <a href="#" onclick="showBadges()"><i class="fas fa-trophy"></i> Achievements</a>
+                    <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+        <!-- Phase Indicator Bar -->
+        <div class="phase-indicator" id="phaseIndicator">
+            <div class="phase-item active" data-phase="1"><div class="phase-icon"><i class="fas fa-megaphone"></i></div><span>Announcement</span></div>
+            <div class="phase-item" data-phase="2"><div class="phase-icon"><i class="fas fa-gavel"></i></div><span>MCC</span></div>
+            <div class="phase-item" data-phase="3"><div class="phase-icon"><i class="fas fa-file-signature"></i></div><span>Nomination</span></div>
+            <div class="phase-item" data-phase="4"><div class="phase-icon"><i class="fas fa-search"></i></div><span>Scrutiny</span></div>
+            <div class="phase-item" data-phase="5"><div class="phase-icon"><i class="fas fa-minus-circle"></i></div><span>Withdrawal</span></div>
+            <div class="phase-item" data-phase="6"><div class="phase-icon"><i class="fas fa-bullhorn"></i></div><span>Campaign</span></div>
+            <div class="phase-item" data-phase="7"><div class="phase-icon"><i class="fas fa-vote-yea"></i></div><span>Polling</span></div>
+            <div class="phase-item" data-phase="8"><div class="phase-icon"><i class="fas fa-calculator"></i></div><span>Counting</span></div>
+            <div class="phase-item" data-phase="9"><div class="phase-icon"><i class="fas fa-landmark"></i></div><span>Results</span></div>
+        </div>
+    </header>
+
+    <!-- ======= LOGIN / ROLE SELECTION SCREEN ======= -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="indian-flag-banner">
+                <div class="flag-stripe saffron"></div>
+                <div class="flag-stripe white">
+                    <svg class="chakra-small rotating" viewBox="0 0 100 100" width="60" height="60">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#000080" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="8" fill="#000080"/>
+                        <g id="spokes2"></g>
+                    </svg>
+                </div>
+                <div class="flag-stripe green"></div>
+            </div>
+            <h2>Welcome to CivicaQuest</h2>
+            <p class="tagline">Experience India's Democracy Through Interactive Simulation</p>
+            <div class="role-selection">
+                <div class="role-card" onclick="showLogin('admin')">
+                    <div class="role-icon"><i class="fas fa-user-shield"></i></div>
+                    <h3>Admin / ECI</h3>
+                    <p>Manage elections, verify candidates, control phases & declare results</p>
+                    <button class="btn-primary">Enter as Admin</button>
+                </div>
+                <div class="role-card" onclick="showLogin('voter')">
+                    <div class="role-icon"><i class="fas fa-person-booth"></i></div>
+                    <h3>Voter</h3>
+                    <p>Register, get EPIC Voter ID, cast your vote at polling booth</p>
+                    <button class="btn-primary">Register as Voter</button>
+                </div>
+                <div class="role-card" onclick="showLogin('candidate')">
+                    <div class="role-icon"><i class="fas fa-user-tie"></i></div>
+                    <h3>Candidate</h3>
+                    <p>File nomination, submit affidavit, contest from your constituency</p>
+                    <button class="btn-primary">File Nomination</button>
+                </div>
+            </div>
+            <div class="quick-voter-lookup">
+                <h4><i class="fas fa-search"></i> Quick Voter ID Lookup</h4>
+                <div class="lookup-row">
+                    <input type="text" id="quickLookupInput" placeholder="Enter Voter ID (e.g. DL-ABC123456) or Aadhaar...">
+                    <button class="btn-primary" onclick="quickVoterLookup()"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div id="quickLookupResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======= ADMIN LOGIN MODAL ======= -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('adminLoginModal')">&times;</span>
+            <h2><i class="fas fa-user-shield"></i> Election Commission Login</h2>
+            <form id="adminLoginForm" onsubmit="adminLogin(event)">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="adminUsername" required placeholder="Enter admin username">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="adminPassword" required placeholder="Enter password">
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Demo credentials: <strong>admin</strong> / <strong>admin123</strong></span>
+                </div>
+                <button type="submit" class="btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======= VOTER REGISTRATION MODAL ======= -->
+    <div id="voterRegistrationModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeModal('voterRegistrationModal')">&times;</span>
+            <div class="modal-title-bar">
+                <h2><i class="fas fa-user-plus"></i> Voter Registration – Form 6</h2>
+                <p class="form-subtitle">Representation of the People Act, 1950</p>
+            </div>
+            <form id="voterRegistrationForm" onsubmit="registerVoter(event)">
+                <div class="form-sections">
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Personal Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label><i class="fas fa-user"></i> Full Name *</label>
+                                <input type="text" id="voterFullName" required placeholder="As per Aadhaar Card">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar"></i> Date of Birth *</label>
+                                <input type="date" id="voterDOB" required onchange="calculateAge()">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-user-circle"></i> Gender *</label>
+                                <select id="voterGender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Third Gender">Third Gender</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-id-card"></i> Aadhaar Number *</label>
+                                <input type="text" id="voterAadhaar" required placeholder="XXXX XXXX XXXX" maxlength="14" oninput="formatAadhaar(this)">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-phone"></i> Mobile Number *</label>
+                                <input type="text" id="voterMobile" required placeholder="10-digit mobile number" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="age-verification" id="ageVerification" style="display:none;">
+                            <div class="verification-box success" id="ageSuccess" style="display:none;">
+                                <i class="fas fa-check-circle"></i>
+                                <div><strong>Eligible to Vote!</strong><p>Age: <span id="calculatedAge"></span> years</p></div>
+                            </div>
+                            <div class="verification-box error" id="ageError" style="display:none;">
+                                <i class="fas fa-times-circle"></i>
+                                <div><strong>Not Eligible – Age below 18</strong><p>Your age: <span id="calculatedAgeError"></span> years</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Address & Constituency</h3>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label><i class="fas fa-home"></i> Full Address *</label>
+                                <textarea id="voterAddress" required rows="2" placeholder="House No., Street, Locality"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-map"></i> State *</label>
+                                <select id="voterState" required onchange="populateDistricts('voter')">
+                                    <option value="">Select State</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-city"></i> District *</label>
+                                <select id="voterDistrict" required onchange="populateConstituencies('voter')">
+                                    <option value="">Select District</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-landmark"></i> Constituency *</label>
+                                <input type="text" id="voterConstituency" required placeholder="Type or select constituency..." list="voterConstList" autocomplete="off">
+                                <datalist id="voterConstList"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-building"></i> Polling Booth (auto-assigned)</label>
+                                <input type="text" id="voterBooth" readonly placeholder="Auto-assigned after constituency selection">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="voterConsent" required>
+                        <span>I hereby declare all information provided is true and accurate to the best of my knowledge.</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary btn-block" id="submitVoterBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Registration (Form 6)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======= CANDIDATE NOMINATION MODAL ======= -->
+    <div id="candidateNominationModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeModal('candidateNominationModal')">&times;</span>
+            <div class="modal-title-bar">
+                <h2><i class="fas fa-file-signature"></i> Candidate Nomination – Form 2-A</h2>
+                <p class="form-subtitle">Representation of the People Act, 1951</p>
+            </div>
+            <form id="candidateNominationForm" onsubmit="submitNomination(event)">
+                <div class="form-sections">
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Personal Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="candidateName" required placeholder="As per official record">
+                            </div>
+                            <div class="form-group">
+                                <label>Date of Birth *</label>
+                                <input type="date" id="candidateDOB" required onchange="calculateCandidateAge()">
+                            </div>
+                            <div class="form-group">
+                                <label>Age (min 25 for Lok Sabha)</label>
+                                <input type="number" id="candidateAge" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Gender *</label>
+                                <select id="candidateGender" required>
+                                    <option value="">Select</option>
+                                    <option>Male</option><option>Female</option><option>Third Gender</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Your Voter ID * (must be a registered voter)</label>
+                                <input type="text" id="candidateVoterID" required placeholder="Your EPIC Voter ID">
+                            </div>
+                        </div>
+                        <div class="candidate-age-check" id="candidateAgeCheck" style="display:none;"></div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-landmark"></i> Electoral & Party Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Constituency *</label>
+                                <input type="text" id="candidateConstituency" required placeholder="Type or select constituency..." list="candidateConstList" autocomplete="off">
+                                <datalist id="candidateConstList"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label>Party Name *</label>
+                                <input type="text" id="candidateParty" required placeholder="Party name or Independent">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Party Symbol *</label>
+                            <div class="symbol-selector" id="symbolSelector">
+                                <div class="symbol-option" onclick="selectSymbol('🪷','Lotus')"><span class="symbol-icon">🪷</span><span class="symbol-name">Lotus</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('✋','Hand')"><span class="symbol-icon">✋</span><span class="symbol-name">Hand</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🧹','Broom')"><span class="symbol-icon">🧹</span><span class="symbol-name">Broom</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🌾','Wheat')"><span class="symbol-icon">🌾</span><span class="symbol-name">Wheat</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🦁','Lion')"><span class="symbol-icon">🦁</span><span class="symbol-name">Lion</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🐘','Elephant')"><span class="symbol-icon">🐘</span><span class="symbol-name">Elephant</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('⚖️','Scale')"><span class="symbol-icon">⚖️</span><span class="symbol-name">Scale</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🌻','Sunflower')"><span class="symbol-icon">🌻</span><span class="symbol-name">Sunflower</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🚲','Bicycle')"><span class="symbol-icon">🚲</span><span class="symbol-name">Bicycle</span></div>
+                                <div class="symbol-option" onclick="selectSymbol('🔦','Torch')"><span class="symbol-icon">🔦</span><span class="symbol-name">Torch</span></div>
+                            </div>
+                            <input type="hidden" id="selectedSymbol" required>
+                            <input type="hidden" id="selectedSymbolName">
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-graduation-cap"></i> Education & Financial Declaration</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Highest Qualification *</label>
+                                <select id="candidateEducation" required>
+                                    <option value="">Select</option>
+                                    <option>Below 10th</option><option>10th Pass</option>
+                                    <option>12th Pass</option><option>Graduate</option>
+                                    <option>Post Graduate</option><option>Doctorate</option>
+                                    <option>Professional Degree</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Nomination Deposit *</label>
+                                <select id="nominationDeposit" required>
+                                    <option value="paid_general">Paid – General (₹25,000)</option>
+                                    <option value="paid_scst">Paid – SC/ST (₹12,500)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Total Assets (₹) *</label>
+                                <input type="number" id="candidateAssets" required placeholder="0" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Total Liabilities (₹) *</label>
+                                <input type="number" id="candidateLiabilities" required placeholder="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-gavel"></i> Criminal Record Affidavit</h3>
+                        <div class="form-group">
+                            <label>Any pending criminal cases?</label>
+                            <div class="radio-group">
+                                <label class="radio-label"><input type="radio" name="criminalCases" value="No" checked onchange="toggleCriminalDetails()"><span>No</span></label>
+                                <label class="radio-label"><input type="radio" name="criminalCases" value="Yes" onchange="toggleCriminalDetails()"><span>Yes</span></label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="criminalDetailsGroup" style="display:none;">
+                            <label>Criminal Case Details *</label>
+                            <textarea id="criminalDetails" rows="3" placeholder="Case No., Court, Section, Status..."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-users"></i> Proposer Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Proposer Name *</label>
+                                <input type="text" id="proposerName" required placeholder="Registered voter from same constituency">
+                            </div>
+                            <div class="form-group">
+                                <label>Proposer Voter ID *</label>
+                                <input type="text" id="proposerVoterID" required placeholder="Proposer's EPIC Voter ID">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-file-contract"></i> Declarations</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label"><input type="checkbox" id="affidavitCheck" required><span>I submit Affidavit (Form 26) and declare all information is true and complete</span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label"><input type="checkbox" id="depositCheck" required><span>Security deposit acknowledged as mentioned above</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('candidateNominationModal')">Cancel</button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Submit Nomination</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======= VOTER ID CARD MODAL ======= -->
+    <div id="voterCardModal" class="modal">
+        <div class="modal-content" style="max-width:480px;">
+            <span class="close" onclick="closeModal('voterCardModal')">&times;</span>
+            <div id="voterCardContent"></div>
+        </div>
+    </div>
+
+    <!-- ======= MAIN DASHBOARD ======= -->
+    <div id="mainDashboard" class="main-dashboard" style="display:none;">
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" onclick="showDashboard('overview',event)"><i class="fas fa-home"></i><span>Overview</span></a>
+                    <a href="#" class="nav-item admin-only" onclick="showDashboard('admin',event)"><i class="fas fa-user-shield"></i><span>Admin Panel</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('register',event)"><i class="fas fa-id-card"></i><span>Voter Registration</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('candidates',event)"><i class="fas fa-users"></i><span>Candidates</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('voters',event)"><i class="fas fa-list"></i><span>Voter List</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('nomination',event)"><i class="fas fa-file-signature"></i><span>Nomination</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('campaign',event)"><i class="fas fa-bullhorn"></i><span>Campaign</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('voting',event)"><i class="fas fa-vote-yea"></i><span>Polling Booth</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('results',event)"><i class="fas fa-chart-bar"></i><span>Results</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('schedule',event)"><i class="fas fa-calendar-alt"></i><span>Schedule</span></a>
+                    <a href="#" class="nav-item" onclick="showDashboard('education',event)"><i class="fas fa-graduation-cap"></i><span>Learn</span></a>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="xp-display">
+                        <i class="fas fa-star"></i>
+                        <div><span class="xp-label">XP Points</span><span class="xp-value" id="userXP">0</span></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+
+                <!-- OVERVIEW -->
+                <div id="overviewDashboard" class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-home"></i> Dashboard Overview</h2>
+                        <button class="btn-icon" onclick="refreshDashboard()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#FF9933,#FFA500)"><i class="fas fa-users"></i></div><div class="stat-info"><h3 id="totalVoters">0</h3><p>Registered Voters</p></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#138808,#20c997)"><i class="fas fa-user-check"></i></div><div class="stat-info"><h3 id="approvedVoters">0</h3><p>Approved Voters</p></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#000080,#0066CC)"><i class="fas fa-user-tie"></i></div><div class="stat-info"><h3 id="totalCandidates">0</h3><p>Candidates</p></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#dc3545,#c82333)"><i class="fas fa-vote-yea"></i></div><div class="stat-info"><h3 id="totalVotes">0</h3><p>Votes Cast</p></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#6f42c1,#5a2d91)"><i class="fas fa-percentage"></i></div><div class="stat-info"><h3 id="turnoutPercent">0%</h3><p>Voter Turnout</p></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#fd7e14,#e55e00)"><i class="fas fa-building"></i></div><div class="stat-info"><h3 id="totalConstituencies">0</h3><p>Constituencies</p></div></div>
+                    </div>
+                    <div class="info-cards-grid">
+                        <div class="info-card">
+                            <h3><i class="fas fa-info-circle"></i> Current Phase</h3>
+                            <div class="phase-status">
+                                <div class="phase-name" id="currentPhaseName">Election Announcement</div>
+                                <div class="phase-description" id="currentPhaseDescription">The Election Commission has announced the election schedule.</div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h3><i class="fas fa-trophy"></i> Achievements</h3>
+                            <div class="badges-preview" id="badgesPreview">
+                                <div class="badge-item locked"><i class="fas fa-lock"></i><span>First Vote</span></div>
+                                <div class="badge-item locked"><i class="fas fa-lock"></i><span>Democracy Defender</span></div>
+                                <div class="badge-item locked"><i class="fas fa-lock"></i><span>Civic Champion</span></div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h3><i class="fas fa-chart-line"></i> Quick Actions</h3>
+                            <div class="quick-actions">
+                                <button class="btn-action" onclick="showModal('voterRegistrationModal')"><i class="fas fa-user-plus"></i> Register Voter</button>
+                                <button class="btn-action" onclick="showModal('candidateNominationModal')"><i class="fas fa-file-signature"></i> File Nomination</button>
+                                <button class="btn-action" onclick="showDashboard('voting',null)"><i class="fas fa-vote-yea"></i> Go to Booth</button>
+                                <button class="btn-action" onclick="showDashboard('results',null)"><i class="fas fa-chart-bar"></i> View Results</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VOTER REGISTRATION SECTION -->
+                <div id="registerDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-id-card"></i> Voter Registration</h2><button class="btn-primary" onclick="showModal('voterRegistrationModal')"><i class="fas fa-plus"></i> New Registration</button></div>
+                    <div class="voter-reg-panel">
+                        <div class="info-card" style="margin-bottom:1.5rem;">
+                            <h3><i class="fas fa-search"></i> Check Registration Status</h3>
+                            <div class="lookup-row">
+                                <input type="text" id="voterStatusInput" placeholder="Enter your Voter ID or Aadhaar number...">
+                                <button class="btn-primary" onclick="checkVoterStatus()"><i class="fas fa-search"></i> Check</button>
+                            </div>
+                            <div id="voterStatusResult"></div>
+                        </div>
+                        <div class="info-card">
+                            <h3><i class="fas fa-list"></i> Recently Registered Voters</h3>
+                            <div id="recentVotersList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN DASHBOARD -->
+                <div id="adminDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-user-shield"></i> Admin Control Panel – Election Commission</h2></div>
+                    <div class="admin-tabs">
+                        <button class="admin-tab-btn active" onclick="showAdminTab('phases',this)"><i class="fas fa-list-check"></i> Phase Control</button>
+                        <button class="admin-tab-btn" onclick="showAdminTab('voterApprovals',this)"><i class="fas fa-user-check"></i> Voters <span class="badge" id="pendingVotersBadge">0</span></button>
+                        <button class="admin-tab-btn" onclick="showAdminTab('candidateApprovals',this)"><i class="fas fa-file-check"></i> Candidates <span class="badge" id="pendingCandidatesBadge">0</span></button>
+                        <button class="admin-tab-btn" onclick="showAdminTab('constituencies',this)"><i class="fas fa-map"></i> Constituencies</button>
+                        <button class="admin-tab-btn" onclick="showAdminTab('counting',this)"><i class="fas fa-calculator"></i> Counting</button>
+                    </div>
+                    <!-- Phase Control Tab -->
+                    <div id="adminTab-phases" class="admin-tab-panel active">
+                        <div class="info-card">
+                            <h3><i class="fas fa-cog"></i> Election Phase Management</h3>
+                            <p style="color:#6C757D;margin-bottom:1rem;">Current Phase: <strong id="adminCurrentPhase"></strong></p>
+                            <div class="phase-control-grid" id="phaseControlGrid"></div>
+                            <div class="phase-controls" style="margin-top:1.5rem;">
+                                <button class="btn-primary" onclick="advancePhase()"><i class="fas fa-forward"></i> Advance to Next Phase</button>
+                                <button class="btn-secondary" onclick="resetElection()"><i class="fas fa-redo"></i> Reset Election</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Voter Approvals Tab -->
+                    <div id="adminTab-voterApprovals" class="admin-tab-panel" style="display:none;">
+                        <div class="info-card">
+                            <h3><i class="fas fa-user-check"></i> Voter Registration Approvals</h3>
+                            <div class="search-filter-row">
+                                <input type="text" id="voterSearchInput" placeholder="Search by name, Voter ID, Aadhaar..." oninput="renderVoterApprovals()">
+                                <select id="voterFilterStatus" onchange="renderVoterApprovals()">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div id="voterApprovalsList"></div>
+                        </div>
+                    </div>
+                    <!-- Candidate Approvals Tab -->
+                    <div id="adminTab-candidateApprovals" class="admin-tab-panel" style="display:none;">
+                        <div class="info-card">
+                            <h3><i class="fas fa-file-check"></i> Candidate Scrutiny & Approvals</h3>
+                            <div class="search-filter-row">
+                                <input type="text" id="candidateSearchInput" placeholder="Search by name, party, constituency..." oninput="renderCandidateApprovals()">
+                                <select id="candidateFilterStatus" onchange="renderCandidateApprovals()">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="withdrawn">Withdrawn</option>
+                                </select>
+                            </div>
+                            <div id="candidateApprovalsList"></div>
+                        </div>
+                    </div>
+                    <!-- Constituencies Tab -->
+                    <div id="adminTab-constituencies" class="admin-tab-panel" style="display:none;">
+                        <div class="info-card">
+                            <h3><i class="fas fa-plus-circle"></i> Add Constituency</h3>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Constituency Name</label><input type="text" id="newConstName" placeholder="e.g. Lucknow"></div>
+                                <div class="form-group"><label>State</label>
+                                    <select id="newConstState">
+                                        <option value="">Select State</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>No. of Booths</label><input type="number" id="newConstBooths" placeholder="e.g. 250" min="1"></div>
+                                <div class="form-group" style="align-self:flex-end;">
+                                    <button class="btn-primary" onclick="addConstituency()"><i class="fas fa-plus"></i> Add Constituency</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-card" style="margin-top:1rem;">
+                            <h3><i class="fas fa-list"></i> Existing Constituencies</h3>
+                            <div id="constituenciesList"></div>
+                        </div>
+                    </div>
+                    <!-- Counting Tab -->
+                    <div id="adminTab-counting" class="admin-tab-panel" style="display:none;">
+                        <div class="info-card">
+                            <h3><i class="fas fa-calculator"></i> Vote Counting Control</h3>
+                            <div class="alert-info-box"><i class="fas fa-info-circle"></i> Counting can only begin after polling phase ends. This will make results visible on the Results page.</div>
+                            <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;">
+                                <button class="btn-primary" onclick="initiateCounting()"><i class="fas fa-play-circle"></i> Initiate Counting & Declare Results</button>
+                                <button class="btn-secondary" onclick="exportCountingReport()"><i class="fas fa-file-csv"></i> Export Counting Report</button>
+                            </div>
+                            <div id="countingStatus" style="margin-top:1rem;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CANDIDATES LIST -->
+                <div id="candidatesDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-users"></i> Candidates</h2><button class="btn-primary" onclick="showModal('candidateNominationModal')"><i class="fas fa-plus"></i> File Nomination</button></div>
+                    <div class="search-filter-row">
+                        <input type="text" id="candListSearch" placeholder="Search by name, party, constituency..." oninput="renderCandidatesList()">
+                        <select id="candListConst" onchange="renderCandidatesList()"><option value="">All Constituencies</option></select>
+                    </div>
+                    <div id="candidatesListContent"></div>
+                </div>
+
+                <!-- VOTER LIST -->
+                <div id="votersDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-list"></i> Voter Electoral Roll</h2></div>
+                    <div class="search-filter-row">
+                        <input type="text" id="voterListSearch" placeholder="Search by name, Voter ID, constituency..." oninput="renderVotersList()">
+                        <select id="voterListConst" onchange="renderVotersList()"><option value="">All Constituencies</option></select>
+                    </div>
+                    <div id="votersListContent"></div>
+                </div>
+
+                <!-- NOMINATION SECTION (separate from modal) -->
+                <div id="nominationDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-file-signature"></i> Candidate Nominations</h2><button class="btn-primary" onclick="showModal('candidateNominationModal')"><i class="fas fa-plus"></i> File New Nomination</button></div>
+                    <div id="nominationsContent"></div>
+                </div>
+
+                <!-- CAMPAIGN -->
+                <div id="campaignDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bullhorn"></i> Election Campaign Simulator</h2>
+                        <div style="display:flex;gap:0.75rem;">
+                            <button class="btn-primary" onclick="startCampaignRound()"><i class="fas fa-play"></i> Start Campaign Round</button>
+                        </div>
+                    </div>
+                    <div id="campaignContent"></div>
+                </div>
+
+                <!-- VOTING / POLLING BOOTH -->
+                <div id="votingDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-vote-yea"></i> Polling Booth – EVM Simulation</h2></div>
+                    <div id="votingContent"></div>
+                </div>
+
+                <!-- RESULTS -->
+                <div id="resultsDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> Election Results</h2>
+                        <div style="display:flex;gap:0.75rem;">
+                            <button class="btn-secondary" onclick="exportResultsCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                            <button class="btn-secondary" onclick="exportResultsPDF()"><i class="fas fa-file-pdf"></i> PDF Report</button>
+                        </div>
+                    </div>
+                    <div class="search-filter-row">
+                        <select id="resultsConstFilter" onchange="renderResults()"><option value="">All Constituencies</option></select>
+                    </div>
+                    <div id="resultsContent"></div>
+                    <div id="resultsCharts" style="display:none;margin-top:2rem;">
+                        <div class="charts-grid">
+                            <div class="chart-card"><canvas id="resultsBarChart"></canvas></div>
+                            <div class="chart-card"><canvas id="resultsPieChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCHEDULE -->
+                <div id="scheduleDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-calendar-alt"></i> Election Schedule</h2></div>
+                    <div id="scheduleContent"></div>
+                </div>
+
+                <!-- EDUCATION -->
+                <div id="educationDashboard" class="dashboard-section" style="display:none;">
+                    <div class="section-header"><h2><i class="fas fa-graduation-cap"></i> Learn About Indian Elections</h2></div>
+                    <div class="education-content">
+                        <div class="edu-card" onclick="toggleEduCard(this)">
+                            <h3><i class="fas fa-gavel"></i> What is Model Code of Conduct?</h3>
+                            <div class="edu-content"><p>The Model Code of Conduct (MCC) is a set of guidelines issued by the Election Commission of India. It comes into force on announcement of the election schedule.</p><ul><li>No misuse of official machinery for campaigning</li><li>No announcement of financial grants</li><li>No hate speech or communal appeals</li><li>Level playing field for all parties</li></ul></div>
+                        </div>
+                        <div class="edu-card" onclick="toggleEduCard(this)">
+                            <h3><i class="fas fa-landmark"></i> Role of Election Commission of India</h3>
+                            <div class="edu-content"><p>The Election Commission of India (ECI) is an autonomous constitutional authority responsible for administering Union and State election processes.</p><ul><li>Superintendence, direction, and control of elections</li><li>Preparation of electoral rolls</li><li>Registration of political parties</li><li>Allotment of election symbols</li></ul></div>
+                        </div>
+                        <div class="edu-card" onclick="toggleEduCard(this)">
+                            <h3><i class="fas fa-sort-numeric-up"></i> First-Past-The-Post System</h3>
+                            <div class="edu-content"><p>India follows the First-Past-The-Post (FPTP) electoral system, also known as simple majority system.</p><ul><li>Candidate with highest votes wins</li><li>No need for 50%+ majority</li><li>Used in Lok Sabha and Vidhan Sabha elections</li></ul></div>
+                        </div>
+                        <div class="edu-card" onclick="toggleEduCard(this)">
+                            <h3><i class="fas fa-receipt"></i> Why VVPAT is Used?</h3>
+                            <div class="edu-content"><p>VVPAT (Voter Verified Paper Audit Trail) provides feedback to voters using EVMs.</p><ul><li>Voters can verify their vote</li><li>Paper slip displayed for 7 seconds</li><li>Stored in sealed box for audit</li><li>Increases transparency</li></ul></div>
+                        </div>
+                        <div class="edu-card" onclick="toggleEduCard(this)">
+                            <h3><i class="fas fa-fingerprint"></i> Indelible Ink</h3>
+                            <div class="edu-content"><p>Indelible ink is applied on the left index finger of voters to prevent multiple voting.</p><ul><li>Stays on finger for several weeks</li><li>Manufactured by Mysore Paints & Varnish Ltd</li><li>Contains Silver Nitrate</li><li>ECI certified standard</li></ul></div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ======= EVM VOTING MODAL ======= -->
+    <div id="evmModal" class="modal">
+        <div class="modal-content modal-large evm-modal">
+            <div class="evm-container">
+                <div class="evm-header">
+                    <h2><i class="fas fa-microchip"></i> Electronic Voting Machine (EVM)</h2>
+                    <p>Select your candidate and press the blue button</p>
+                </div>
+                <div class="evm-body">
+                    <div class="control-unit">
+                        <div class="control-header">
+                            <h3>Control Unit – BEL India</h3>
+                            <div class="ballot-status" id="ballotStatus"><i class="fas fa-check-circle"></i><span>Ready to Vote</span></div>
+                        </div>
+                        <div class="constituency-display" id="evmConstDisplay"></div>
+                    </div>
+                    <div class="balloting-unit" id="ballotingUnit"></div>
+                    <div class="vvpat-unit" id="vvpatUnit" style="display:none;">
+                        <div class="vvpat-header"><h3><i class="fas fa-receipt"></i> VVPAT Paper Slip</h3><p>Verify your vote (Visible for 7 seconds)</p></div>
+                        <div class="vvpat-display" id="vvpatDisplay"></div>
+                        <div class="vvpat-countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
+                        <div class="vvpat-countdown" id="vvpatCountdown">7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+</div><!-- end #app -->
+
+<script src="election-simulator/js/utils.js"></script>
+<script src="election-simulator/js/evm.js"></script>
+<script src="election-simulator/js/admin.js"></script>
+<script src="election-simulator/js/campaign.js"></script>
+<script src="election-simulator/js/app.js"></script>
+<script src="static/js/cq_ai_enhanced.js"></script>
+<script src="static/js/cq_lang.js"></script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="static/css/cq_lang.css"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Civic Progress – CivicaQuest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="static/css/cq_ai.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--navy:#0f172a;--gold:#f59e0b;--emerald:#059669;--sky:#0ea5e9;--rose:#e11d48;--violet:#7c3aed;--teal:#0d9488;--text:#1e293b;--muted:#64748b;--bg:#f8fafc;}
+    body{font-family:'DM Sans',sans-serif;background:#F5F3FF;color:var(--text);min-height:100vh;}
+
+    /* NAV */
+    .top-nav{display:none!important;background:var(--navy);padding:0 24px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:200;}
+    .top-nav a{color:#94a3b8;text-decoration:none;font-size:0.9rem;display:flex;align-items:center;gap:5px;}
+    .top-nav a:hover{color:#fff;}
+    .top-nav .ttl{color:#fff;font-weight:600;margin:0 auto;}
+
+    /* HERO */
+    .hero{background:linear-gradient(135deg,var(--navy) 0%,#1e3a5f 100%);padding:36px 24px;color:#fff;}
+    .hero-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+    .hero-left h1{font-family:'Playfair Display',serif;font-size:1.9rem;margin-bottom:4px;}
+    .hero-left p{color:#94a3b8;font-size:0.9rem;}
+    .user-level{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:16px;padding:14px 24px;text-align:center;}
+    .level-num{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold);}
+    .level-label{font-size:0.75rem;color:#94a3b8;margin-top:2px;}
+    .streak-chip{display:flex;align-items:center;gap:6px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:8px 16px;font-size:0.88rem;font-weight:600;color:var(--gold);}
+
+    /* LOADING */
+    .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:16px;}
+    .spinner{width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:var(--sky);border-radius:50%;animation:spin 0.8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .loading-text{color:var(--muted);font-size:0.9rem;}
+
+    /* CONTAINER */
+    .container{max-width:1100px;margin:0 auto;padding:32px 24px;}
+    .section-title{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--navy);margin:36px 0 18px;display:flex;align-items:center;gap:10px;}
+    .section-title::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+
+    /* KPI STRIP */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:0;}
+    .kpi{background:#fff;border-radius:18px;padding:22px;border:1px solid #f1f5f9;box-shadow:0 2px 10px rgba(0,0,0,0.05);position:relative;overflow:hidden;}
+    .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+    .kpi.k1::before{background:linear-gradient(90deg,var(--sky),#06b6d4);}
+    .kpi.k2::before{background:linear-gradient(90deg,var(--rose),#f43f5e);}
+    .kpi.k3::before{background:linear-gradient(90deg,var(--emerald),#10b981);}
+    .kpi.k4::before{background:linear-gradient(90deg,var(--gold),#fbbf24);}
+    .kpi-icon{font-size:1.8rem;margin-bottom:8px;}
+    .kpi-val{font-family:'Playfair Display',serif;font-size:2rem;color:var(--navy);line-height:1;}
+    .kpi-label{font-size:0.78rem;color:var(--muted);margin-top:4px;}
+    .kpi-sub{font-size:0.72rem;color:var(--emerald);font-weight:600;margin-top:2px;}
+
+    /* READINESS METER */
+    .readiness-card{background:#fff;border-radius:20px;padding:28px;box-shadow:0 4px 20px rgba(0,0,0,0.07);display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+    .readiness-ring-wrap{position:relative;width:140px;height:140px;flex-shrink:0;}
+    .readiness-ring-wrap svg{transform:rotate(-90deg);}
+    .ring-bg{fill:none;stroke:#e2e8f0;stroke-width:12;}
+    .ring-fill{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease;}
+    .ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .ring-pct{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--navy);}
+    .ring-sub{font-size:0.7rem;color:var(--muted);font-weight:600;}
+    .readiness-info h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--navy);margin-bottom:8px;}
+    .readiness-info p{font-size:0.88rem;color:var(--muted);line-height:1.5;max-width:380px;}
+    .readiness-bars{margin-top:14px;display:flex;flex-direction:column;gap:10px;}
+    .rbar-row{display:flex;align-items:center;gap:10px;}
+    .rbar-label{font-size:0.78rem;font-weight:600;color:var(--navy);width:120px;flex-shrink:0;}
+    .rbar-track{flex:1;height:8px;background:#f1f5f9;border-radius:4px;}
+    .rbar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+    .rbar-val{font-size:0.75rem;color:var(--muted);width:36px;text-align:right;flex-shrink:0;}
+
+    /* CHAPTER PROGRESS */
+    .chapter-list{display:flex;flex-direction:column;gap:12px;}
+    .ch-row{background:#fff;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+    .ch-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+    .ch-info{flex:1;}
+    .ch-title{font-weight:600;color:var(--navy);font-size:0.92rem;margin-bottom:2px;}
+    .ch-meta{font-size:0.78rem;color:var(--muted);}
+    .ch-status{font-size:0.82rem;font-weight:600;padding:4px 12px;border-radius:10px;}
+    .status-read{background:#dcfce7;color:#166534;}
+    .status-unread{background:#f1f5f9;color:var(--muted);}
+
+    /* WEEKLY CHART */
+    .chart-card{background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.06);}
+    .chart-wrap{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:16px;}
+    .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .bar-track{width:100%;flex:1;background:#f1f5f9;border-radius:6px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;}
+    .bar-fill{width:100%;border-radius:6px;transition:height 1s ease;min-height:4px;}
+    .bar-day{font-size:0.7rem;color:var(--muted);font-weight:600;}
+    .bar-val{font-size:0.68rem;color:var(--muted);}
+
+    /* MCQ HISTORY */
+    .history-list{display:flex;flex-direction:column;gap:10px;}
+    .hist-row{background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+    .hist-topic{font-weight:600;font-size:0.88rem;color:var(--navy);flex:1;}
+    .hist-score{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);}
+    .hist-acc{font-size:0.75rem;padding:3px 10px;border-radius:8px;font-weight:600;}
+    .acc-high{background:#dcfce7;color:#166534;}
+    .acc-mid{background:#fef3c7;color:#92400e;}
+    .acc-low{background:#fff1f2;color:#9f1239;}
+    .hist-xp{font-size:0.75rem;color:var(--gold);font-weight:700;}
+    .hist-time{font-size:0.72rem;color:var(--muted);}
+
+    /* BADGES */
+    .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px;}
+    .badge-item{background:#fff;border-radius:16px;padding:16px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:transform 0.2s;}
+    .badge-item:hover{transform:translateY(-3px);}
+    .badge-item.locked{opacity:0.4;filter:grayscale(1);}
+    .badge-emoji{font-size:2rem;margin-bottom:6px;}
+    .badge-name{font-size:0.72rem;font-weight:700;color:var(--navy);}
+    .badge-req{font-size:0.64rem;color:var(--muted);margin-top:2px;line-height:1.3;}
+
+    /* CASES GRID */
+    .cases-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+    .case-mini{background:#fff;border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+    .case-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .case-name{font-size:0.82rem;font-weight:600;color:var(--navy);flex:1;line-height:1.3;}
+    .case-status{font-size:0.7rem;font-weight:600;}
+
+    /* EMPTY STATE */
+    .empty{text-align:center;padding:32px;color:var(--muted);font-size:0.9rem;}
+    .empty-icon{font-size:2.5rem;margin-bottom:10px;}
+
+    /* AUTH GATE */
+    .auth-gate{text-align:center;padding:60px 24px;}
+    .auth-gate h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--navy);margin-bottom:10px;}
+    .auth-gate p{color:var(--muted);margin-bottom:20px;}
+    .auth-gate a{display:inline-block;padding:12px 28px;background:var(--navy);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;}
+
+    @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.readiness-card{flex-direction:column;}.hero-inner{flex-direction:column;}}
+  </style>
+  <!-- React 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <link rel="stylesheet" href="static/css/cq_ai_enhanced.css">
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#F5F3FF !important;background-color:#F5F3FF !important;}</style>
+</head>
+<body>
+<div class="cq-grid"></div>
+<nav class="cq-nav">
+  <div class="cq-nav-underline"></div>
+  <a href="index.html" class="cq-brand"><div class="cq-brand-icon">🏛️</div>Civica<span>Quest</span></a>
+  <div class="cq-nav-links">
+    <a href="index.html" class="cq-nav-link">🏠 Dashboard</a>
+    <a href="civics.html" class="cq-nav-link active">📚 <span data-i18n="nav.civics.label">Civics</span></a>
+    <a href="quiz-game.html" class="cq-nav-link">📜 Quiz</a>
+    <a href="parliament-simulator.html" class="cq-nav-link">🏛️ Parliament</a>
+  </div>
+  <div class="cq-nav-right"><a href="civics.html" class="cq-back">← Civics Hub</a></div>
+</nav>
+<nav class="top-nav">
+  <a href="civics.html"><i class="fas fa-arrow-left"></i> Civic Hub</a>
+  <span class="ttl">📊 My Civic Progress</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <h1>Your Learning Dashboard</h1>
+      <p id="heroSub">Loading your progress from the cloud…</p>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div class="streak-chip"><span style="font-size:1.2rem;">🔥</span> <span id="streakNum">0</span>-day streak</div>
+      <div class="user-level">
+        <div class="level-num" id="levelNum">1</div>
+        <div class="level-label">Civic Level</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mainArea">
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-text">Fetching your progress from Firestore…</div>
+  </div>
+</div>
+
+<script type="module">
+import { auth } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  loadCivicProgress, loadWeeklyActivity, loadMCQHistory,
+  computeReadiness
+} from "./civic-db.js";
+
+// ── Badge definitions ──────────────────────────────────────────────────────
+const BADGES = [
+  { id:'civic_first_chapter', emoji:'📖', name:'First Chapter', req:'Read 1 chapter',    check: p => (p.chaptersRead||[]).length >= 1 },
+  { id:'civic_all_chapters',  emoji:'📚', name:'Scholar',       req:'Read all 4 chapters', check: p => (p.chaptersRead||[]).length >= 4 },
+  { id:'civic_mcq_10',        emoji:'🎯', name:'Quiz Starter',  req:'Attempt 10 MCQs',  check: p => (p.mcqAttempted||0) >= 10 },
+  { id:'civic_mcq_50',        emoji:'🏹', name:'MCQ Expert',    req:'Attempt 50 MCQs',  check: p => (p.mcqAttempted||0) >= 50 },
+  { id:'civic_mcq_100',       emoji:'🏆', name:'MCQ Master',    req:'Attempt 100 MCQs', check: p => (p.mcqAttempted||0) >= 100 },
+  { id:'civic_accuracy_80',   emoji:'🌟', name:'Sharp Mind',    req:'80%+ MCQ accuracy', check: p => p.mcqAttempted > 5 && (p.mcqCorrect/p.mcqAttempted) >= 0.8 },
+  { id:'civic_case_3',        emoji:'⚖️', name:'Case Reader',   req:'Study 3 cases',    check: p => (p.casesStudied||[]).length >= 3 },
+  { id:'civic_case_all',      emoji:'🏛️', name:'Judgement Pro', req:'Study all 12 cases', check: p => (p.casesStudied||[]).length >= 12 },
+  { id:'civic_streak_3',      emoji:'🔥', name:'On Fire',       req:'3-day study streak', check: p => (p.studyStreak||0) >= 3 },
+  { id:'civic_streak_7',      emoji:'💎', name:'Week Warrior',  req:'7-day streak',     check: p => (p.studyStreak||0) >= 7 },
+  { id:'civic_xp_100',        emoji:'⭐', name:'Rising Star',   req:'Earn 100 Civic XP', check: p => (p.totalCivicXP||0) >= 100 },
+  { id:'civic_ready',         emoji:'🎓', name:'Exam Ready',    req:'80%+ readiness score', check: (p,r) => r >= 80 }
+];
+
+const CHAPTERS = [
+  { id:'constitution',       icon:'📜', bg:'#eff6ff', title:'The Indian Constitution',       class9:'Part of Class 9 Chapter 1' },
+  { id:'fundamental-rights', icon:'⚖️', bg:'#f0fdf4', title:'Fundamental Rights (Art 12–35)', class9:'Class 9 & Class 11' },
+  { id:'parliament',         icon:'🏛️', bg:'#f5f3ff', title:'Parliament & Law-making',        class9:'Class 11 Chapter 5' },
+  { id:'elections-panchayat',icon:'🗳️', bg:'#fff7ed', title:'Elections, ECI & Panchayati Raj', class9:'Class 9 Chapter 3 & 6' }
+];
+
+const CASES = [
+  'Kesavananda Bharati (1973)','Maneka Gandhi (1978)','Vishaka (1997)',
+  'NALSA — Transgender (2014)','Right to Privacy (2017)','RTI — MGNREGS Fraud',
+  'RTI — Army Welfare Fund','RTI — Lokpal Movement','Niyamgiri Gram Sabha',
+  'Kerala COVID Response','MCC Violations 2024','Article 370 Abrogation'
+];
+const CASE_IDS = [
+  'kesavananda','maneka','vishaka','nalsa','puttaswamy','rti-shehla',
+  'rti-army','rti-lokpal','gram-niyamgiri','gram-kerala','mcc-violation','art370'
+];
+
+// ── Auth gate ──────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    document.getElementById('mainArea').innerHTML = `
+      <div class="auth-gate">
+        <div style="font-size:3rem;margin-bottom:12px;">🔐</div>
+        <h2>Sign In to View Progress</h2>
+        <p>Your civic learning progress is saved to your account. Log in to access your dashboard.</p>
+        <a href="auth.html">Log In / Sign Up →</a>
+      </div>`;
+    return;
+  }
+  document.getElementById('heroSub').textContent = `Welcome back, ${user.displayName || user.email}`;
+
+  // Load all data in parallel
+  const [progress, weeklyAct, mcqHistory] = await Promise.all([
+    loadCivicProgress(),
+    loadWeeklyActivity(),
+    loadMCQHistory(10)
+  ]);
+
+  const readiness = computeReadiness(progress);
+  const accuracy = progress.mcqAttempted > 0
+    ? Math.round((progress.mcqCorrect / progress.mcqAttempted) * 100) : 0;
+
+  // Compute civic level from totalCivicXP
+  const cxp = progress.totalCivicXP || 0;
+  const civicLevel = Math.floor(cxp / 50) + 1;
+  document.getElementById('levelNum').textContent = civicLevel;
+  document.getElementById('streakNum').textContent = progress.studyStreak || 0;
+
+  // ── Determine earned badges ──────────────────────────────────────────────
+  const earnedBadges = BADGES.filter(b => b.check(progress, readiness)).map(b => b.id);
+
+  // ── Render full page ─────────────────────────────────────────────────────
+  document.getElementById('mainArea').innerHTML = `
+    <div class="container">
+
+      <!-- KPIs -->
+      <div class="section-title">📈 Key Stats</div>
+      <div class="kpi-grid">
+        <div class="kpi k1">
+          <div class="kpi-icon">📖</div>
+          <div class="kpi-val">${(progress.chaptersRead||[]).length}<span style="font-size:1rem;color:var(--muted);">/4</span></div>
+          <div class="kpi-label">Chapters Read</div>
+          <div class="kpi-sub">${Math.round(((progress.chaptersRead||[]).length/4)*100)}% complete</div>
+        </div>
+        <div class="kpi k2">
+          <div class="kpi-icon">🎯</div>
+          <div class="kpi-val">${progress.mcqAttempted||0}</div>
+          <div class="kpi-label">MCQs Attempted</div>
+          <div class="kpi-sub">${accuracy}% accuracy</div>
+        </div>
+        <div class="kpi k3">
+          <div class="kpi-icon">🏛️</div>
+          <div class="kpi-val">${(progress.casesStudied||[]).length}<span style="font-size:1rem;color:var(--muted);">/12</span></div>
+          <div class="kpi-label">Cases Studied</div>
+          <div class="kpi-sub">${earnedBadges.length} badges earned</div>
+        </div>
+        <div class="kpi k4">
+          <div class="kpi-icon">⭐</div>
+          <div class="kpi-val">${cxp}</div>
+          <div class="kpi-label">Civic XP Earned</div>
+          <div class="kpi-sub">Level ${civicLevel} • ${Math.max(0,(civicLevel*50)-cxp)} XP to next</div>
+        </div>
+      </div>
+
+      <!-- EXAM READINESS -->
+      <div class="section-title">🎓 Exam Readiness</div>
+      <div class="readiness-card">
+        <div class="readiness-ring-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="ring-bg" cx="70" cy="70" r="58"/>
+            <circle class="ring-fill" id="readRing" cx="70" cy="70" r="58"
+              stroke="${readiness >= 80 ? '#059669' : readiness >= 50 ? '#f59e0b' : '#e11d48'}"
+              stroke-dasharray="${2*Math.PI*58}"
+              stroke-dashoffset="${2*Math.PI*58}"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-pct" id="readPct">0%</div>
+            <div class="ring-sub">READINESS</div>
+          </div>
+        </div>
+        <div class="readiness-info">
+          <h3>${readiness >= 80 ? '🎉 Exam Ready!' : readiness >= 50 ? '📈 Making Progress' : '📚 Keep Studying'}</h3>
+          <p>${readiness >= 80
+            ? 'You\'re well-prepared for Class 9–12 Polity exams. Keep reviewing MCQs and case studies to maintain your edge.'
+            : readiness >= 50
+            ? 'Good progress! Focus on completing all chapter notes and improving MCQ accuracy to cross 80%.'
+            : 'Start with Chapter Notes, then attempt MCQs. Each activity boosts your readiness score.'}</p>
+          <div class="readiness-bars">
+            ${renderRbar('Chapter Notes (30%)', Math.round(((progress.chaptersRead||[]).length/4)*100), '#0ea5e9')}
+            ${renderRbar('MCQ Accuracy (50%)', accuracy, '#e11d48')}
+            ${renderRbar('Case Studies (20%)', Math.round(((progress.casesStudied||[]).length/12)*100), '#059669')}
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEKLY CHART -->
+      <div class="section-title">📅 This Week's Activity</div>
+      <div class="chart-card">
+        <div style="font-size:0.85rem;color:var(--muted);">XP earned per day (last 7 days)</div>
+        <div class="chart-wrap" id="chartWrap"></div>
+      </div>
+
+      <!-- CHAPTER PROGRESS -->
+      <div class="section-title">📖 Chapter Notes Progress</div>
+      <div class="chapter-list">
+        ${CHAPTERS.map(c => {
+          const isRead = (progress.chaptersRead||[]).includes(c.id);
+          return `<div class="ch-row">
+            <div class="ch-icon-wrap" style="background:${c.bg}">${c.icon}</div>
+            <div class="ch-info">
+              <div class="ch-title">${c.title}</div>
+              <div class="ch-meta">${c.class9}</div>
+            </div>
+            <span class="ch-status ${isRead?'status-read':'status-unread'}">${isRead?'✅ Read':'Not yet'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- MCQ HISTORY -->
+      <div class="section-title">🎯 Recent MCQ Sessions</div>
+      ${mcqHistory.length === 0
+        ? `<div class="empty"><div class="empty-icon">📋</div>No MCQ sessions yet — <a href="civic-mcq.html" style="color:var(--sky)">Start practising!</a></div>`
+        : `<div class="history-list">${mcqHistory.map(h => {
+            const acc = Math.round(h.accuracy);
+            const ts = h.timestamp?.toDate ? h.timestamp.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+            return `<div class="hist-row">
+              <div style="font-size:1.2rem;">${topicIcon(h.topic)}</div>
+              <div class="hist-topic">${h.topic||'Mixed'}</div>
+              <div class="hist-score">${h.score}/${h.total}</div>
+              <span class="hist-acc ${acc>=80?'acc-high':acc>=50?'acc-mid':'acc-low'}">${acc}%</span>
+              <span class="hist-xp">+${h.xpEarned} XP</span>
+              <span class="hist-time">${ts}</span>
+            </div>`;
+          }).join('')}</div>`}
+
+      <!-- CASE STUDIES -->
+      <div class="section-title">🏛️ Case Studies Progress</div>
+      <div class="cases-mini">
+        ${CASES.map((name,i) => {
+          const studied = (progress.casesStudied||[]).includes(CASE_IDS[i]);
+          return `<div class="case-mini">
+            <div class="case-dot" style="background:${studied?'var(--emerald)':'#e2e8f0'}"></div>
+            <div class="case-name">${name}</div>
+            <span class="case-status" style="color:${studied?'var(--emerald)':'var(--muted)'}">${studied?'✅':'—'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- BADGES -->
+      <div class="section-title">🏅 Achievements</div>
+      <div class="badge-grid">
+        ${BADGES.map(b => {
+          const earned = earnedBadges.includes(b.id);
+          return `<div class="badge-item ${earned?'':'locked'}" title="${earned?'Earned!':b.req}">
+            <div class="badge-emoji">${b.emoji}</div>
+            <div class="badge-name">${b.name}</div>
+            <div class="badge-req">${earned?'✅ Earned':b.req}</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div style="height:48px;"></div>
+    </div>`;
+
+  // Animate readiness ring
+  requestAnimationFrame(() => {
+    const ring = document.getElementById('readRing');
+    const c = 2 * Math.PI * 58;
+    ring.style.strokeDashoffset = c - (c * readiness / 100);
+    let n = 0;
+    const pctEl = document.getElementById('readPct');
+    const step = () => { if(n<readiness){ n++; pctEl.textContent=n+'%'; requestAnimationFrame(step); } };
+    step();
+  });
+
+  // Render weekly chart
+  const maxXP = Math.max(...weeklyAct.map(d => d.xp), 1);
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const today = new Date().getDay();
+  document.getElementById('chartWrap').innerHTML = weeklyAct.map((d,i) => {
+    const h = Math.round((d.xp / maxXP) * 100);
+    const dayName = days[(new Date(d.date).getDay()+6)%7];
+    const isToday = d.date === new Date().toISOString().split('T')[0];
+    return `<div class="bar-col">
+      <div class="bar-val">${d.xp||''}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="height:${h}%;background:${isToday?'var(--sky)':'#c7d2fe'}"></div>
+      </div>
+      <div class="bar-day" style="color:${isToday?'var(--sky)':'var(--muted)'}">${dayName}</div>
+    </div>`;
+  }).join('');
+});
+
+function renderRbar(label, pct, color) {
+  return `<div class="rbar-row">
+    <div class="rbar-label">${label}</div>
+    <div class="rbar-track"><div class="rbar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="rbar-val">${pct}%</div>
+  </div>`;
+}
+function topicIcon(t='') {
+  const map = {'Constitution':'📜','Fundamental Rights':'⚖️','Parliament':'🏛️','Elections & ECI':'🗳️','Panchayati Raj':'🌾','All Topics':'📋'};
+  return map[t] || '📋';
+}
+</script>
+<script src="static/js/cq_ai_enhanced.js"></script>
+<script src="static/js/cq_lang.js"></script>
+</body>
+</html>

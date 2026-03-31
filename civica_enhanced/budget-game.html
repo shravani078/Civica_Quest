@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CivicSense — Governance Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0eb7e5;
+  --bg2: #51d0ed;
+  --white: #eaf87f;
+  --border: #e0ddd8;
+  --border2: #d0ccc5;
+  --text: #1c1a17;
+  --text2: #5c574f;
+  --text3: #9c968d;
+  --ink: #2c2822;
+  --blue: #2563d4;
+  --blue-lt: #eff4ff;
+  --blue-md: #c7d9ff;
+  --green: #1a7a4a;
+  --green-lt: #edfaf3;
+  --green-md: #b6ebd3;
+  --amber: #c47a0a;
+  --amber-lt: #fef8ec;
+  --amber-md: #fde4a0;
+  --red: #c0392b;
+  --red-lt: #fef0ef;
+  --red-md: #fac8c4;
+  --purple: #6d3fc0;
+  --purple-lt: #f3effd;
+  --teal: #0e7490;
+  --teal-lt: #ecfbff;
+  --shadow: 0 2px 10px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.10);
+  --radius: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#F5F3FF;color:var(--text);min-height:100vh;overflow-x:hidden;}
+h1,h2,h3,h4,h5{font-family:'Playfair Display',serif;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:#F5F3FF;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── LAYOUT ── */
+.app{display:flex;min-height:100vh;}
+.sidebar{
+  width:230px;min-height:100vh;
+  background:var(--white);
+  border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;bottom:0;
+  overflow-y:auto;z-index:100;
+  display:flex;flex-direction:column;
+}
+.sidebar-head{
+  padding:22px 20px 18px;
+  border-bottom:1px solid var(--border);
+}
+.logo-mark{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.logo-icon{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.logo-text h1{font-size:17px;color:var(--ink);letter-spacing:-.3px;}
+.logo-text p{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.fund-pill{
+  margin:10px 20px 0;
+  background:var(--green-lt);border:1px solid var(--green-md);
+  border-radius:8px;padding:8px 12px;
+}
+.fund-pill .fl{font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.6px;}
+.fund-pill .fv{font-size:15px;font-weight:700;color:var(--green);font-family:'Playfair Display',serif;}
+
+.nav-body{flex:1;padding:10px 10px;}
+.nav-sec-label{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1.4px;text-transform:uppercase;padding:12px 10px 4px;}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:8px;
+  cursor:pointer;font-size:13px;font-weight:600;
+  color:var(--text2);transition:all .15s;margin-bottom:1px;
+}
+.nav-item:hover{background:#F5F3FF;color:var(--text);}
+.nav-item.active{background:var(--ink);color:#fff;}
+.nav-item .ni{font-size:15px;width:18px;text-align:center;}
+
+.main{margin-left:230px;flex:1;padding:32px;max-width:1100px;}
+
+/* ── PAGE ── */
+.page-fade{animation:pfade .3s ease forwards;}
+@keyframes pfade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.ph{margin-bottom:24px;}
+.ph h2{font-size:26px;color:var(--ink);}
+.ph p{font-size:13.5px;color:var(--text2);margin-top:3px;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+
+/* ── INPUTS ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;letter-spacing:.3px;}
+.field input,.field select{
+  width:100%;background:#F5F3FF;border:1.5px solid var(--border);
+  color:var(--text);padding:9px 13px;border-radius:8px;
+  font-family:'Nunito',sans-serif;font-size:14px;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);background:var(--white);}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 20px;border-radius:8px;font-size:13.5px;
+  font-weight:700;cursor:pointer;border:none;
+  transition:all .18s;font-family:'Nunito',sans-serif;
+}
+.btn-ink{background:var(--ink);color:#fff;}
+.btn-ink:hover{background:#3d3630;transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.15);}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{background:#1e50b8;transform:translateY(-1px);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#155f39;}
+.btn-outline{background:transparent;border:1.5px solid var(--border2);color:var(--text2);}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+.btn-full{width:100%;justify-content:center;}
+
+/* ── STATS ── */
+.stat-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 18px;
+  box-shadow:var(--shadow);
+}
+.stat-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
+.stat-val{font-size:24px;font-weight:700;font-family:'Playfair Display',serif;margin-top:3px;}
+.stat-sub{font-size:11.5px;color:var(--text2);margin-top:2px;}
+
+/* ── ROW ── */
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+.rrow:last-child{border-bottom:none;}
+.rrow .rl{color:var(--text2);}
+.rrow .rv{font-weight:700;font-family:'Playfair Display',serif;font-size:15px;}
+.c-blue{color:var(--blue);}
+.c-green{color:var(--green);}
+.c-red{color:var(--red);}
+.c-amber{color:var(--amber);}
+.c-purple{color:var(--purple);}
+.c-teal{color:var(--teal);}
+
+/* ── PROGRESS ── */
+.pbar-wrap{margin-bottom:12px;}
+.pbar-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--text2);}
+.pbar{height:8px;background:#F5F3FF;border-radius:4px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.b-blue{background:var(--blue-lt);color:var(--blue);}
+.b-green{background:var(--green-lt);color:var(--green);}
+.b-amber{background:var(--amber-lt);color:var(--amber);}
+.b-red{background:var(--red-lt);color:var(--red);}
+.b-purple{background:var(--purple-lt);color:var(--purple);}
+.b-teal{background:var(--teal-lt);color:var(--teal);}
+.b-ink{background:#F5F3FF;color:var(--ink);}
+
+/* ── ALERT ── */
+.alert{padding:11px 14px;border-radius:8px;font-size:13px;font-weight:500;line-height:1.55;}
+.al-blue{background:var(--blue-lt);border:1px solid var(--blue-md);color:var(--blue);}
+.al-green{background:var(--green-lt);border:1px solid var(--green-md);color:var(--green);}
+.al-amber{background:var(--amber-lt);border:1px solid var(--amber-md);color:var(--amber);}
+.al-red{background:var(--red-lt);border:1px solid var(--red-md);color:var(--red);}
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:14px 0;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:3px;background:#F5F3FF;padding:3px;border-radius:9px;margin-bottom:18px;}
+.tab{flex:1;padding:7px 10px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;text-align:center;color:var(--text2);transition:all .15s;border:none;background:transparent;font-family:'Nunito',sans-serif;}
+.tab.active{background:var(--white);color:var(--ink);box-shadow:var(--shadow);}
+
+/* ── HOME HERO ── */
+.hero{
+  background:var(--ink);border-radius:18px;
+  padding:44px 48px;position:relative;overflow:hidden;
+  margin-bottom:24px;
+}
+.hero-dots{
+  position:absolute;top:0;right:0;bottom:0;width:280px;
+  background-image:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.85);padding:4px 13px;border-radius:20px;
+  font-size:11px;font-weight:700;margin-bottom:16px;letter-spacing:.4px;
+}
+.hero h1{font-size:38px;color:#fff;line-height:1.1;margin-bottom:12px;}
+.hero h1 span{color:#f0c060;}
+.hero p{font-size:14.5px;color:rgba(255,255,255,.65);max-width:480px;line-height:1.7;margin-bottom:26px;}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-white{background:#fff;color:var(--ink);font-weight:700;}
+.btn-white:hover{background:#f5f4f0;transform:translateY(-1px);}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25);}
+.btn-ghost:hover{background:rgba(255,255,255,.18);}
+
+.mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+.mod-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:18px;cursor:pointer;
+  transition:all .2s;
+}
+.mod-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.mod-icon{font-size:26px;margin-bottom:10px;}
+.mod-card h4{font-size:13.5px;margin-bottom:4px;}
+.mod-card p{font-size:11.5px;color:var(--text2);line-height:1.5;}
+
+/* ── SHOP ── */
+.shop-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 14px;background:#F5F3FF;border:1.5px solid var(--border);
+  border-radius:9px;margin-bottom:7px;cursor:pointer;transition:all .15s;
+}
+.shop-item:hover{border-color:var(--blue);}
+.shop-item.sel{border-color:var(--green);background:var(--green-lt);}
+.bill-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;border-bottom:1px solid var(--border);}
+.bill-row:last-child{border-bottom:none;}
+
+/* ── VOTE ── */
+.policy-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:22px;margin-bottom:14px;
+  box-shadow:var(--shadow);transition:border-color .2s;
+}
+.policy-card:hover{border-color:var(--border2);}
+.vbtn{
+  flex:1;padding:11px;border-radius:9px;
+  font-family:'Playfair Display',serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .18s;border:2px solid transparent;
+}
+.vbtn.for{background:var(--green-lt);border-color:var(--green-md);color:var(--green);}
+.vbtn.for:hover,.vbtn.for.voted{background:var(--green);color:#fff;border-color:var(--green);}
+.vbtn.against{background:var(--red-lt);border-color:var(--red-md);color:var(--red);}
+.vbtn.against:hover,.vbtn.against.voted{background:var(--red);color:#fff;border-color:var(--red);}
+.vbtn.abstain{background:var(--amber-lt);border-color:var(--amber-md);color:var(--amber);}
+.vbtn.abstain:hover,.vbtn.abstain.voted{background:var(--amber);color:#fff;border-color:var(--amber);}
+
+/* ── BUDGET ── */
+.budget-layout{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:start;}
+.notes-panel{
+  background:var(--amber-lt);border:1.5px solid var(--amber-md);
+  border-radius:var(--radius);padding:18px;position:sticky;top:20px;
+}
+.notes-panel h4{font-size:14px;color:var(--amber);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.note-step{display:flex;gap:10px;margin-bottom:13px;align-items:flex-start;}
+.note-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--amber);color:#fff;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.note-text{font-size:12px;color:#7a5010;line-height:1.55;font-weight:500;}
+.note-tip{
+  margin-top:14px;padding:10px 12px;
+  background:rgba(196,122,10,.1);border-radius:8px;
+  font-size:11.5px;color:#7a5010;line-height:1.5;
+}
+
+.slider-wrap{margin-bottom:18px;}
+.slider-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.slider-name{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.slider-val{font-size:12.5px;font-weight:700;}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;background:#F5F3FF;border-radius:3px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+
+/* Budget verdict */
+.verdict-box{
+  border-radius:var(--radius);padding:22px;text-align:center;
+  border:2px solid;margin-top:16px;
+}
+.verdict-box .v-icon{font-size:40px;margin-bottom:10px;}
+.verdict-box .v-grade{font-size:22px;font-family:'Playfair Display',serif;font-weight:700;margin-bottom:6px;}
+.verdict-box .v-quote{font-size:13px;line-height:1.65;font-style:italic;max-width:360px;margin:0 auto 8px;}
+.verdict-box .v-sub{font-size:11.5px;font-weight:600;opacity:.75;}
+
+/* ── CHART ── */
+.ch-wrap{height:200px;position:relative;}
+
+/* ── GAUGE ── */
+.gauge-c{text-align:center;}
+
+/* ── DASHBOARD ── */
+.score-hero{
+  background:var(--ink);border-radius:var(--radius);
+  padding:32px;text-align:center;color:#fff;margin-bottom:18px;
+}
+.score-hero .sh-val{font-size:72px;font-family:'Playfair Display',serif;font-weight:700;color:#f0c060;line-height:1;}
+.score-hero .sh-label{font-size:14px;opacity:.65;margin-top:4px;}
+.score-hero .sh-grade{font-size:16px;margin-top:10px;opacity:.9;}
+.stars{display:flex;gap:3px;justify-content:center;margin-top:8px;}
+.star{font-size:24px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .sidebar{width:190px;}
+  .main{margin-left:190px;padding:20px;}
+  .mod-grid{grid-template-columns:repeat(2,1fr);}
+  .g4{grid-template-columns:repeat(2,1fr);}
+  .budget-layout{grid-template-columns:1fr;}
+  .notes-panel{position:static;}
+}
+@media(max-width:620px){
+  .sidebar{transform:translateX(-100%);}
+  .main{margin-left:0;}
+  .g2,.g3{grid-template-columns:1fr;}
+  .hero{padding:28px;}
+  .hero h1{font-size:26px;}
+}
+</style>
+<style>/* UNIVERSAL-BG-OVERRIDE */ html,body{background:#F5F3FF !important;background-color:#F5F3FF !important;}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+/* ── HELPERS ── */
+const fmt=(n)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
+const fmtN=(n)=>new Intl.NumberFormat('en-IN',{maximumFractionDigits:0}).format(n);
+
+function calcIncomeTax(income){
+  if(income<=250000) return 0;
+  if(income<=500000) return Math.round((income-250000)*.05);
+  if(income<=1000000) return Math.round(12500+(income-500000)*.20);
+  return Math.round(112500+(income-1000000)*.30);
+}
+
+/* ── SHOP DATA ── */
+const SHOP_ITEMS=[
+  {id:1,name:'Rice & Wheat 5kg',cat:'Essential',price:250,gst:5,icon:'🌾'},
+  {id:2,name:'Cooking Oil 1L',cat:'Essential',price:180,gst:5,icon:'🫙'},
+  {id:3,name:'Fruits & Vegetables',cat:'Essential',price:120,gst:5,icon:'🥦'},
+  {id:4,name:'Baby Formula 400g',cat:'Essential',price:680,gst:5,icon:'🍼'},
+  {id:5,name:'Branded Shirt',cat:'Standard',price:1200,gst:12,icon:'👕'},
+  {id:6,name:'Restaurant Meal',cat:'Standard',price:600,gst:12,icon:'🍽️'},
+  {id:7,name:'Footwear',cat:'Standard',price:2400,gst:12,icon:'👟'},
+  {id:8,name:'Hotel Stay/Night',cat:'Standard',price:3500,gst:12,icon:'🏨'},
+  {id:9,name:'Smartphone',cat:'Electronics',price:18000,gst:18,icon:'📱'},
+  {id:10,name:'Laptop',cat:'Electronics',price:65000,gst:18,icon:'💻'},
+  {id:11,name:'Smart TV 55"',cat:'Electronics',price:55000,gst:18,icon:'📺'},
+  {id:12,name:'Air Conditioner',cat:'Electronics',price:42000,gst:18,icon:'❄️'},
+  {id:13,name:'Luxury Watch',cat:'Luxury',price:80000,gst:28,icon:'⌚'},
+  {id:14,name:'Premium Car',cat:'Luxury',price:1500000,gst:28,icon:'🚗'},
+  {id:15,name:'Aerated Drinks',cat:'Luxury',price:90,gst:28,icon:'🥤'},
+  {id:16,name:'Tobacco Products',cat:'Luxury',price:350,gst:28,icon:'🚬'},
+];
+
+/* ── POLICY DATA (expanded) ── */
+const POLICIES=[
+  {
+    id:1,icon:'💼',title:'Raise Top Income Tax Slab to 35%',
+    desc:'Proposal to increase the highest income tax slab from 30% to 35% for income above ₹10 lakh. Revenue generated will fund public infrastructure.',
+    party:'Finance Ministry',scope:'National',
+    pros:['Increases government revenue','Reduces income inequality','Funds public infrastructure'],
+    cons:['May reduce high-income consumer spending','Could discourage foreign talent','Complexity in tax filing'],
+    impH:-10,impD:15,impL:0,impE:8,
+  },
+  {
+    id:2,icon:'📱',title:'Reduce GST on Electronics to 12%',
+    desc:'Cut electronics GST from 18% to 12% to make technology accessible to middle-class households and boost digital adoption across India.',
+    party:'Commerce Ministry',scope:'National',
+    pros:['Boosts digital adoption','Reduces burden on middle class','Increases device sales volume'],
+    cons:['Reduces indirect tax revenue','May widen fiscal deficit','Benefit mostly urban population'],
+    impH:12,impD:-5,impL:5,impE:-6,
+  },
+  {
+    id:3,icon:'📚',title:'Increase Education Budget by 25%',
+    desc:'Allocate an additional 25% to the education sector, covering new school buildings, teacher salaries, digital classrooms, and scholarship programs.',
+    party:'Education Ministry',scope:'National',
+    pros:['Long-term human capital growth','Improves literacy rates','Reduces dropout rates'],
+    cons:['High short-term fiscal cost','Takes years to show results','Risk of misallocation'],
+    impH:7,impD:18,impL:20,impE:12,
+  },
+  {
+    id:4,icon:'💳',title:'Universal Basic Income ₹3,000/month',
+    desc:'Introduce a monthly transfer of ₹3,000 to every Indian citizen below the poverty line — approximately 270 million beneficiaries.',
+    party:'Welfare Commission',scope:'National',
+    pros:['Immediate poverty alleviation','Boosts rural consumption','Simple to administer'],
+    cons:['Enormous fiscal burden','Potential inflation risk','May reduce work incentives'],
+    impH:20,impD:-8,impL:0,impE:4,
+  },
+  {
+    id:5,icon:'🏗️',title:'National Infrastructure Fund — ₹10L Cr',
+    desc:'Launch a ₹10 lakh crore 5-year infrastructure push: 50,000 km highways, 100 new airports, metro rail in 30 cities.',
+    party:'Infrastructure Ministry',scope:'National',
+    pros:['Massive job creation','Connectivity for rural areas','Long-term GDP multiplier'],
+    cons:['Huge debt financing required','Land acquisition challenges','Environmental concerns'],
+    impH:5,impD:25,impL:0,impE:10,
+  },
+  {
+    id:6,icon:'🏥',title:'Free Healthcare for All Citizens',
+    desc:'Universal healthcare coverage — free outpatient treatment, essential medicines, and emergency care at all government hospitals nationwide.',
+    party:'Health Ministry',scope:'National',
+    pros:['Reduces out-of-pocket expenses','Improves life expectancy','Equal access for all'],
+    cons:['Enormous recurring cost','Overburdened hospitals','Quality may suffer'],
+    impH:18,impD:6,impL:0,impE:15,
+  },
+  {
+    id:7,icon:'🌱',title:'Abolish GST on Organic/Eco Products',
+    desc:'Remove GST on certified organic food, solar panels, and eco-friendly products to incentivise sustainable consumption and green transition.',
+    party:'Environment Ministry',scope:'National',
+    pros:['Promotes sustainability','Grows green industry','Health benefits'],
+    cons:['Certification loopholes','Revenue loss','Limited initial impact'],
+    impH:8,impD:4,impL:0,impE:3,
+  },
+  {
+    id:8,icon:'🎓',title:'Free University Education for All',
+    desc:'Eliminate tuition fees at all central and state government universities. Fund the gap through corporate education cess of 2%.',
+    party:'Higher Education Board',scope:'National',
+    pros:['Removes financial barrier','Increases higher education enrollment','Boosts skilled workforce'],
+    cons:['2% cess impacts businesses','Quality vs quantity tradeoff','Private university competition'],
+    impH:14,impD:12,impL:18,impE:10,
+  },
+];
+
+/* ── DONUT CHART ── */
+function DonutChart({data}){
+  const ref=useRef(null);const ch=useRef(null);
+  useEffect(()=>{
+    if(!ref.current)return;
+    if(ch.current)ch.current.destroy();
+    ch.current=new Chart(ref.current,{
+      type:'doughnut',
+      data:{labels:data.map(d=>d.label),datasets:[{data:data.map(d=>d.value),backgroundColor:data.map(d=>d.color),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+      options:{cutout:'66%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>` ${c.label}: ${fmt(c.raw)}`}}}}
+    });
+    return()=>{if(ch.current)ch.current.destroy();};
+  },[JSON.stringify(data)]);
+  return <div className="ch-wrap"><canvas ref={ref}/></div>;
+}
+
+function BarChart({data}){
+  const ref=useRef(null);const ch=useRef(null);
+  useEffect(()=>{
+    if(!ref.current)return;
+    if(ch.current)ch.current.destroy();
+    ch.current=new Chart(ref.current,{
+      type:'bar',
+      data:{labels:data.map(d=>d.label),datasets:[{data:data.map(d=>d.value),backgroundColor:data.map(d=>d.color+'33'),borderColor:data.map(d=>d.color),borderWidth:2,borderRadius:6}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9c968d',font:{size:11,family:'Nunito'}},grid:{display:false}},y:{ticks:{color:'#9c968d',font:{size:10,family:'Nunito'},callback:v=>fmt(v)},grid:{color:'#edecea'}}}}
+    });
+    return()=>{if(ch.current)ch.current.destroy();};
+  },[JSON.stringify(data)]);
+  return <div className="ch-wrap"><canvas ref={ref}/></div>;
+}
+
+/* ── HOME ── */
+function HomePage({onNav,govFund}){
+  const mods=[
+    {id:'tax',icon:'💼',title:'Income Tax',desc:'Slab-based tax calculator with breakdown'},
+    {id:'gst',icon:'🧾',title:'GST Calculator',desc:'Calculate GST on any product or service'},
+    {id:'shop',icon:'🛒',title:'GST Shopping',desc:'Shop items — GST applied automatically'},
+    {id:'budget',icon:'📊',title:'Budget Allocator',desc:'Act as Finance Minister, allocate funds'},
+    {id:'vote',icon:'🗳️',title:'Policy Voting',desc:'Vote on 8 national policies & see outcomes'},
+    {id:'dashboard',icon:'📈',title:'Dashboard',desc:'Full governance report & final rating'},
+  ];
+  return(
+    <div className="page-fade">
+      <div className="hero">
+        <div className="hero-dots"/>
+        <div className="hero-badge">🏛️ India Governance Simulation</div>
+        <h1>Learn Governance by<br/><span>Experiencing It</span></h1>
+        <p>Simulate taxes, allocate budgets, vote on policies and watch your decisions shape a nation's future. Civic learning made interactive.</p>
+        <div className="hero-btns">
+          <button className="btn btn-white" onClick={()=>onNav('tax')}>▶ Start Simulating</button>
+          <button className="btn btn-ghost" onClick={()=>onNav('vote')}>🗳️ Vote on Policies</button>
+        </div>
+      </div>
+      {govFund>0&&<div className="alert al-green" style={{marginBottom:'18px'}}>🏦 Government Fund accumulated: <strong>{fmt(govFund)}</strong> in this session.</div>}
+      <div style={{fontSize:'11px',fontWeight:700,color:'var(--text3)',letterSpacing:'1.2px',textTransform:'uppercase',marginBottom:'12px'}}>Simulation Modules</div>
+      <div className="mod-grid">
+        {mods.map(m=>(
+          <div key={m.id} className="mod-card" onClick={()=>onNav(m.id)}>
+            <div className="mod-icon">{m.icon}</div>
+            <h4>{m.title}</h4>
+            <p>{m.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── TAX PAGE ── */
+function TaxPage({onTaxAdded}){
+  const [income,setIncome]=useState('');
+  const [role,setRole]=useState('citizen');
+  const [res,setRes]=useState(null);
+  const calc=()=>{
+    const inc=parseFloat(income)||0;
+    const tax=calcIncomeTax(inc);
+    const cess=Math.round(tax*.04);
+    setRes({inc,tax,cess,net:inc-tax-cess,central:Math.round(tax*.6),state:Math.round(tax*.4)});
+    onTaxAdded(tax+cess);
+  };
+  const slabs=[
+    {range:'₹0 – ₹2.5 Lakh',rate:'NIL',color:'var(--green)'},
+    {range:'₹2.5L – ₹5 Lakh',rate:'5%',color:'var(--blue)'},
+    {range:'₹5L – ₹10 Lakh',rate:'20%',color:'var(--amber)'},
+    {range:'Above ₹10 Lakh',rate:'30%',color:'var(--red)'},
+  ];
+  const sectors=[
+    {l:'📚 Education',p:25,c:'var(--blue)'},
+    {l:'🏥 Healthcare',p:20,c:'var(--green)'},
+    {l:'🛡️ Defence',p:30,c:'var(--red)'},
+    {l:'🏗️ Infrastructure',p:25,c:'var(--purple)'},
+  ];
+  return(
+    <div className="page-fade">
+      <div className="ph"><h2>💼 Income Tax Calculator</h2><p>India's simplified slab-based personal income tax</p></div>
+      <div className="g2">
+        <div>
+          <div className="card" style={{marginBottom:'16px'}}>
+            <div className="card-title">Enter Your Details</div>
+            <div className="field">
+              <label>Your Role</label>
+              <select value={role} onChange={e=>setRole(e.target.value)}>
+                <option value="citizen">👤 Salaried Citizen</option>
+                <option value="business">🏢 Business Owner</option>
+                <option value="freelance">💻 Freelancer</option>
+              </select>
+            </div>
+            <div className="field">
+              <label>Annual Income (₹)</label>
+              <input type="number" placeholder="e.g. 8,00,000" value={income} onChange={e=>setIncome(e.target.value)}/>
+            </div>
+            <button className="btn btn-ink btn-full" onClick={calc}>Calculate My Tax →</button>
+          </div>
+          <div className="card">
+            <div className="card-title">Tax Slab Structure</div>
+            {slabs.map((s,i)=>(
+              <div key={i} className="rrow">
+                <span className="rl">{s.range}</span>
+                <span style={{fontWeight:700,color:s.color,fontSize:'14px'}}>{s.rate}</span>
+              </div>
+            ))}
+            <div style={{marginTop:'12px'}} className="alert al-blue">ℹ️ Health & Education Cess of 4% is added on total income tax.</div>
+          </div>
+        </div>
+        <div>
+          {res?(
+            <>
+              <div className="card" style={{marginBottom:'14px'}}>
+                <div className="card-title">Tax Breakdown</div>
+                <div className="rrow"><span className="rl">Annual Income</span><span className="rv c-blue">{fmt(res.inc)}</span></div>
+                <div className="rrow"><span className="rl">Income Tax</span><span className="rv c-red">– {fmt(res.tax)}</span></div>
+                <div className="rrow"><span className="rl">Health & Edu Cess (4%)</span><span className="rv c-red">– {fmt(res.cess)}</span></div>
+                <div className="div"/>
+                <div className="rrow"><span className="rl" style={{fontWeight:700,color:'var(--text)'}}>Net Take-Home</span><span className="rv c-green" style={{fontSize:'18px'}}>{fmt(res.net)}</span></div>
+                <div className="rrow"><span className="rl">Effective Tax Rate</span><span className="rv c-amber">{res.inc>0?((( res.tax+res.cess)/res.inc)*100).toFixed(1):0}%</span></div>
+              </div>
+              <div className="card" style={{marginBottom:'14px'}}>
+                <div className="card-title">Tax Distribution</div>
+                <div className="rrow"><span className="rl">🏛️ Central Government (60%)</span><span className="rv c-blue">{fmt(res.central)}</span></div>
+                <div className="rrow"><span className="rl">🏢 State Government (40%)</span><span className="rv c-purple">{fmt(res.state)}</span></div>
+              </div>
+              <div className="card">
+                <div className="card-title">Where Your Tax Goes</div>
+                {sectors.map((s,i)=>(
+                  <div key={i} className="pbar-wrap">
+                    <div className="pbar-top"><span>{s.l}</span><span style={{color:s.c,fontWeight:700}}>{fmt(Math.round(res.tax*s.p/100))}</span></div>
+                    <div className="pbar"><div className="pbar-fill" style={{width:`${s.p}%`,background:s.c}}/></div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ):(
+            <div className="card" style={{textAlign:'center',padding:'60px 24px',color:'var(--text3)'}}>
+              <div style={{fontSize:'48px',marginBottom:'12px'}}>💼</div>
+              <p style={{fontSize:'14px'}}>Enter your annual income on the left<br/>and click Calculate to see your tax breakdown</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── GST PAGE ── */
+function GSTPage({onGSTAdded}){
+  const [price,setPrice]=useState('');
+  const [cat,setCat]=useState('Essential');
+  const [res,setRes]=useState(null);
+  const rates={Essential:5,Standard:12,Electronics:18,Luxury:28};
+  const catInfo={
+    Essential:{color:'var(--green)',badge:'b-green',note:'Essential goods carry minimal GST to keep daily necessities affordable for all citizens.'},
+    Standard:{color:'var(--blue)',badge:'b-blue',note:'Standard rate applies to regular goods and services consumed by the middle class.'},
+    Electronics:{color:'var(--amber)',badge:'b-amber',note:'Electronics are taxed at 18% as they are considered non-essential discretionary goods.'},
+    Luxury:{color:'var(--red)',badge:'b-red',note:'Luxury items attract the highest GST slab to redistribute wealth through taxation.'},
+  };
+  const calc=()=>{
+    const p=parseFloat(price)||0;
+    const rate=rates[cat];
+    const gst=Math.round(p*rate/100);
+    setRes({p,rate,gst,final:p+gst,cgst:Math.round(gst/2),sgst:Math.round(gst/2)});
+    onGSTAdded(gst);
+  };
+  return(
+    <div className="page-fade">
+      <div className="ph"><h2>🧾 GST Calculator</h2><p>Goods & Services Tax — India's unified indirect tax system</p></div>
+      <div className="g2">
+        <div>
+          <div className="card" style={{marginBottom:'14px'}}>
+            <div className="card-title">GST Input</div>
+            <div className="field">
+              <label>Product / Service Category</label>
+              <select value={cat} onChange={e=>setCat(e.target.value)}>
+                {Object.entries(rates).map(([k,v])=><option key={k} value={k}>{k} — {v}% GST</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Base Price Before GST (₹)</label>
+              <input type="number" placeholder="e.g. 15,000" value={price} onChange={e=>setPrice(e.target.value)}/>
+            </div>
+            <button className="btn btn-ink btn-full" onClick={calc}>Calculate GST →</button>
+          </div>
+          <div className="card">
+            <div className="card-title">GST Rate Reference</div>
+            {Object.entries(rates).map(([k,v])=>(
+              <div key={k} className="rrow">
+                <span className="rl">{k}</span>
+                <span className={`badge ${catInfo[k].badge}`}>{v}%</span>
+              </div>
+            ))}
+            <div style={{marginTop:'12px'}} className="alert al-amber">💡 GST is split equally: CGST goes to Centre, SGST goes to State.</div>
+          </div>
+        </div>
+        <div>
+          {res?(
+            <>
+              <div className="card" style={{marginBottom:'14px'}}>
+                <div className="card-title">GST Breakdown</div>
+                <div className="rrow"><span className="rl">Base Price</span><span className="rv">{fmt(res.p)}</span></div>
+                <div className="rrow"><span className="rl">GST Rate Applied</span><span className="rv" style={{color:catInfo[cat].color}}>{res.rate}%</span></div>
+                <div className="rrow"><span className="rl">CGST ({res.rate/2}% → Centre)</span><span className="rv c-blue">{fmt(res.cgst)}</span></div>
+                <div className="rrow"><span className="rl">SGST ({res.rate/2}% → State)</span><span className="rv c-purple">{fmt(res.sgst)}</span></div>
+                <div className="div"/>
+                <div className="rrow"><span className="rl" style={{fontWeight:700,color:'var(--text)'}}>Final Price (incl. GST)</span><span className="rv c-green" style={{fontSize:'20px'}}>{fmt(res.final)}</span></div>
+                <div className="rrow"><span className="rl">You Pay Extra</span><span className="rv c-red">{fmt(res.gst)} ({res.rate}% of base)</span></div>
+              </div>
+              <div className="card">
+                <div className={`alert al-${cat==='Essential'?'green':cat==='Standard'?'blue':cat==='Electronics'?'amber':'red'}`}>
+                  ℹ️ {catInfo[cat].note}
+                </div>
+                <div style={{marginTop:'14px'}}>
+                  <div className="card-title">Tax Destination</div>
+                  {[
+                    {l:'🏛️ Central Govt (CGST)',v:res.cgst,c:'var(--blue)'},
+                    {l:'🏢 State Govt (SGST)',v:res.sgst,c:'var(--purple)'},
+                  ].map((d,i)=>(
+                    <div key={i} className="pbar-wrap">
+                      <div className="pbar-top"><span style={{fontSize:'12.5px'}}>{d.l}</span><span style={{color:d.c,fontWeight:700,fontSize:'12px'}}>{fmt(d.v)}</span></div>
+                      <div className="pbar"><div className="pbar-fill" style={{width:'50%',background:d.c}}/></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ):(
+            <div className="card" style={{textAlign:'center',padding:'60px 24px',color:'var(--text3)'}}>
+              <div style={{fontSize:'48px',marginBottom:'12px'}}>🧾</div>
+              <p style={{fontSize:'14px'}}>Select a category and enter a price<br/>to calculate GST instantly</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── SHOP PAGE ── */
+function ShopPage({onGSTAdded}){
+  const [cart,setCart]=useState([]);
+  const [filterCat,setFilterCat]=useState('All');
+  const catColors={Essential:'var(--green)',Standard:'var(--blue)',Electronics:'var(--amber)',Luxury:'var(--red)'};
+  const catBadge={Essential:'b-green',Standard:'b-blue',Electronics:'b-amber',Luxury:'b-red'};
+  const toggle=(item)=>setCart(c=>c.find(x=>x.id===item.id)?c.filter(x=>x.id!==item.id):[...c,item]);
+  const totalBase=cart.reduce((s,i)=>s+i.price,0);
+  const totalGST=cart.reduce((s,i)=>s+Math.round(i.price*i.gst/100),0);
+  const totalFinal=totalBase+totalGST;
+  const checkout=()=>{
+    if(cart.length>0){onGSTAdded(totalGST);alert(`🛍️ Checkout done!\nGST of ${fmt(totalGST)} added to Government Fund.`);setCart([]);}
+  };
+  const cats=['All','Essential','Standard','Electronics','Luxury'];
+  const filtered=filterCat==='All'?SHOP_ITEMS:SHOP_ITEMS.filter(i=>i.cat===filterCat);
+  return(
+    <div className="page-fade">
+      <div className="ph"><h2>🛒 GST Shopping Simulator</h2><p>Shop items — GST calculated automatically on each product</p></div>
+      <div className="g2">
+        <div>
+          <div className="card">
+            <div className="card-title">Browse Items</div>
+            <div style={{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'14px'}}>
+              {cats.map(c=>(
+                <button key={c} className={`btn ${filterCat===c?'btn-ink':'btn-outline'}`}
+                  style={{padding:'5px 12px',fontSize:'12px'}}
+                  onClick={()=>setFilterCat(c)}>{c}</button>
+              ))}
+            </div>
+            {filtered.map(item=>{
+              const gstAmt=Math.round(item.price*item.gst/100);
+              const inCart=cart.find(x=>x.id===item.id);
+              return(
+                <div key={item.id} className={`shop-item ${inCart?'sel':''}`} onClick={()=>toggle(item)}>
+                  <div style={{display:'flex',alignItems:'center',gap:'11px'}}>
+                    <span style={{fontSize:'22px'}}>{item.icon}</span>
+                    <div>
+                      <div style={{fontSize:'13.5px',fontWeight:700}}>{item.name}</div>
+                      <span className={`badge ${catBadge[item.cat]}`} style={{fontSize:'10px'}}>{item.cat} · {item.gst}% GST</span>
+                    </div>
+                  </div>
+                  <div style={{textAlign:'right',flexShrink:0}}>
+                    <div style={{fontSize:'12px',color:'var(--text3)'}}>Base: {fmt(item.price)}</div>
+                    <div style={{fontSize:'11.5px',color:'var(--red)'}}>+GST: {fmt(gstAmt)}</div>
+                    <div style={{fontSize:'13.5px',fontWeight:700,color:'var(--green)'}}>{fmt(item.price+gstAmt)}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="card" style={{position:'sticky',top:'20px',alignSelf:'start'}}>
+          <div className="card-title">🧾 Your Shopping Bill</div>
+          {cart.length===0?(
+            <div style={{textAlign:'center',padding:'40px',color:'var(--text3)'}}>
+              <div style={{fontSize:'40px',marginBottom:'10px'}}>🛒</div>
+              <p style={{fontSize:'13px'}}>Click items on the left to add them to your cart</p>
+            </div>
+          ):(
+            <>
+              {cart.map(item=>{
+                const gst=Math.round(item.price*item.gst/100);
+                return(
+                  <div key={item.id} className="bill-row">
+                    <div><div style={{fontWeight:600,fontSize:'13px'}}>{item.icon} {item.name}</div><div style={{fontSize:'11px',color:'var(--text3)'}}>{item.cat} — {item.gst}% GST</div></div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontSize:'13px',fontWeight:700}}>{fmt(item.price+gst)}</div>
+                      <div style={{fontSize:'11px',color:'var(--red)'}}>GST: {fmt(gst)}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="div"/>
+              <div className="rrow"><span className="rl">Items Base Total</span><span className="rv">{fmt(totalBase)}</span></div>
+              <div className="rrow"><span className="rl">Total GST Payable</span><span className="rv c-red">{fmt(totalGST)}</span></div>
+              <div className="rrow"><span className="rl" style={{fontWeight:700}}>Grand Total</span><span className="rv c-green" style={{fontSize:'20px'}}>{fmt(totalFinal)}</span></div>
+              <div style={{marginTop:'6px',marginBottom:'12px'}} className="alert al-blue">
+                💡 You pay <strong>{fmt(totalGST)}</strong> as GST which goes to the Government Fund.
+              </div>
+              <button className="btn btn-green btn-full" onClick={checkout}>✅ Checkout & Submit GST to Govt</button>
+              <button className="btn btn-outline btn-full" style={{marginTop:'8px'}} onClick={()=>setCart([])}>🗑️ Clear Cart</button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── BUDGET PAGE ── */
+function BudgetPage({govFund}){
+  const base=Math.max(govFund,10000000);
+  const sectors=[
+    {key:'edu',label:'Education',icon:'📚',color:'#2563d4',desc:'Schools, colleges, scholarships, mid-day meals'},
+    {key:'health',label:'Healthcare',icon:'🏥',color:'#1a7a4a',desc:'Hospitals, medicine, insurance, research'},
+    {key:'defence',label:'Defence',icon:'🛡️',color:'#c0392b',desc:'Army, Navy, Air Force, border security'},
+    {key:'infra',label:'Infrastructure',icon:'🏗️',color:'#6d3fc0',desc:'Roads, bridges, railways, ports, electricity'},
+  ];
+  const [alloc,setAlloc]=useState({edu:25,health:20,defence:30,infra:20});
+  const total=Object.values(alloc).reduce((s,v)=>s+v,0);
+  const over=total>100;
+  const update=(key,val)=>{
+    const n={...alloc,[key]:parseInt(val)};
+    if(Object.values(n).reduce((s,v)=>s+v,0)>100)return;
+    setAlloc(n);
+  };
+  const remaining=100-total;
+
+  // Verdict logic
+  const getVerdict=()=>{
+    const {edu,health,defence,infra}=alloc;
+    let score=0;
+    if(edu>=20&&edu<=35)score+=25;else if(edu>=15)score+=15;
+    if(health>=15&&health<=30)score+=25;else if(health>=10)score+=15;
+    if(defence>=20&&defence<=35)score+=25;else if(defence>=15)score+=15;
+    if(infra>=15&&infra<=30)score+=25;else if(infra>=10)score+=15;
+    if(score>=90) return{
+      grade:'Outstanding Allocation',icon:'🌟',
+      color:'var(--green)',bg:'var(--green-lt)',border:'var(--green-md)',
+      quote:'"A nation that invests wisely in every pillar — education, health, defence, and infrastructure — is a nation that builds its own future." — Reflecting India\'s balanced governance ideals',
+      sub:'Score: Excellent balance across all sectors'
+    };
+    if(score>=65) return{
+      grade:'Good Allocation',icon:'✅',
+      color:'var(--blue)',bg:'var(--blue-lt)',border:'var(--blue-md)',
+      quote:'"Good governance is not just about allocating resources; it is about allocating them where they create the most enduring value for citizens." — Governance Principles',
+      sub:'Score: Most sectors well-funded with minor imbalances'
+    };
+    if(score>=40) return{
+      grade:'Average Allocation',icon:'⚠️',
+      color:'var(--amber)',bg:'var(--amber-lt)',border:'var(--amber-md)',
+      quote:'"The test of a budget is not how it reads on paper, but how it reads in the lives of those who depend upon it." — Reimagine the distribution.',
+      sub:'Score: Some sectors underfunded — review and rebalance'
+    };
+    return{
+      grade:'Poor Allocation',icon:'❌',
+      color:'var(--red)',bg:'var(--red-lt)',border:'var(--red-md)',
+      quote:'"An imbalanced budget is a quiet crisis — it may not show today, but its consequences echo through generations." — Reconsider your priorities.',
+      sub:'Score: Major imbalances detected — this needs urgent revision'
+    };
+  };
+  const v=getVerdict();
+
+  return(
+    <div className="page-fade">
+      <div className="ph"><h2>📊 Budget Allocator</h2><p>Act as Finance Minister — distribute the national budget wisely</p></div>
+      <div className="budget-layout">
+        {/* LEFT: NOTES */}
+        <div className="notes-panel">
+          <h4>📋 How to Use This Tool</h4>
+          {[
+            {n:1,t:'Look at the total Government Fund shown above the sliders — that\'s your budget to allocate.'},
+            {n:2,t:'Drag each sector\'s slider left or right to set the % of budget for that sector.'},
+            {n:3,t:'Watch the "Total Allocated" tracker — it must stay at or below 100%.'},
+            {n:4,t:'If you try to exceed 100%, the slider will stop — you must reduce another sector first.'},
+            {n:5,t:'See live rupee amounts update as you slide — aim for a balanced distribution.'},
+            {n:6,t:'Scroll down to see your Budget Verdict and quality rating with an expert quote.'},
+          ].map(s=>(
+            <div key={s.n} className="note-step">
+              <div className="note-num">{s.n}</div>
+              <div className="note-text">{s.t}</div>
+            </div>
+          ))}
+          <div className="note-tip">
+            💡 <strong>Pro Tip:</strong> Try to give each sector at least 15–25% for a "Good" or "Outstanding" verdict. No sector should be ignored — neglecting health or education has long-term costs!
+          </div>
+        </div>
+
+        {/* RIGHT: CONTROLS + RESULTS */}
+        <div>
+          <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:'10px',padding:'14px 18px',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px',boxShadow:'var(--shadow)'}}>
+            <div><div style={{fontSize:'11px',color:'var(--text3)',fontWeight:700,textTransform:'uppercase',letterSpacing:'.6px'}}>Total Budget Available</div><div style={{fontSize:'20px',fontWeight:700,fontFamily:'Playfair Display,serif',color:'var(--green)'}}>{fmt(base)}</div></div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:'11px',color:'var(--text3)',fontWeight:700,textTransform:'uppercase',letterSpacing:'.6px'}}>Allocated</div>
+              <div style={{fontSize:'22px',fontWeight:700,color:over?'var(--red)':total===100?'var(--green)':'var(--amber)',fontFamily:'Playfair Display,serif'}}>{total}% {over?'⚠️':total===100?'✅':''}</div>
+              <div style={{fontSize:'11px',color:'var(--text2)'}}>{remaining>0?`${remaining}% unallocated`:over?'Over budget!':'Fully allocated'}</div>
+            </div>
+          </div>
+
+          {over&&<div className="alert al-red" style={{marginBottom:'14px'}}>⚠️ Over 100%! Reduce a sector before proceeding.</div>}
+
+          <div className="card" style={{marginBottom:'16px'}}>
+            <div className="card-title">Sector Allocation Sliders</div>
+            {sectors.map(sec=>(
+              <div key={sec.key} className="slider-wrap">
+                <div className="slider-top">
+                  <span className="slider-name"><span>{sec.icon}</span>{sec.label}</span>
+                  <span className="slider-val" style={{color:sec.color}}>{alloc[sec.key]}% — {fmt(Math.round(base*alloc[sec.key]/100))}</span>
+                </div>
+                <input type="range" min="0" max="60" value={alloc[sec.key]}
+                  style={{accentColor:sec.color}}
+                  onChange={e=>update(sec.key,e.target.value)}/>
+                <div style={{fontSize:'11px',color:'var(--text3)',marginTop:'2px'}}>{sec.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="g2" style={{marginBottom:'16px'}}>
+            <div className="card">
+              <div className="card-title">Allocation Breakdown</div>
+              {sectors.map(s=>(
+                <div key={s.key} className="pbar-wrap">
+                  <div className="pbar-top"><span>{s.icon} {s.label}</span><span style={{color:s.color,fontWeight:700}}>{fmt(Math.round(base*alloc[s.key]/100))}</span></div>
+                  <div className="pbar"><div className="pbar-fill" style={{width:`${alloc[s.key]}%`,background:s.color}}/></div>
+                </div>
+              ))}
+            </div>
+            <div className="card">
+              <div className="card-title">Budget Distribution Chart</div>
+              <DonutChart data={sectors.map(s=>({label:s.label,value:Math.round(base*alloc[s.key]/100),color:s.color}))}/>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'10px',justifyContent:'center'}}>
+                {sectors.map(s=><span key={s.key} className="badge" style={{background:s.color+'22',color:s.color,border:`1px solid ${s.color}44`}}>{s.icon} {s.label}</span>)}
+              </div>
+            </div>
+          </div>
+
+          {/* VERDICT */}
+          <div className="verdict-box" style={{background:v.bg,borderColor:v.border,color:v.color}}>
+            <div className="v-icon">{v.icon}</div>
+            <div className="v-grade">{v.grade}</div>
+            <div className="v-quote" style={{color:v.color}}>{v.quote}</div>
+            <div className="v-sub">{v.sub}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── VOTE PAGE ── */
+function VotePage(){
+  const [votes,setVotes]=useState({});
+  const [results,setResults]=useState({});
+  const [expanded,setExpanded]=useState(null);
+
+  const castVote=(pid,choice)=>{
+    if(votes[pid])return;
+    const policy=POLICIES.find(p=>p.id===pid);
+    const forV=Math.floor(Math.random()*400)+300;
+    const againstV=Math.floor(Math.random()*350)+200;
+    const abstainV=Math.floor(Math.random()*100)+50;
+    const myFor=choice==='for'?forV+1:forV;
+    const myAgainst=choice==='against'?againstV+1:againstV;
+    const myAbstain=choice==='abstain'?abstainV+1:abstainV;
+    setVotes(v=>({...v,[pid]:choice}));
+    setResults(r=>({...r,[pid]:{for:myFor,against:myAgainst,abstain:myAbstain,passed:myFor>myAgainst,policy}}));
+  };
+
+  return(
+    <div className="page-fade">
+      <div className="ph"><h2>🗳️ Policy Voting System</h2><p>Vote on 8 national policies — see democratic outcomes and impact analysis</p></div>
+      <div style={{display:'flex',gap:'10px',marginBottom:'18px',flexWrap:'wrap'}}>
+        {[
+          {label:`${Object.keys(votes).length} Voted`,c:'b-ink'},
+          {label:`${POLICIES.length-Object.keys(votes).length} Remaining`,c:'b-amber'},
+          {label:`${Object.values(results).filter(r=>r.passed).length} Passed`,c:'b-green'},
+          {label:`${Object.values(results).filter(r=>!r.passed).length} Rejected`,c:'b-red'},
+        ].map((b,i)=><span key={i} className={`badge ${b.c}`} style={{padding:'5px 12px',fontSize:'12px'}}>{b.label}</span>)}
+      </div>
+      {POLICIES.map(policy=>{
+        const voted=votes[policy.id];
+        const res=results[policy.id];
+        const isExp=expanded===policy.id;
+        const total=res?res.for+res.against+res.abstain:0;
+        const forPct=res?Math.round((res.for/total)*100):0;
+        const againstPct=res?Math.round((res.against/total)*100):0;
+        const abstainPct=res?Math.round((res.abstain/total)*100):0;
+        return(
+          <div key={policy.id} className="policy-card">
+            <div style={{display:'flex',gap:'14px',marginBottom:'12px'}}>
+              <span style={{fontSize:'30px',lineHeight:'1'}}>{policy.icon}</span>
+              <div style={{flex:1}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:'8px',flexWrap:'wrap'}}>
+                  <h4 style={{fontSize:'15.5px',color:'var(--ink)'}}>{policy.title}</h4>
+                  <div style={{display:'flex',gap:'6px',flexShrink:0}}>
+                    <span className="badge b-ink">{policy.party}</span>
+                    <span className="badge b-blue">{policy.scope}</span>
+                  </div>
+                </div>
+                <p style={{fontSize:'13px',color:'var(--text2)',marginTop:'5px',lineHeight:'1.6'}}>{policy.desc}</p>
+                <div style={{display:'flex',gap:'6px',marginTop:'8px',flexWrap:'wrap'}}>
+                  <span className="badge b-green">😊 Happiness {policy.impH>0?'+':''}{policy.impH}</span>
+                  <span className="badge b-blue">📈 Dev {policy.impD>0?'+':''}{policy.impD}</span>
+                  {policy.impL!==0&&<span className="badge b-purple">📚 Literacy {policy.impL>0?'+':''}{policy.impL}</span>}
+                  {policy.impE!==0&&<span className="badge b-amber">💰 Economy {policy.impE>0?'+':''}{policy.impE}</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* Expand pros/cons */}
+            <button className="btn btn-outline" style={{marginBottom:'12px',padding:'5px 13px',fontSize:'12px'}}
+              onClick={()=>setExpanded(isExp?null:policy.id)}>
+              {isExp?'▲ Hide Details':'▼ View Pros & Cons'}
+            </button>
+
+            {isExp&&(
+              <div className="g2" style={{marginBottom:'14px'}}>
+                <div style={{background:'var(--green-lt)',border:'1px solid var(--green-md)',borderRadius:'9px',padding:'13px'}}>
+                  <div style={{fontSize:'11px',fontWeight:700,color:'var(--green)',textTransform:'uppercase',letterSpacing:'.7px',marginBottom:'8px'}}>✅ Arguments FOR</div>
+                  {policy.pros.map((p,i)=><div key={i} style={{fontSize:'12.5px',color:'var(--green)',marginBottom:'5px',display:'flex',gap:'6px'}}><span>•</span>{p}</div>)}
+                </div>
+                <div style={{background:'var(--red-lt)',border:'1px solid var(--red-md)',borderRadius:'9px',padding:'13px'}}>
+                  <div style={{fontSize:'11px',fontWeight:700,color:'var(--red)',textTransform:'uppercase',letterSpacing:'.7px',marginBottom:'8px'}}>❌ Arguments AGAINST</div>
+                  {policy.cons.map((c,i)=><div key={i} style={{fontSize:'12.5px',color:'var(--red)',marginBottom:'5px',display:'flex',gap:'6px'}}><span>•</span>{c}</div>)}
+                </div>
+              </div>
+            )}
+
+            {!voted?(
+              <div style={{display:'flex',gap:'8px'}}>
+                <button className="vbtn for" onClick={()=>castVote(policy.id,'for')}>✅ Vote For</button>
+                <button className="vbtn against" onClick={()=>castVote(policy.id,'against')}>❌ Vote Against</button>
+                <button className="vbtn abstain" onClick={()=>castVote(policy.id,'abstain')}>🟡 Abstain</button>
+              </div>
+            ):(
+              <div>
+                <div style={{marginBottom:'10px'}}>
+                  <div style={{display:'flex',gap:'8px',marginBottom:'6px',flexWrap:'wrap'}}>
+                    <span className="badge b-green">✅ For: {fmtN(res.for)} ({forPct}%)</span>
+                    <span className="badge b-red">❌ Against: {fmtN(res.against)} ({againstPct}%)</span>
+                    <span className="badge b-amber">🟡 Abstain: {fmtN(res.abstain)} ({abstainPct}%)</span>
+                    <span className="badge b-ink">Your vote: {voted}</span>
+                  </div>
+                  <div className="pbar" style={{height:'12px'}}>
+                    <div style={{display:'flex',height:'100%',borderRadius:'6px',overflow:'hidden'}}>
+                      <div style={{width:`${forPct}%`,background:'var(--green)',transition:'width .6s'}}/>
+                      <div style={{width:`${againstPct}%`,background:'var(--red)',transition:'width .6s'}}/>
+                      <div style={{width:`${abstainPct}%`,background:'var(--amber)',transition:'width .6s'}}/>
+                    </div>
+                  </div>
+                </div>
+                <div className={`alert ${res.passed?'al-green':'al-red'}`}>
+                  {res.passed?`✅ Policy PASSED with ${forPct}% majority! `:`❌ Policy REJECTED — only ${forPct}% voted in favour. `}
+                  {res.passed
+                    ?`Impact: Happiness ${policy.impH>0?'+':''}${policy.impH}, Development ${policy.impD>0?'+':''}${policy.impD}`
+                    :'The proposal has been sent back for revision.'}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── DASHBOARD ── */
+function DashboardPage({taxRevenue,gstRevenue,govFund}){
+  const total=taxRevenue+gstRevenue;
+  const happiness=Math.min(100,Math.max(30,60+(total>1000000?15:0)));
+  const devIndex=Math.min(100,Math.max(30,50+(total/5000000)*20));
+  const literacy=Math.min(100,72+devIndex*.12);
+  const lifeExp=Math.min(100,65+happiness*.1);
+  const score=Math.round((happiness+devIndex+literacy+lifeExp)/4);
+  const stars=Math.max(1,Math.round(score/20));
+  const grade=score>=80?'🌟 Visionary Leader':score>=65?'✅ Competent Ruler':score>=50?'⚠️ Average Governance':'❌ Needs Improvement';
+  return(
+    <div className="page-fade">
+      <div className="ph"><h2>📈 Governance Dashboard</h2><p>Full simulation summary — your governance report card</p></div>
+      <div className="score-hero">
+        <div style={{fontSize:'12px',opacity:.6,textTransform:'uppercase',letterSpacing:'1px',marginBottom:'6px'}}>Overall Governance Score</div>
+        <div className="sh-val">{score}</div>
+        <div className="sh-label">/100 composite score</div>
+        <div className="stars">{[1,2,3,4,5].map(s=><span key={s} className="star" style={{color:s<=stars?'#f0c060':'rgba(255,255,255,.15)'}}>★</span>)}</div>
+        <div className="sh-grade">{grade}</div>
+      </div>
+      <div className="g4" style={{marginBottom:'18px'}}>
+        {[
+          {l:'😊 Happiness',v:Math.round(happiness),c:'var(--amber)'},
+          {l:'📈 Development',v:Math.round(devIndex),c:'var(--blue)'},
+          {l:'📚 Literacy',v:Math.round(literacy),c:'var(--green)'},
+          {l:'🏥 Life Exp.',v:Math.round(lifeExp),c:'var(--purple)'},
+        ].map((s,i)=>(
+          <div key={i} className="stat-card">
+            <div className="stat-label">{s.l}</div>
+            <div className="stat-val" style={{color:s.c}}>{s.v}<span style={{fontSize:'14px',color:'var(--text3)'}}>/100</span></div>
+            <div className="pbar" style={{marginTop:'6px'}}><div className="pbar-fill" style={{width:`${s.v}%`,background:s.c}}/></div>
+          </div>
+        ))}
+      </div>
+      <div className="g2">
+        <div className="card">
+          <div className="card-title">Revenue Summary</div>
+          {[
+            {l:'💼 Income Tax',v:taxRevenue,c:'var(--blue)'},
+            {l:'🧾 GST Revenue',v:gstRevenue,c:'var(--amber)'},
+            {l:'🏦 Total Collected',v:total,c:'var(--green)'},
+          ].map((r,i)=>(
+            <div key={i} className="rrow">
+              <span className="rl">{r.l}</span>
+              <span className="rv" style={{color:r.c}}>{fmt(r.v)}</span>
+            </div>
+          ))}
+          <div style={{marginTop:'14px'}}>
+            <BarChart data={[
+              {label:'Income Tax',value:taxRevenue,color:'#2563d4'},
+              {label:'GST Revenue',value:gstRevenue,color:'#c47a0a'},
+              {label:'Total',value:total,color:'#1a7a4a'},
+            ]}/>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-title">Achievements</div>
+          {[
+            {done:taxRevenue>0,icon:'💼',l:'First Tax Calculated'},
+            {done:gstRevenue>0,icon:'🧾',l:'GST Simulated'},
+            {done:total>500000,icon:'🏦',l:'₹5L+ Revenue Collected'},
+            {done:total>5000000,icon:'💰',l:'₹50L+ Revenue — Big Earner'},
+            {done:taxRevenue>0&&gstRevenue>0,icon:'⚖️',l:'Both Tax Types Used'},
+            {done:score>=70,icon:'🌟',l:'Governance Score ≥70'},
+          ].map((a,i)=>(
+            <div key={i} style={{display:'flex',gap:'10px',alignItems:'center',padding:'8px 0',borderBottom:'1px solid var(--border)',opacity:a.done?1:.35}}>
+              <span style={{fontSize:'20px'}}>{a.icon}</span>
+              <span style={{fontSize:'13px',fontWeight:600,color:a.done?'var(--green)':'var(--text3)'}}>{a.done?'✅':''} {a.l}</span>
+            </div>
+          ))}
+          {total===0&&<div className="alert al-amber" style={{marginTop:'12px'}}>ℹ️ Use Tax, GST, and Shopping modules to populate real data here.</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── APP ── */
+function App(){
+  const [page,setPage]=useState('home');
+  const [taxRev,setTaxRev]=useState(0);
+  const [gstRev,setGSTRev]=useState(0);
+  const govFund=taxRev+gstRev;
+
+  const navItems=[
+    {id:'home',icon:'🏠',label:'Home'},
+    {sec:'Taxation'},
+    {id:'tax',icon:'💼',label:'Income Tax'},
+    {id:'gst',icon:'🧾',label:'GST Calculator'},
+    {id:'shop',icon:'🛒',label:'GST Shopping'},
+    {sec:'Governance'},
+    {id:'budget',icon:'📊',label:'Budget Allocator'},
+    {id:'vote',icon:'🗳️',label:'Policy Voting'},
+    {sec:'Reports'},
+    {id:'dashboard',icon:'📈',label:'Dashboard'},
+  ];
+
+  const pages={
+    home:<HomePage onNav={setPage} govFund={govFund}/>,
+    tax:<TaxPage onTaxAdded={v=>setTaxRev(r=>r+v)}/>,
+    gst:<GSTPage onGSTAdded={v=>setGSTRev(r=>r+v)}/>,
+    shop:<ShopPage onGSTAdded={v=>setGSTRev(r=>r+v)}/>,
+    budget:<BudgetPage govFund={govFund}/>,
+    vote:<VotePage/>,
+    dashboard:<DashboardPage taxRevenue={taxRev} gstRevenue={gstRev} govFund={govFund}/>,
+  };
+
+  return(
+    <div className="app">
+      <aside className="sidebar">
+        <div className="sidebar-head">
+          <div className="logo-mark">
+            <div className="logo-icon">🏛️</div>
+            <div className="logo-text"><h1>CivicSense</h1><p>Gov Simulator</p></div>
+          </div>
+        </div>
+        {govFund>0&&(
+          <div className="fund-pill">
+            <div className="fl">Govt Fund</div>
+            <div className="fv">{fmt(govFund)}</div>
+          </div>
+        )}
+        <div className="nav-body">
+          {navItems.map((item,i)=>
+            item.sec?(
+              <div key={i} className="nav-sec-label">{item.sec}</div>
+            ):(
+              <div key={i} className={`nav-item ${page===item.id?'active':''}`} onClick={()=>setPage(item.id)}>
+                <span className="ni">{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
+            )
+          )}
+        </div>
+      </aside>
+      <main className="main">
+        {pages[page]||pages.home}
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
