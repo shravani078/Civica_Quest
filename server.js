@@ -139,6 +139,10 @@ app.get('/api/users/me', authenticate, (req, res) => {
   res.json({ ...safeUser(user), levelTitle: getLevelTitle(user.level) });
 });
 
+app.get("/", (req, res) => {
+  res.send("API is running ");
+});
+
 app.patch('/api/users/me', authenticate, (req, res) => {
   const user = DB.users[req.user.uid];
   if (!user) return res.status(404).json({ error: 'User not found' });
